@@ -53,5 +53,5 @@ kotlin {
 }
 
 android {
-    namespace = "com.juevigrace.diva.network.client"
+    namespace = "io.github.juevigrace.diva.network.client"
 }

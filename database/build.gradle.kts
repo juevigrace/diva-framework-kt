@@ -39,5 +39,5 @@ kotlin {
 }
 
 android {
-    namespace = "com.juevigrace.diva.database"
+    namespace = "io.github.juevigrace.diva.database"
 }

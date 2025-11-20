@@ -29,9 +29,9 @@ Add the framework to your project's `build.gradle.kts`:
 
 ```kotlin
 dependencies {
-    implementation("com.juevigrace.diva:database:1.0.0")
-    implementation("com.juevigrace.diva:network:1.0.0")
-    implementation("com.juevigrace.diva:types:1.0.0")
+    implementation("io.github.juevigrace:diva-database:1.0.0")
+    implementation("io.github.juevigrace:diva-network:1.0.0")
+    implementation("io.github.juevigrace:diva-types:1.0.0")
 }
 ```
 

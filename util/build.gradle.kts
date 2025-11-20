@@ -3,5 +3,5 @@ plugins {
 }
 
 android {
-    namespace = "com.juevigrace.diva.util"
+    namespace = "io.github.juevigrace.diva.util"
 }

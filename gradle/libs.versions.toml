@@ -3,7 +3,7 @@ diva-version = "0.0.1"
 agp = "8.13.1"
 android-compileSdk = "36"
 android-minSdk = "24"
-androidx-activity = "1.11.0"
+androidx-activity = "1.12.0"
 androidx-core = "1.17.0"
 androidx-lifecycle = "2.9.6"
 coil = "3.3.0"
@@ -16,6 +16,7 @@ kotlinx-serialization = "1.9.0"
 koin = "4.1.1"
 ktor = "3.3.2"
 logback = "1.5.21"
+maven-publish = "0.35.0"
 navigation-compose = "2.9.1"
 sqldelight = "2.2.1"
 sqlite = "3.45.3.0"
@@ -49,6 +50,7 @@ compose-compiler-gradle-plugin = { module = "org.jetbrains.kotlin.plugin.compose
 jetbrains-compose-gradle-plugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }
 kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-serialization-gradle-plugin = { module = "org.jetbrains.kotlin.plugin.serialization:org.jetbrains.kotlin.plugin.serialization.gradle.plugin", version.ref = "kotlin" }
+maven-publish = { module = "com.vanniktech:gradle-maven-publish-plugin", version.ref = "maven-publish" }
 
 ######### [KOIN DEPENDENCIES] #########
 
