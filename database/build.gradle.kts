@@ -14,26 +14,29 @@ kotlin {
         }
 
         androidMain.dependencies {
-            implementation(libs.sqldelight.android.driver)
+            api(libs.sqldelight.android.driver)
         }
 
         nativeMain.dependencies {
-            implementation(libs.sqldelight.native.driver)
+            api(libs.sqldelight.native.driver)
         }
 
         jvmMain.dependencies {
-            implementation(libs.sqldelight.sqlite.driver)
-            implementation(libs.sqlite)
+            api(libs.sqldelight.sqlite.driver)
+            api(libs.sqlite)
+            api(libs.postgresql)
+            api(libs.mysql)
+            api(libs.h2)
         }
 
         jsMain.dependencies {
-            implementation(libs.sqldelight.web.worker.driver)
-            implementation(devNpm("copy-webpack-plugin", libs.versions.copy.webpack.plugin.get()))
+            api(libs.sqldelight.web.worker.driver)
+            api(devNpm("copy-webpack-plugin", libs.versions.copy.webpack.plugin.get()))
         }
 
         wasmJsMain.dependencies {
-            implementation(libs.sqldelight.web.worker.driver)
-            implementation(devNpm("copy-webpack-plugin", libs.versions.copy.webpack.plugin.get()))
+            api(libs.sqldelight.web.worker.driver)
+            api(devNpm("copy-webpack-plugin", libs.versions.copy.webpack.plugin.get()))
         }
     }
 }
