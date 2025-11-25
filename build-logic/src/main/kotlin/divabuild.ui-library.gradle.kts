@@ -20,42 +20,38 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             // Compose Multiplatform
-            implementation(compose.animation)
-            implementation(compose.animationGraphics)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
-            implementation(compose.foundation)
-            implementation(compose.materialIconsExtended)
-            implementation(compose.material3)
-            implementation(compose.material3AdaptiveNavigationSuite)
-            implementation(compose.runtimeSaveable)
-            implementation(compose.ui)
+            api(compose.animation)
+            api(compose.animationGraphics)
+            api(compose.components.resources)
+            api(compose.components.uiToolingPreview)
+            api(compose.foundation)
+            api(compose.materialIconsExtended)
+            api(compose.material3)
+            api(compose.material3AdaptiveNavigationSuite)
+            api(compose.runtimeSaveable)
+            api(compose.ui)
 
             // ViewModel and Lifecycle
-            implementation(libs.lifecycle.runtime.compose)
-            implementation(libs.lifecycle.viewmodel)
-            implementation(libs.lifecycle.viewmodel.compose)
-            implementation(libs.lifecycle.viewmodel.savedstate)
+            api(libs.lifecycle.runtime.compose)
+            api(libs.lifecycle.viewmodel)
+            api(libs.lifecycle.viewmodel.compose)
+            api(libs.lifecycle.viewmodel.savedstate)
 
             // Navigation
-            implementation(libs.navigation.compose)
+            api(libs.navigation.compose)
 
             // Image loading
-            implementation(libs.coil.compose)
-            implementation(libs.coil.core)
+            api(libs.coil.compose)
+            api(libs.coil.core)
 
             // Dependency injection
-            implementation(libs.koin.compose)
-            implementation(libs.koin.compose.viewmodel)
-            implementation(libs.koin.compose.viewmodel.navigation)
-
-            // Internal modules
-            implementation(project(":types"))
-            implementation(project(":util"))
+            api(libs.koin.compose)
+            api(libs.koin.compose.viewmodel)
+            api(libs.koin.compose.viewmodel.navigation)
         }
 
         androidMain.dependencies {
-            implementation(libs.koin.androidx.compose)
+            api(libs.koin.androidx.compose)
         }
     }
 }

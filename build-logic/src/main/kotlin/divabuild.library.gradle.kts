@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-
 plugins {
     id("divabuild.base-library")
 }
@@ -19,13 +17,4 @@ kotlin {
     linuxX64()
     linuxArm64()
     mingwX64()
-
-    js(IR) {
-        nodejs()
-    }
-
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        nodejs()
-    }
 }

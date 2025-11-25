@@ -1,7 +1,16 @@
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+
 plugins {
     id("divabuild.library")
 }
 
-android {
-    namespace = "io.github.juevigrace.diva.util"
+kotlin {
+    js(IR) {
+        nodejs()
+    }
+
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        nodejs()
+    }
 }

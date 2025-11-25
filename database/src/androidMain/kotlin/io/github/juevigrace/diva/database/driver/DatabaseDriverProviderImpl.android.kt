@@ -7,50 +7,35 @@ import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlSchema
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
+import io.github.juevigrace.diva.types.DivaResult
+import io.github.juevigrace.diva.types.isFailure
 
 actual class DatabaseDriverProviderImpl(
     private val context: Context,
-    actual override val schema: SqlSchema<QueryResult.Value<Unit>>? = null,
-    actual override val asyncSchema: SqlSchema<QueryResult.AsyncValue<Unit>>? = null,
-    actual override val config: PlatformDriverConfig,
+    private val conf: PlatformDriverConf.Android,
 ) : DatabaseDriverProvider {
-    private val actualConfig: PlatformDriverConfig.Android = config as? PlatformDriverConfig.Android
-        ?: error("PlatformDriverConfig must be Android")
-
-    actual override fun createDriver(): Result<SqlDriver> {
+    actual override suspend fun createDriver(schema: Schema): DivaResult<SqlDriver, Exception> {
         return try {
-            if (schema == null && asyncSchema == null) error("No schema provided")
-            Result.success(
+            val syncSchema: SqlSchema<QueryResult.Value<Unit>> = when (schema) {
+                is Schema.Sync -> schema.value
+                is Schema.Async -> schema.value.synchronous()
+            }
+
+            DivaResult.success(
                 AndroidSqliteDriver(
-                    schema = schema ?: asyncSchema!!.synchronous(),
+                    schema = syncSchema,
                     context = context,
-                    name = "jdbc:sqlite:${actualConfig.driverConfig.name}",
-                    callback = fkCallback(schema ?: asyncSchema!!.synchronous()),
+                    name = "jdbc:sqlite:${conf.driverConfig.url}.db",
+                    callback = if (conf.driverConfig.properties.containsKey("foreign_keys")) {
+                        fkCallback(syncSchema)
+                    } else {
+                        object : AndroidSqliteDriver.Callback(syncSchema) {}
+                    },
                 ),
             )
         } catch (e: Exception) {
-            Result.failure(e)
+            DivaResult.failure(e)
         }
-    }
-
-    actual override fun createDriverAsync(): Result<SqlDriver> {
-        return try {
-            if (schema == null && asyncSchema == null) error("No schema provided")
-            Result.success(
-                AndroidSqliteDriver(
-                    schema = asyncSchema?.synchronous() ?: schema!!,
-                    context = context,
-                    name = "jdbc:sqlite:${actualConfig.driverConfig.name}",
-                    callback = fkCallback(asyncSchema?.synchronous() ?: schema!!),
-                ),
-            )
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    actual override fun builder(): DatabaseDriverProvider.Builder {
-        return Builder()
     }
 
     private fun fkCallback(schema: SqlSchema<QueryResult.Value<Unit>>): AndroidSqliteDriver.Callback {
@@ -62,53 +47,36 @@ actual class DatabaseDriverProviderImpl(
         }
     }
 
-    private class Builder : DatabaseDriverProvider.Builder {
+    actual class Builder : DatabaseDriverProvider.Builder {
         private lateinit var context: Context
-        private var schema: SqlSchema<QueryResult.Value<Unit>>? = null
-        private var asyncSchema: SqlSchema<QueryResult.AsyncValue<Unit>>? = null
-        private lateinit var config: PlatformDriverConfig.Android
+        private var conf: DivaResult<PlatformDriverConf.Android, Exception> = DivaResult.failure(
+            Exception("Platform configuration is not set")
+        )
 
         fun setContext(context: Context): Builder {
             return apply { this.context = context }
         }
 
-        override fun setSchema(schema: SqlSchema<QueryResult.Value<Unit>>): Builder {
-            return apply { this.schema = schema }
-        }
-
-        override fun setSchemaAsync(schema: SqlSchema<QueryResult.AsyncValue<Unit>>): Builder {
-            return apply { this.asyncSchema = schema }
-        }
-
-        override fun setPlatform(platform: PlatformDriverConfig): Builder {
-            return when (platform) {
-                is PlatformDriverConfig.Android -> {
-                    apply { this.config = platform }
-                }
-                else -> {
-                    apply {
-                        this.config =
-                            PlatformDriverConfig.Android(DriverConfig.SqliteDriverConfig("diva"))
+        actual override fun setPlatformConf(platformConf: PlatformDriverConf): Builder {
+            return apply {
+                this.conf = when (platformConf) {
+                    is PlatformDriverConf.Android -> {
+                        DivaResult.success(platformConf)
+                    }
+                    else -> {
+                        DivaResult.failure(Exception("PlatformDriverConfig must be Android"))
                     }
                 }
             }
         }
 
-        override fun build(): Result<DatabaseDriverProvider> {
-            try {
+        actual override fun build(): DivaResult<DatabaseDriverProvider, Exception> {
+            return try {
                 if (!::context.isInitialized) error("Context not set")
-                if (schema == null && asyncSchema == null) error("Schema not set")
-                if (!::config.isInitialized) error("Platform not set")
-                return Result.success(
-                    DatabaseDriverProviderImpl(
-                        context,
-                        schema,
-                        asyncSchema,
-                        config,
-                    ),
-                )
+                if (conf.isFailure()) error((conf as DivaResult.Failure).error)
+                DivaResult.success(DatabaseDriverProviderImpl(context, (conf as DivaResult.Success).value))
             } catch (e: IllegalStateException) {
-                return Result.failure(e)
+                DivaResult.failure(e)
             }
         }
     }

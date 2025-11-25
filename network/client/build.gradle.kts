@@ -1,9 +1,20 @@
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+
 plugins {
     id("divabuild.library")
     alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
+    js(IR) {
+        nodejs()
+    }
+
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        nodejs()
+    }
+
     sourceSets {
         commonMain.dependencies {
             // Ktor
@@ -50,8 +61,4 @@ kotlin {
             implementation(libs.ktor.client.cio)
         }
     }
-}
-
-android {
-    namespace = "io.github.juevigrace.diva.network.client"
 }

@@ -1,7 +1,23 @@
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+
 plugins {
     id("divabuild.ui-library")
 }
 
-android {
-    namespace = "io.github.juevigrace.diva.ui"
+kotlin {
+    js(IR) {
+        browser()
+    }
+
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        browser()
+    }
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation(projects.types)
+            implementation(projects.util)
+        }
+    }
 }

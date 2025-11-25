@@ -1,67 +1,150 @@
 package io.github.juevigrace.diva.database.driver
 
+import app.cash.sqldelight.async.coroutines.awaitCreate
+import app.cash.sqldelight.async.coroutines.synchronous
 import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlSchema
+import app.cash.sqldelight.driver.jdbc.JdbcDriver
+import app.cash.sqldelight.driver.jdbc.asJdbcDriver
+import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
+import io.github.juevigrace.diva.types.DivaResult
+import io.github.juevigrace.diva.types.isFailure
 
 actual class DatabaseDriverProviderImpl(
-    actual override val schema: SqlSchema<QueryResult.Value<Unit>>?,
-    actual override val asyncSchema: SqlSchema<QueryResult.AsyncValue<Unit>>?,
-    actual override val config: PlatformDriverConfig
+    private val conf: PlatformDriverConf.Jvm,
 ) : DatabaseDriverProvider {
-    actual override fun createDriver(): Result<SqlDriver> {
-        TODO("Not yet implemented")
-    }
-
-    actual override fun createDriverAsync(): Result<SqlDriver> {
-        TODO("Not yet implemented")
-    }
-
-    actual override fun builder(): DatabaseDriverProvider.Builder {
-        return Builder()
-    }
-
-    private class Builder : DatabaseDriverProvider.Builder {
-        private var schema: SqlSchema<QueryResult.Value<Unit>>? = null
-        private var asyncSchema: SqlSchema<QueryResult.AsyncValue<Unit>>? = null
-        private lateinit var config: PlatformDriverConfig.Jvm
-
-        override fun setSchema(schema: SqlSchema<QueryResult.Value<Unit>>): Builder {
-            return apply { this.schema = schema }
-        }
-
-        override fun setSchemaAsync(schema: SqlSchema<QueryResult.AsyncValue<Unit>>): Builder {
-            return apply { this.asyncSchema = schema }
-        }
-
-        override fun setPlatform(platform: PlatformDriverConfig): Builder {
-            return when (platform) {
-                is PlatformDriverConfig.Jvm -> {
-                    apply { this.config = platform }
-                }
-                else -> {
-                    apply {
-                        this.config =
-                            PlatformDriverConfig.Jvm(DriverConfig.SqliteDriverConfig("diva"))
-                    }
+    actual override suspend fun createDriver(schema: Schema): DivaResult<SqlDriver, Exception> {
+        return try {
+            val sync: SqlSchema<QueryResult.Value<Unit>> = when (schema) {
+                is Schema.Sync -> schema.value
+                is Schema.Async -> schema.value.synchronous()
+            }
+            when (val result: DivaResult<SqlDriver, Exception> = createDriverFromDataSource(sync)) {
+                is DivaResult.Failure -> result
+                is DivaResult.Success -> {
+                    sync.awaitCreate(result.value)
+                    DivaResult.success(result.value)
                 }
             }
+        } catch (e: Exception) {
+            DivaResult.failure(e)
         }
+    }
 
-        override fun build(): Result<DatabaseDriverProvider> {
-            try {
-                if (schema == null && asyncSchema == null) error("Schema not set")
-                if (!::config.isInitialized) error("Platform not set")
-                return Result.success(
-                    DatabaseDriverProviderImpl(
+    private fun createDriverFromDataSource(
+        schema: SqlSchema<QueryResult.Value<Unit>>
+    ): DivaResult<SqlDriver, Exception> {
+        return try {
+            val driver: JdbcDriver = when (conf.driverConfig) {
+                is DriverConfig.MysqlDriverConfig -> {
+                    createDataSourceWithConfig(
+                        driver = MYSQL_DRIVER_NAME,
+                        host = conf.driverConfig.host,
+                        port = conf.driverConfig.port,
+                        database = conf.driverConfig.database,
+                        username = conf.driverConfig.username,
+                        password = conf.driverConfig.password
+                    ).asJdbcDriver()
+                }
+                is DriverConfig.PostgresqlDriverConfig -> {
+                    createDataSourceWithConfig(
+                        driver = POSTGRESQL_DRIVER_NAME,
+                        host = conf.driverConfig.host,
+                        port = conf.driverConfig.port,
+                        database = conf.driverConfig.database,
+                        username = conf.driverConfig.username,
+                        password = conf.driverConfig.password
+                    ).asJdbcDriver()
+                }
+                is DriverConfig.H2DriverConfig -> {
+                    createDataSourceWithConfig(
+                        url = conf.driverConfig.url,
+                        username = conf.driverConfig.username,
+                        password = conf.driverConfig.password
+                    ).asJdbcDriver()
+                }
+                is DriverConfig.SqliteDriverConfig -> {
+                    JdbcSqliteDriver(
+                        conf.driverConfig.url,
+                        conf.driverConfig.properties.toProperties(),
                         schema,
-                        asyncSchema,
-                        config,
-                    ),
-                )
-            } catch (e: IllegalStateException) {
-                return Result.failure(e)
+                    )
+                }
+            }
+            DivaResult.success(driver)
+        } catch (e: Exception) {
+            return DivaResult.failure(e)
+        }
+    }
+
+    private fun createDataSourceWithConfig(
+        url: String,
+        username: String,
+        password: String,
+    ): HikariDataSource {
+        val config: HikariConfig = HikariConfig().apply {
+            jdbcUrl = url
+            this.username = username
+            this.password = password
+            maximumPoolSize = MAX_POOL_SIZE
+            minimumIdle = MIN_IDLE_CONNECTIONS
+        }
+        return HikariDataSource(config)
+    }
+
+    private fun createDataSourceWithConfig(
+        driver: String,
+        username: String,
+        password: String,
+        host: String,
+        port: Int,
+        database: String,
+    ): HikariDataSource {
+        val config: HikariConfig = HikariConfig().apply {
+            jdbcUrl = "jdbc:$driver://$host:$port/$database"
+            this.username = username
+            this.password = password
+            maximumPoolSize = MAX_POOL_SIZE
+            minimumIdle = MIN_IDLE_CONNECTIONS
+        }
+        return HikariDataSource(config)
+    }
+
+    actual class Builder : DatabaseDriverProvider.Builder {
+        private var conf: DivaResult<PlatformDriverConf.Jvm, Exception> = DivaResult.failure(
+            Exception("Platform configuration is not set"),
+        )
+        actual override fun setPlatformConf(platformConf: PlatformDriverConf): Builder {
+            return apply {
+                this.conf =
+                    when (platformConf) {
+                        is PlatformDriverConf.Jvm -> {
+                            DivaResult.success(platformConf)
+                        }
+                        else -> {
+                            DivaResult.failure(Exception("PlatformDriverConfig must be Jvm"))
+                        }
+                    }
             }
         }
+
+        actual override fun build(): DivaResult<DatabaseDriverProvider, Exception> {
+            return try {
+                if (conf.isFailure()) error((conf as DivaResult.Failure).error)
+                DivaResult.success(DatabaseDriverProviderImpl((conf as DivaResult.Success).value))
+            } catch (e: IllegalStateException) {
+                DivaResult.failure(e)
+            }
+        }
+    }
+
+    companion object {
+        const val MYSQL_DRIVER_NAME = "mysql"
+        const val POSTGRESQL_DRIVER_NAME = "postgresql"
+        const val MAX_POOL_SIZE = 10
+        const val MIN_IDLE_CONNECTIONS = 2
     }
 }

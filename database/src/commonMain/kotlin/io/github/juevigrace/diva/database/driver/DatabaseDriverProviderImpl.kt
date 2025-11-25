@@ -1,15 +1,13 @@
 package io.github.juevigrace.diva.database.driver
 
-import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
-import app.cash.sqldelight.db.SqlSchema
+import io.github.juevigrace.diva.types.DivaResult
 
 expect class DatabaseDriverProviderImpl : DatabaseDriverProvider {
-    override val schema: SqlSchema<QueryResult.Value<Unit>>?
-    override val asyncSchema: SqlSchema<QueryResult.AsyncValue<Unit>>?
-    override val config: PlatformDriverConfig
+    override suspend fun createDriver(schema: Schema): DivaResult<SqlDriver, Exception>
 
-    override fun createDriver(): Result<SqlDriver>
-    override fun createDriverAsync(): Result<SqlDriver>
-    override fun builder(): DatabaseDriverProvider.Builder
+    class Builder : DatabaseDriverProvider.Builder {
+        override fun setPlatformConf(platformConf: PlatformDriverConf): Builder
+        override fun build(): DivaResult<DatabaseDriverProvider, Exception>
+    }
 }

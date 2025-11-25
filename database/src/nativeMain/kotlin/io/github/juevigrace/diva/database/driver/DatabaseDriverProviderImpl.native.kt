@@ -5,88 +5,55 @@ import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlSchema
 import app.cash.sqldelight.driver.native.NativeSqliteDriver
+import io.github.juevigrace.diva.types.DivaResult
+import io.github.juevigrace.diva.types.isFailure
 
 actual class DatabaseDriverProviderImpl(
-    actual override val schema: SqlSchema<QueryResult.Value<Unit>>?,
-    actual override val asyncSchema: SqlSchema<QueryResult.AsyncValue<Unit>>?,
-    actual override val config: PlatformDriverConfig,
+    private val conf: PlatformDriverConf.Native,
 ) : DatabaseDriverProvider {
-    private val actualConfig: PlatformDriverConfig.Native = config as? PlatformDriverConfig.Native
-        ?: error("PlatformDriverConfig must be Native")
-
-    actual override fun createDriver(): Result<SqlDriver> {
+    actual override suspend fun createDriver(schema: Schema): DivaResult<SqlDriver, Exception> {
         return try {
-            if (schema == null && asyncSchema == null) error("No schema provided")
-            Result.success(
+            val syncSchema: SqlSchema<QueryResult.Value<Unit>> = when (schema) {
+                is Schema.Sync -> schema.value
+                is Schema.Async -> schema.value.synchronous()
+            }
+
+            DivaResult.success(
                 NativeSqliteDriver(
-                    schema = schema ?: asyncSchema!!.synchronous(),
-                    name = actualConfig.driverConfig.name,
+                    schema = syncSchema,
+                    name = conf.driverConfig.url,
                 ),
             )
         } catch (e: Exception) {
-            Result.failure(e)
+            DivaResult.failure(e)
         }
     }
 
-    actual override fun createDriverAsync(): Result<SqlDriver> {
-        return try {
-            if (schema == null && asyncSchema == null) error("No schema provided")
-            Result.success(
-                NativeSqliteDriver(
-                    schema = asyncSchema?.synchronous() ?: schema!!,
-                    name = actualConfig.driverConfig.name,
-                ),
-            )
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
+    actual class Builder : DatabaseDriverProvider.Builder {
+        private var conf: DivaResult<PlatformDriverConf.Native, Exception> = DivaResult.failure(
+            Exception("Platform configuration is not set")
+        )
 
-    actual override fun builder(): DatabaseDriverProvider.Builder {
-        return Builder()
-    }
-
-    private class Builder : DatabaseDriverProvider.Builder {
-        private var schema: SqlSchema<QueryResult.Value<Unit>>? = null
-        private var asyncSchema: SqlSchema<QueryResult.AsyncValue<Unit>>? = null
-        private lateinit var config: PlatformDriverConfig.Native
-
-        override fun setSchema(schema: SqlSchema<QueryResult.Value<Unit>>): Builder {
-            return apply { this.schema = schema }
-        }
-
-        override fun setSchemaAsync(schema: SqlSchema<QueryResult.AsyncValue<Unit>>): Builder {
-            return apply { this.asyncSchema = schema }
-        }
-
-        override fun setPlatform(platform: PlatformDriverConfig): Builder {
-            return when (platform) {
-                is PlatformDriverConfig.Native -> {
-                    apply { this.config = platform }
-                }
-
-                else -> {
-                    apply {
-                        this.config =
-                            PlatformDriverConfig.Native(DriverConfig.SqliteDriverConfig("diva"))
+        actual override fun setPlatformConf(platformConf: PlatformDriverConf): Builder {
+            return apply {
+                when (platformConf) {
+                    is PlatformDriverConf.Native -> {
+                        this.conf = DivaResult.success(platformConf)
+                    }
+                    else -> {
+                        this.conf = DivaResult.failure(Exception("PlatformDriverConfig must be Native"))
                     }
                 }
             }
         }
 
-        override fun build(): Result<DatabaseDriverProvider> {
+        actual override fun build(): DivaResult<DatabaseDriverProvider, Exception> {
             try {
-                if (schema == null && asyncSchema == null) error("Schema not set")
-                if (!::config.isInitialized) error("Platform not set")
-                return Result.success(
-                    DatabaseDriverProviderImpl(
-                        schema,
-                        asyncSchema,
-                        config,
-                    ),
-                )
+                if (conf.isFailure()) throw (conf as DivaResult.Failure).error
+
+                return DivaResult.success(DatabaseDriverProviderImpl((conf as DivaResult.Success).value))
             } catch (e: IllegalStateException) {
-                return Result.failure(e)
+                return DivaResult.failure(e)
             }
         }
     }

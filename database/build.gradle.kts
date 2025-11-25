@@ -1,13 +1,27 @@
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+
 plugins {
     id("divabuild.library")
 }
 
 kotlin {
+    js(IR) {
+        browser()
+    }
+
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
+        browser()
+    }
+
     sourceSets {
         commonMain.dependencies {
             // Sqldelight
             api(libs.sqldelight.async.extensions)
             api(libs.sqldelight.coroutines.extensions)
+
+            // Types
+            api(projects.types)
 
             // Util
             implementation(projects.util)
@@ -27,20 +41,13 @@ kotlin {
             api(libs.postgresql)
             api(libs.mysql)
             api(libs.h2)
+            api(libs.hikaricp)
         }
 
         jsMain.dependencies {
             api(libs.sqldelight.web.worker.driver)
-            api(devNpm("copy-webpack-plugin", libs.versions.copy.webpack.plugin.get()))
-        }
-
-        wasmJsMain.dependencies {
-            api(libs.sqldelight.web.worker.driver)
-            api(devNpm("copy-webpack-plugin", libs.versions.copy.webpack.plugin.get()))
+            api(devNpm("copy-webpack-plugin", "9.1.0"))
+            api(npm("sql.js", "1.6.2"))
         }
     }
-}
-
-android {
-    namespace = "io.github.juevigrace.diva.database"
 }
