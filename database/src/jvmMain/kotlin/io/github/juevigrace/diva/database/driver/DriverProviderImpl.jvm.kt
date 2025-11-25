@@ -13,9 +13,9 @@ import com.zaxxer.hikari.HikariDataSource
 import io.github.juevigrace.diva.types.DivaResult
 import io.github.juevigrace.diva.types.isFailure
 
-actual class DatabaseDriverProviderImpl(
+actual class DriverProviderImpl(
     private val conf: PlatformDriverConf.Jvm,
-) : DatabaseDriverProvider {
+) : DriverProvider {
     actual override suspend fun createDriver(schema: Schema): DivaResult<SqlDriver, Exception> {
         return try {
             val sync: SqlSchema<QueryResult.Value<Unit>> = when (schema) {
@@ -38,38 +38,38 @@ actual class DatabaseDriverProviderImpl(
         schema: SqlSchema<QueryResult.Value<Unit>>
     ): DivaResult<SqlDriver, Exception> {
         return try {
-            val driver: JdbcDriver = when (conf.driverConfig) {
-                is DriverConfig.MysqlDriverConfig -> {
+            val driver: JdbcDriver = when (conf.driverConf) {
+                is DriverConf.MysqlDriverConf -> {
                     createDataSourceWithConfig(
                         driver = MYSQL_DRIVER_NAME,
-                        host = conf.driverConfig.host,
-                        port = conf.driverConfig.port,
-                        database = conf.driverConfig.database,
-                        username = conf.driverConfig.username,
-                        password = conf.driverConfig.password
+                        host = conf.driverConf.host,
+                        port = conf.driverConf.port,
+                        database = conf.driverConf.database,
+                        username = conf.driverConf.username,
+                        password = conf.driverConf.password
                     ).asJdbcDriver()
                 }
-                is DriverConfig.PostgresqlDriverConfig -> {
+                is DriverConf.PostgresqlDriverConf -> {
                     createDataSourceWithConfig(
                         driver = POSTGRESQL_DRIVER_NAME,
-                        host = conf.driverConfig.host,
-                        port = conf.driverConfig.port,
-                        database = conf.driverConfig.database,
-                        username = conf.driverConfig.username,
-                        password = conf.driverConfig.password
+                        host = conf.driverConf.host,
+                        port = conf.driverConf.port,
+                        database = conf.driverConf.database,
+                        username = conf.driverConf.username,
+                        password = conf.driverConf.password
                     ).asJdbcDriver()
                 }
-                is DriverConfig.H2DriverConfig -> {
+                is DriverConf.H2DriverConf -> {
                     createDataSourceWithConfig(
-                        url = conf.driverConfig.url,
-                        username = conf.driverConfig.username,
-                        password = conf.driverConfig.password
+                        url = conf.driverConf.url,
+                        username = conf.driverConf.username,
+                        password = conf.driverConf.password
                     ).asJdbcDriver()
                 }
-                is DriverConfig.SqliteDriverConfig -> {
+                is DriverConf.SqliteDriverConf -> {
                     JdbcSqliteDriver(
-                        conf.driverConfig.url,
-                        conf.driverConfig.properties.toProperties(),
+                        conf.driverConf.url,
+                        conf.driverConf.properties.toProperties(),
                         schema,
                     )
                 }
@@ -113,7 +113,7 @@ actual class DatabaseDriverProviderImpl(
         return HikariDataSource(config)
     }
 
-    actual class Builder : DatabaseDriverProvider.Builder {
+    actual class Builder : DriverProvider.Builder {
         private var conf: DivaResult<PlatformDriverConf.Jvm, Exception> = DivaResult.failure(
             Exception("Platform configuration is not set"),
         )
@@ -131,10 +131,10 @@ actual class DatabaseDriverProviderImpl(
             }
         }
 
-        actual override fun build(): DivaResult<DatabaseDriverProvider, Exception> {
+        actual override fun build(): DivaResult<DriverProvider, Exception> {
             return try {
                 if (conf.isFailure()) error((conf as DivaResult.Failure).error)
-                DivaResult.success(DatabaseDriverProviderImpl((conf as DivaResult.Success).value))
+                DivaResult.success(DriverProviderImpl((conf as DivaResult.Success).value))
             } catch (e: IllegalStateException) {
                 DivaResult.failure(e)
             }

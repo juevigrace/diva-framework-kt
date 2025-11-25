@@ -7,9 +7,9 @@ import io.github.juevigrace.diva.types.DivaResult
 import io.github.juevigrace.diva.types.isFailure
 import org.w3c.dom.Worker
 
-actual class DatabaseDriverProviderImpl(
+actual class DriverProviderImpl(
     private val conf: PlatformDriverConf.Web,
-) : DatabaseDriverProvider {
+) : DriverProvider {
     private val worker = Worker(
         js("""new URL("@cashapp/sqldelight-sqljs-worker/sqljs.worker.js", import.meta.url)"""),
     )
@@ -28,7 +28,7 @@ actual class DatabaseDriverProviderImpl(
         }
     }
 
-    actual class Builder : DatabaseDriverProvider.Builder {
+    actual class Builder : DriverProvider.Builder {
         private var conf: DivaResult<PlatformDriverConf.Web, Exception> = DivaResult.failure(
             Exception("Platform configuration is not set"),
         )
@@ -46,10 +46,10 @@ actual class DatabaseDriverProviderImpl(
             }
         }
 
-        actual override fun build(): DivaResult<DatabaseDriverProvider, Exception> {
+        actual override fun build(): DivaResult<DriverProvider, Exception> {
             return try {
                 if (conf.isFailure()) throw (conf as DivaResult.Failure).error
-                DivaResult.success(DatabaseDriverProviderImpl((conf as DivaResult.Success).value))
+                DivaResult.success(DriverProviderImpl((conf as DivaResult.Success).value))
             } catch (e: IllegalStateException) {
                 DivaResult.failure(e)
             }

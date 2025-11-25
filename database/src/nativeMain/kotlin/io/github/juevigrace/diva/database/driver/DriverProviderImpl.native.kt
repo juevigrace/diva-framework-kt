@@ -8,9 +8,9 @@ import app.cash.sqldelight.driver.native.NativeSqliteDriver
 import io.github.juevigrace.diva.types.DivaResult
 import io.github.juevigrace.diva.types.isFailure
 
-actual class DatabaseDriverProviderImpl(
+actual class DriverProviderImpl(
     private val conf: PlatformDriverConf.Native,
-) : DatabaseDriverProvider {
+) : DriverProvider {
     actual override suspend fun createDriver(schema: Schema): DivaResult<SqlDriver, Exception> {
         return try {
             val syncSchema: SqlSchema<QueryResult.Value<Unit>> = when (schema) {
@@ -21,7 +21,7 @@ actual class DatabaseDriverProviderImpl(
             DivaResult.success(
                 NativeSqliteDriver(
                     schema = syncSchema,
-                    name = conf.driverConfig.url,
+                    name = conf.driverConf.url,
                 ),
             )
         } catch (e: Exception) {
@@ -29,7 +29,7 @@ actual class DatabaseDriverProviderImpl(
         }
     }
 
-    actual class Builder : DatabaseDriverProvider.Builder {
+    actual class Builder : DriverProvider.Builder {
         private var conf: DivaResult<PlatformDriverConf.Native, Exception> = DivaResult.failure(
             Exception("Platform configuration is not set")
         )
@@ -47,11 +47,11 @@ actual class DatabaseDriverProviderImpl(
             }
         }
 
-        actual override fun build(): DivaResult<DatabaseDriverProvider, Exception> {
+        actual override fun build(): DivaResult<DriverProvider, Exception> {
             try {
                 if (conf.isFailure()) throw (conf as DivaResult.Failure).error
 
-                return DivaResult.success(DatabaseDriverProviderImpl((conf as DivaResult.Success).value))
+                return DivaResult.success(DriverProviderImpl((conf as DivaResult.Success).value))
             } catch (e: IllegalStateException) {
                 return DivaResult.failure(e)
             }

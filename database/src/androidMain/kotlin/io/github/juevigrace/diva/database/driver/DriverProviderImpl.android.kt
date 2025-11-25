@@ -10,10 +10,10 @@ import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import io.github.juevigrace.diva.types.DivaResult
 import io.github.juevigrace.diva.types.isFailure
 
-actual class DatabaseDriverProviderImpl(
+actual class DriverProviderImpl(
     private val context: Context,
     private val conf: PlatformDriverConf.Android,
-) : DatabaseDriverProvider {
+) : DriverProvider {
     actual override suspend fun createDriver(schema: Schema): DivaResult<SqlDriver, Exception> {
         return try {
             val syncSchema: SqlSchema<QueryResult.Value<Unit>> = when (schema) {
@@ -25,8 +25,8 @@ actual class DatabaseDriverProviderImpl(
                 AndroidSqliteDriver(
                     schema = syncSchema,
                     context = context,
-                    name = "jdbc:sqlite:${conf.driverConfig.url}.db",
-                    callback = if (conf.driverConfig.properties.containsKey("foreign_keys")) {
+                    name = "jdbc:sqlite:${conf.driverConf.url}.db",
+                    callback = if (conf.driverConf.properties.containsKey("foreign_keys")) {
                         fkCallback(syncSchema)
                     } else {
                         object : AndroidSqliteDriver.Callback(syncSchema) {}
@@ -47,7 +47,7 @@ actual class DatabaseDriverProviderImpl(
         }
     }
 
-    actual class Builder : DatabaseDriverProvider.Builder {
+    actual class Builder : DriverProvider.Builder {
         private lateinit var context: Context
         private var conf: DivaResult<PlatformDriverConf.Android, Exception> = DivaResult.failure(
             Exception("Platform configuration is not set")
@@ -70,11 +70,11 @@ actual class DatabaseDriverProviderImpl(
             }
         }
 
-        actual override fun build(): DivaResult<DatabaseDriverProvider, Exception> {
+        actual override fun build(): DivaResult<DriverProvider, Exception> {
             return try {
                 if (!::context.isInitialized) error("Context not set")
                 if (conf.isFailure()) error((conf as DivaResult.Failure).error)
-                DivaResult.success(DatabaseDriverProviderImpl(context, (conf as DivaResult.Success).value))
+                DivaResult.success(DriverProviderImpl(context, (conf as DivaResult.Success).value))
             } catch (e: IllegalStateException) {
                 DivaResult.failure(e)
             }
