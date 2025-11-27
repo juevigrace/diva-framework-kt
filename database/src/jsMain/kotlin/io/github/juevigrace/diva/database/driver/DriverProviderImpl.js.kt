@@ -4,7 +4,7 @@ import app.cash.sqldelight.async.coroutines.awaitCreate
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.worker.WebWorkerDriver
 import io.github.juevigrace.diva.types.DivaResult
-import io.github.juevigrace.diva.types.isFailure
+import io.github.juevigrace.diva.types.getOrThrow
 import org.w3c.dom.Worker
 
 actual class DriverProviderImpl(
@@ -48,8 +48,7 @@ actual class DriverProviderImpl(
 
         actual override fun build(): DivaResult<DriverProvider, Exception> {
             return try {
-                if (conf.isFailure()) throw (conf as DivaResult.Failure).error
-                DivaResult.success(DriverProviderImpl((conf as DivaResult.Success).value))
+                DivaResult.success(DriverProviderImpl(conf.getOrThrow()))
             } catch (e: IllegalStateException) {
                 DivaResult.failure(e)
             }

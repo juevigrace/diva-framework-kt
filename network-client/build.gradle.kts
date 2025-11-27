@@ -8,57 +8,59 @@ plugins {
 kotlin {
     js(IR) {
         nodejs()
+        binaries.library()
     }
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         nodejs()
+        binaries.library()
     }
 
     sourceSets {
         commonMain.dependencies {
             // Ktor
-            implementation(libs.ktor.client.core)
-            implementation(libs.ktor.client.content.negotiation)
-            implementation(libs.ktor.client.logging)
-            implementation(libs.ktor.serialization.kotlinx.json)
+            api(libs.ktor.client.core)
+            api(libs.ktor.client.content.negotiation)
+            api(libs.ktor.client.logging)
+            api(libs.ktor.serialization.kotlinx.json)
 
             // Serialization/json
-            implementation(libs.kotlinx.serialization.json)
+            api(libs.kotlinx.serialization.json)
 
             // Types
-            implementation(projects.types)
+            api(projects.types)
 
             // Util
             implementation(projects.util)
         }
 
         androidMain.dependencies {
-            implementation(libs.ktor.client.okhttp)
+            api(libs.ktor.client.okhttp)
         }
 
         appleMain.dependencies {
-            implementation(libs.ktor.client.darwin)
+            api(libs.ktor.client.darwin)
         }
 
         linuxMain.dependencies {
-            implementation(libs.ktor.client.curl)
+            api(libs.ktor.client.curl)
         }
 
         mingwMain.dependencies {
-            implementation(libs.ktor.client.winhttp)
+            api(libs.ktor.client.winhttp)
         }
 
         jvmMain.dependencies {
-            implementation(libs.ktor.client.okhttp)
+            api(libs.ktor.client.okhttp)
         }
 
         jsMain.dependencies {
-            implementation(libs.ktor.client.js)
+            api(libs.ktor.client.js)
         }
 
         wasmJsMain.dependencies {
-            implementation(libs.ktor.client.cio)
+            api(libs.ktor.client.cio)
         }
     }
 }

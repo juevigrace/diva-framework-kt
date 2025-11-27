@@ -8,7 +8,7 @@ import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlSchema
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import io.github.juevigrace.diva.types.DivaResult
-import io.github.juevigrace.diva.types.isFailure
+import io.github.juevigrace.diva.types.getOrThrow
 
 actual class DriverProviderImpl(
     private val context: Context,
@@ -20,12 +20,11 @@ actual class DriverProviderImpl(
                 is Schema.Sync -> schema.value
                 is Schema.Async -> schema.value.synchronous()
             }
-
             DivaResult.success(
                 AndroidSqliteDriver(
                     schema = syncSchema,
                     context = context,
-                    name = "jdbc:sqlite:${conf.driverConf.url}.db",
+                    name = conf.driverConf.url,
                     callback = if (conf.driverConf.properties.containsKey("foreign_keys")) {
                         fkCallback(syncSchema)
                     } else {
@@ -73,8 +72,7 @@ actual class DriverProviderImpl(
         actual override fun build(): DivaResult<DriverProvider, Exception> {
             return try {
                 if (!::context.isInitialized) error("Context not set")
-                if (conf.isFailure()) error((conf as DivaResult.Failure).error)
-                DivaResult.success(DriverProviderImpl(context, (conf as DivaResult.Success).value))
+                DivaResult.success(DriverProviderImpl(context, conf.getOrThrow()))
             } catch (e: IllegalStateException) {
                 DivaResult.failure(e)
             }

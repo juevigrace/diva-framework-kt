@@ -20,9 +20,9 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            api(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.coroutines.core)
 
-            api(libs.kotlinx.datetime)
+            implementation(libs.kotlinx.datetime)
 
             implementation(libs.kotlin.reflect)
         }
@@ -32,25 +32,25 @@ kotlin {
 
             implementation(libs.androidx.activity.compose)
 
-            api(libs.kotlinx.coroutines.android)
+            implementation(libs.kotlinx.coroutines.android)
         }
 
         jvmMain.dependencies {
-            api(libs.kotlinx.coroutines.swing)
+            implementation(libs.kotlinx.coroutines.swing)
 
-            api(libs.logback.classic)
+            implementation(libs.logback.classic)
         }
 
         hasTarget("js") {
             jsMain.dependencies {
-                api(libs.kotlinx.coroutines.core.js)
+                implementation(libs.kotlinx.coroutines.core.js)
             }
         }
     }
 }
 
 android {
-    namespace = "io.github.juevigrace.diva.${project.name}"
+    namespace = "io.github.juevigrace.diva.${project.name.split("-").joinToString(".")}"
 
     compileSdk =
         libs.versions.android.compileSdk

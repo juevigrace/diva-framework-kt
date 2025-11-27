@@ -11,7 +11,7 @@ import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.github.juevigrace.diva.types.DivaResult
-import io.github.juevigrace.diva.types.isFailure
+import io.github.juevigrace.diva.types.getOrThrow
 
 actual class DriverProviderImpl(
     private val conf: PlatformDriverConf.Jvm,
@@ -133,8 +133,7 @@ actual class DriverProviderImpl(
 
         actual override fun build(): DivaResult<DriverProvider, Exception> {
             return try {
-                if (conf.isFailure()) error((conf as DivaResult.Failure).error)
-                DivaResult.success(DriverProviderImpl((conf as DivaResult.Success).value))
+                DivaResult.success(DriverProviderImpl(conf.getOrThrow()))
             } catch (e: IllegalStateException) {
                 DivaResult.failure(e)
             }

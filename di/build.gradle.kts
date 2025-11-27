@@ -19,15 +19,15 @@ kotlin {
             // Database
             implementation(projects.database)
 
-            // types
+            // Types
             implementation(projects.types)
 
             // Koin
-            implementation(libs.koin.core)
+            api(libs.koin.core)
         }
 
         androidMain.dependencies {
-            implementation(libs.koin.android)
+            api(libs.koin.android)
         }
     }
 }

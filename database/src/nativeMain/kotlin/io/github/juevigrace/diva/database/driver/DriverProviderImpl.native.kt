@@ -6,7 +6,7 @@ import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlSchema
 import app.cash.sqldelight.driver.native.NativeSqliteDriver
 import io.github.juevigrace.diva.types.DivaResult
-import io.github.juevigrace.diva.types.isFailure
+import io.github.juevigrace.diva.types.getOrThrow
 
 actual class DriverProviderImpl(
     private val conf: PlatformDriverConf.Native,
@@ -48,12 +48,10 @@ actual class DriverProviderImpl(
         }
 
         actual override fun build(): DivaResult<DriverProvider, Exception> {
-            try {
-                if (conf.isFailure()) throw (conf as DivaResult.Failure).error
-
-                return DivaResult.success(DriverProviderImpl((conf as DivaResult.Success).value))
+            return try {
+                DivaResult.success(DriverProviderImpl(conf.getOrThrow()))
             } catch (e: IllegalStateException) {
-                return DivaResult.failure(e)
+                DivaResult.failure(e)
             }
         }
     }
