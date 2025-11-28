@@ -1,21 +1,9 @@
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
-
 plugins {
-    id("divabuild.library")
+    id("divabuild.library-framework")
+    id("divabuild.targets-web")
 }
 
 kotlin {
-    js(IR) {
-        browser()
-        binaries.library()
-    }
-
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        browser()
-        binaries.library()
-    }
-
     sourceSets {
         commonMain.dependencies {
             // Sqldelight
@@ -38,12 +26,9 @@ kotlin {
         }
 
         jvmMain.dependencies {
-            api(libs.sqldelight.sqlite.driver)
-            api(libs.sqlite)
-            api(libs.postgresql)
-            api(libs.mysql)
-            api(libs.h2)
-            api(libs.hikaricp)
+            implementation(libs.sqldelight.sqlite.driver)
+            implementation(libs.sqldelight.jdbc.driver)
+            implementation(libs.hikaricp)
         }
 
         jsMain.dependencies {

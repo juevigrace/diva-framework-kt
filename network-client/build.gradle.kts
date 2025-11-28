@@ -1,18 +1,21 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
-    id("divabuild.library")
-    alias(libs.plugins.kotlin.serialization)
+    id("divabuild.library-framework")
+    id("divabuild.serialization")
+    id("divabuild.targets-web")
 }
 
 kotlin {
     js(IR) {
+        browser()
         nodejs()
         binaries.library()
     }
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
+        browser()
         nodejs()
         binaries.library()
     }
@@ -24,9 +27,6 @@ kotlin {
             api(libs.ktor.client.content.negotiation)
             api(libs.ktor.client.logging)
             api(libs.ktor.serialization.kotlinx.json)
-
-            // Serialization/json
-            api(libs.kotlinx.serialization.json)
 
             // Types
             api(projects.types)

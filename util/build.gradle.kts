@@ -1,7 +1,8 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
-    id("divabuild.library")
+    id("divabuild.library-framework")
+    id("divabuild.targets-web")
 }
 
 kotlin {

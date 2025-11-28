@@ -1,5 +1,5 @@
 plugins {
-    id("divabuild.ui-library")
+    id("divabuild.library-ui")
 }
 
 kotlin {

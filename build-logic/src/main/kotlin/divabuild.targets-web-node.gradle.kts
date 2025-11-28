@@ -1,21 +1,25 @@
+import divabuild.internal.libs
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
-    id("divabuild.library-framework")
-    id("divabuild.targets-web")
+    id("divabuild.kmp-base")
 }
 
 kotlin {
     js(IR) {
-        browser()
         nodejs()
         binaries.library()
     }
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
-        browser()
         nodejs()
         binaries.library()
+    }
+
+    sourceSets {
+        jsMain.dependencies {
+            api(libs.kotlinx.coroutines.core.js)
+        }
     }
 }

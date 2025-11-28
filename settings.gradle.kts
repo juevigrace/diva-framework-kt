@@ -33,10 +33,9 @@ enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
 
 include(
     ":database",
-//    ":di",
+    ":di",
     ":network-client",
     ":types",
     ":ui",
     ":util",
 )
-

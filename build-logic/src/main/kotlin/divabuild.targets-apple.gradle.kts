@@ -1,5 +1,5 @@
 plugins {
-    id("divabuild.base-library")
+    id("divabuild.kmp-base")
 }
 
 kotlin {
@@ -10,11 +10,4 @@ kotlin {
     tvosX64()
     tvosArm64()
     tvosSimulatorArm64()
-
-    macosX64()
-    macosArm64()
-
-    linuxX64()
-    linuxArm64()
-    mingwX64()
 }

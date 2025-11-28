@@ -1,27 +1,26 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
-    id("divabuild.library")
+    id("divabuild.library-framework")
+    id("divabuild.targets-web")
 }
 
 kotlin {
     js(IR) {
+        browser()
         nodejs()
+        binaries.library()
     }
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
+        browser()
         nodejs()
+        binaries.library()
     }
 
     sourceSets {
         commonMain.dependencies {
-            // Database
-            implementation(projects.database)
-
-            // Types
-            implementation(projects.types)
-
             // Koin
             api(libs.koin.core)
         }

@@ -1,8 +1,7 @@
-import divabuild.internal.libs
-import gradle.kotlin.dsl.accessors._35787f43bc24aba5ab545d54467a1c80.compose
+import divabuild.internal.hasTarget
 
 plugins {
-    id("divabuild.kmp-convention")
+    id("divabuild.kmp-base")
     id("org.jetbrains.compose")
     id("org.jetbrains.kotlin.plugin.compose")
 }
@@ -11,19 +10,25 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             // Compose Multiplatform
-            api(compose.animation)
-            api(compose.animationGraphics)
-            api(compose.components.resources)
-            api(compose.components.uiToolingPreview)
-            api(compose.foundation)
-            api(compose.materialIconsExtended)
-            api(compose.material3)
-            api(compose.material3AdaptiveNavigationSuite)
-            api(compose.runtimeSaveable)
-            api(compose.ui)
+            implementation(compose.animation)
+            implementation(compose.animationGraphics)
+            implementation(compose.components.resources)
+            implementation(compose.components.uiToolingPreview)
+            implementation(compose.foundation)
+            implementation(compose.materialIconsExtended)
+            implementation(compose.material3)
+            implementation(compose.material3AdaptiveNavigationSuite)
+            implementation(compose.runtimeSaveable)
+            implementation(compose.ui)
 
             // Navigation
-            api(libs.navigation.compose)
+//            implementation(libs.navigation.compose)
+        }
+
+        hasTarget("jvm") {
+            jvmMain.dependencies {
+                implementation(compose.desktop.common)
+            }
         }
     }
 }
