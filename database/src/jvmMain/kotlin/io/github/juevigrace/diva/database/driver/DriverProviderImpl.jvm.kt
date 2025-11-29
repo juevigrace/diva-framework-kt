@@ -11,7 +11,6 @@ import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.github.juevigrace.diva.types.DivaResult
-import io.github.juevigrace.diva.types.getOrThrow
 
 actual class DriverProviderImpl(
     private val conf: PlatformDriverConf.Jvm,
@@ -111,33 +110,6 @@ actual class DriverProviderImpl(
             minimumIdle = MIN_IDLE_CONNECTIONS
         }
         return HikariDataSource(config)
-    }
-
-    actual class Builder : DriverProvider.Builder {
-        private var conf: DivaResult<PlatformDriverConf.Jvm, Exception> = DivaResult.failure(
-            Exception("Platform configuration is not set"),
-        )
-        actual override fun setPlatformConf(platformConf: PlatformDriverConf): Builder {
-            return apply {
-                this.conf =
-                    when (platformConf) {
-                        is PlatformDriverConf.Jvm -> {
-                            DivaResult.success(platformConf)
-                        }
-                        else -> {
-                            DivaResult.failure(Exception("PlatformDriverConfig must be Jvm"))
-                        }
-                    }
-            }
-        }
-
-        actual override fun build(): DivaResult<DriverProvider, Exception> {
-            return try {
-                DivaResult.success(DriverProviderImpl(conf.getOrThrow()))
-            } catch (e: IllegalStateException) {
-                DivaResult.failure(e)
-            }
-        }
     }
 
     companion object {

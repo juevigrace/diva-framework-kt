@@ -8,9 +8,4 @@ interface DriverProvider {
      * Create a sql diver by the given schema and name synchronously.
      * */
     suspend fun createDriver(schema: Schema): DivaResult<SqlDriver, Exception>
-
-    interface Builder {
-        fun setPlatformConf(platformConf: PlatformDriverConf): Builder
-        fun build(): DivaResult<DriverProvider, Exception>
-    }
 }

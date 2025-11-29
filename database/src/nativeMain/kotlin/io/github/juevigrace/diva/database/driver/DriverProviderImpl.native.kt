@@ -6,7 +6,6 @@ import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlSchema
 import app.cash.sqldelight.driver.native.NativeSqliteDriver
 import io.github.juevigrace.diva.types.DivaResult
-import io.github.juevigrace.diva.types.getOrThrow
 
 actual class DriverProviderImpl(
     private val conf: PlatformDriverConf.Native,
@@ -26,33 +25,6 @@ actual class DriverProviderImpl(
             )
         } catch (e: Exception) {
             DivaResult.failure(e)
-        }
-    }
-
-    actual class Builder : DriverProvider.Builder {
-        private var conf: DivaResult<PlatformDriverConf.Native, Exception> = DivaResult.failure(
-            Exception("Platform configuration is not set")
-        )
-
-        actual override fun setPlatformConf(platformConf: PlatformDriverConf): Builder {
-            return apply {
-                when (platformConf) {
-                    is PlatformDriverConf.Native -> {
-                        this.conf = DivaResult.success(platformConf)
-                    }
-                    else -> {
-                        this.conf = DivaResult.failure(Exception("PlatformDriverConfig must be Native"))
-                    }
-                }
-            }
-        }
-
-        actual override fun build(): DivaResult<DriverProvider, Exception> {
-            return try {
-                DivaResult.success(DriverProviderImpl(conf.getOrThrow()))
-            } catch (e: IllegalStateException) {
-                DivaResult.failure(e)
-            }
         }
     }
 }

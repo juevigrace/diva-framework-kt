@@ -8,7 +8,6 @@ import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlSchema
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import io.github.juevigrace.diva.types.DivaResult
-import io.github.juevigrace.diva.types.getOrThrow
 
 actual class DriverProviderImpl(
     private val context: Context,
@@ -42,39 +41,6 @@ actual class DriverProviderImpl(
             override fun onOpen(db: SupportSQLiteDatabase) {
                 db.setForeignKeyConstraintsEnabled(true)
                 super.onOpen(db)
-            }
-        }
-    }
-
-    actual class Builder : DriverProvider.Builder {
-        private lateinit var context: Context
-        private var conf: DivaResult<PlatformDriverConf.Android, Exception> = DivaResult.failure(
-            Exception("Platform configuration is not set")
-        )
-
-        fun setContext(context: Context): Builder {
-            return apply { this.context = context }
-        }
-
-        actual override fun setPlatformConf(platformConf: PlatformDriverConf): Builder {
-            return apply {
-                this.conf = when (platformConf) {
-                    is PlatformDriverConf.Android -> {
-                        DivaResult.success(platformConf)
-                    }
-                    else -> {
-                        DivaResult.failure(Exception("PlatformDriverConfig must be Android"))
-                    }
-                }
-            }
-        }
-
-        actual override fun build(): DivaResult<DriverProvider, Exception> {
-            return try {
-                if (!::context.isInitialized) error("Context not set")
-                DivaResult.success(DriverProviderImpl(context, conf.getOrThrow()))
-            } catch (e: IllegalStateException) {
-                DivaResult.failure(e)
             }
         }
     }

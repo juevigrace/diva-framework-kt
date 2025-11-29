@@ -9,14 +9,4 @@ actual class DriverProviderImpl(
     actual override suspend fun createDriver(schema: Schema): DivaResult<SqlDriver, Exception> {
         TODO("Not yet implemented")
     }
-
-    actual class Builder : DriverProvider.Builder {
-        actual override fun setPlatformConf(platformConf: PlatformDriverConf): Builder {
-            TODO("Not yet implemented")
-        }
-
-        actual override fun build(): DivaResult<DriverProvider, Exception> {
-            TODO("Not yet implemented")
-        }
-    }
 }
