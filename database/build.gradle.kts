@@ -26,9 +26,10 @@ kotlin {
         }
 
         jvmMain.dependencies {
-            implementation(libs.sqldelight.sqlite.driver)
-            implementation(libs.sqldelight.jdbc.driver)
-            implementation(libs.hikaricp)
+            api(libs.sqldelight.sqlite.driver)
+            api(libs.sqldelight.jdbc.driver)
+            api(libs.sqldelight.r2dbc.driver)
+            api(libs.hikaricp)
         }
 
         jsMain.dependencies {

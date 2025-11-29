@@ -1,12 +1,11 @@
 [versions]
 diva-version = "0.0.1"
-agp = "8.12.0"
+agp = "8.13.1"
 android-compileSdk = "36"
 android-minSdk = "24"
 androidx-activity = "1.12.0"
 androidx-core = "1.17.0"
 androidx-lifecycle = "2.9.6"
-coil = "3.3.0"
 compose-multiplatform = "1.9.3"
 kotlin = "2.2.21"
 kotlinx-coroutines = "1.10.2"
@@ -89,6 +88,7 @@ sqldelight-coroutines-extensions = { group = "app.cash.sqldelight", name = "coro
 sqldelight-native-driver = { group = "app.cash.sqldelight", name = "native-driver", version.ref = "sqldelight" }
 sqldelight-sqlite-driver = { group = "app.cash.sqldelight", name = "sqlite-driver", version.ref = "sqldelight" }
 sqldelight-jdbc-driver = { group = "app.cash.sqldelight", name = "jdbc-driver", version.ref = "sqldelight" }
+sqldelight-r2dbc-driver = { group = "app.cash.sqldelight", name = "r2dbc-driver", version.ref = "sqldelight" }
 sqldelight-web-worker-driver = { group = "app.cash.sqldelight", name = "web-worker-driver", version.ref = "sqldelight" }
 sqldelight-dialect-mysql = { group = "app.cash.sqldelight", name = "mysql-dialect", version.ref = "sqldelight" }
 sqldelight-dialect-postgresql = { group = "app.cash.sqldelight", name = "postgresql-dialect", version.ref = "sqldelight" }
