@@ -1,0 +1,19 @@
+selectAll:
+SELECT * FROM diva_user ORDER BY created_at DESC;
+selectById:
+SELECT * FROM diva_user WHERE id = ?;
+selectByEmail:
+SELECT * FROM diva_user WHERE email = ?;
+insertUser:
+INSERT INTO diva_user (name, email, created_at, updated_at)
+VALUES (?, ?, ?, ?);
+updateUser:
+UPDATE diva_user
+SET name = ?, email = ?, updated_at = ?
+WHERE id = ?;
+deleteUser:
+DELETE FROM diva_user WHERE id = ?;
+deleteAll:
+DELETE FROM diva_user;
+countUsers:
+SELECT COUNT(*) FROM diva_user;

@@ -11,26 +11,26 @@ kotlin {
     sourceSets {
         hasTarget("android") {
             androidMain.dependencies {
-                implementation(libs.kotlinx.coroutines.android)
+                api(libs.kotlinx.coroutines.android)
             }
         }
 
         commonMain.dependencies {
-            implementation(libs.kotlinx.coroutines.core)
-            implementation(libs.kotlinx.datetime)
-            implementation(libs.kotlin.reflect)
+            api(libs.kotlinx.coroutines.core)
+            api(libs.kotlinx.datetime)
+            api(libs.kotlin.reflect)
         }
 
         hasTarget("jvm") {
             jvmMain.dependencies {
-                implementation(libs.kotlinx.coroutines.swing)
-                implementation(libs.logback.classic)
+                api(libs.kotlinx.coroutines.swing)
+                api(libs.logback.classic)
             }
         }
 
         hasTarget("js") {
             jsMain.dependencies {
-                implementation(libs.kotlinx.coroutines.core.js)
+                api(libs.kotlinx.coroutines.core.js)
             }
         }
     }

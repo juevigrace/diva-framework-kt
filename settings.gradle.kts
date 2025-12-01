@@ -39,3 +39,7 @@ include(
     ":ui",
     ":util",
 )
+
+include(
+    ":examples:databases:jvm"
+)

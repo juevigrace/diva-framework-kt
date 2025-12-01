@@ -1,5 +1,23 @@
 package io.github.juevigrace.diva.database
 
-interface Storage
+import app.cash.sqldelight.TransacterBase
+import io.github.juevigrace.diva.types.DivaError
+import io.github.juevigrace.diva.types.DivaResult
 
-class StorageImpl<S>(private val db: S) : Storage
+interface Storage<S : TransacterBase> {
+    /**
+     * Primary entry point for all database operations.
+     * All database functions must be used within this scope.
+     */
+    suspend fun <T : Any> withDb(
+        block: suspend StorageScope<S>.() -> DivaResult<T, DivaError>
+    ): DivaResult<T, DivaError>
+
+    /**
+     * System operations - available outside withDb scope
+     */
+    suspend fun checkHealth(): DivaResult<Boolean, DivaError>
+
+    suspend fun close(): DivaResult<Unit, DivaError>
+}
+

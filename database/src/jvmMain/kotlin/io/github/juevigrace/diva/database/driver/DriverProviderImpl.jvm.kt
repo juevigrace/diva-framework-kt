@@ -5,116 +5,85 @@ import app.cash.sqldelight.async.coroutines.synchronous
 import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlSchema
-import app.cash.sqldelight.driver.jdbc.JdbcDriver
 import app.cash.sqldelight.driver.jdbc.asJdbcDriver
-import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import io.github.juevigrace.diva.types.DivaError
 import io.github.juevigrace.diva.types.DivaResult
 
 actual class DriverProviderImpl(
     private val conf: PlatformDriverConf.Jvm,
 ) : DriverProvider {
-    actual override suspend fun createDriver(schema: Schema): DivaResult<SqlDriver, Exception> {
+    actual override suspend fun createDriver(schema: Schema): DivaResult<SqlDriver, DivaError> {
         return try {
-            val sync: SqlSchema<QueryResult.Value<Unit>> = when (schema) {
+            val syncSchema: SqlSchema<QueryResult.Value<Unit>> = when (schema) {
                 is Schema.Sync -> schema.value
                 is Schema.Async -> schema.value.synchronous()
             }
-            when (val result: DivaResult<SqlDriver, Exception> = createDriverFromDataSource(sync)) {
+            when (val result: DivaResult<SqlDriver, DivaError> = createDriverFromDataSource()) {
                 is DivaResult.Failure -> result
                 is DivaResult.Success -> {
-                    sync.awaitCreate(result.value)
+                    syncSchema.awaitCreate(result.value)
                     DivaResult.success(result.value)
                 }
             }
         } catch (e: Exception) {
-            DivaResult.failure(e)
+            DivaResult.failure(DivaError.database("CREATE", null, e.message, e))
         }
     }
 
-    private fun createDriverFromDataSource(
-        schema: SqlSchema<QueryResult.Value<Unit>>
-    ): DivaResult<SqlDriver, Exception> {
+    private fun createDriverFromDataSource(): DivaResult<SqlDriver, DivaError> {
         return try {
-            val driver: JdbcDriver = when (conf.driverConf) {
+            val config: HikariConfig = when (conf.driverConf) {
+                is DriverConf.SqliteDriverConf -> {
+                    createHikariConfig(
+                        url = "jdbc:sqlite:${conf.driverConf.name}",
+                        username = "",
+                        password = ""
+                    )
+                }
                 is DriverConf.MysqlDriverConf -> {
-                    createDataSourceWithConfig(
-                        driver = MYSQL_DRIVER_NAME,
-                        host = conf.driverConf.host,
-                        port = conf.driverConf.port,
-                        database = conf.driverConf.database,
-                        username = conf.driverConf.username,
-                        password = conf.driverConf.password
-                    ).asJdbcDriver()
+                    createHikariConfig(
+                        "jdbc:mysql://${conf.driverConf.host}:${conf.driverConf.port}/${conf.driverConf.database}",
+                        conf.driverConf.username,
+                        conf.driverConf.password,
+                    )
                 }
                 is DriverConf.PostgresqlDriverConf -> {
-                    createDataSourceWithConfig(
-                        driver = POSTGRESQL_DRIVER_NAME,
-                        host = conf.driverConf.host,
-                        port = conf.driverConf.port,
-                        database = conf.driverConf.database,
-                        username = conf.driverConf.username,
-                        password = conf.driverConf.password
-                    ).asJdbcDriver()
+                    createHikariConfig(
+                        "jdbc:postgresql://${conf.driverConf.host}:${conf.driverConf.port}/${conf.driverConf.database}",
+                        conf.driverConf.username,
+                        conf.driverConf.password,
+                    )
                 }
                 is DriverConf.H2DriverConf -> {
-                    createDataSourceWithConfig(
-                        url = conf.driverConf.url,
-                        username = conf.driverConf.username,
-                        password = conf.driverConf.password
-                    ).asJdbcDriver()
-                }
-                is DriverConf.SqliteDriverConf -> {
-                    JdbcSqliteDriver(
+                    createHikariConfig(
                         conf.driverConf.url,
-                        conf.driverConf.properties.toProperties(),
-                        schema,
+                        conf.driverConf.username,
+                        conf.driverConf.password,
                     )
                 }
             }
-            DivaResult.success(driver)
+            DivaResult.success(HikariDataSource(config).asJdbcDriver())
         } catch (e: Exception) {
-            return DivaResult.failure(e)
+            DivaResult.failure(DivaError.database("CREATE_DATASOURCE", null, e.message, e))
         }
     }
 
-    private fun createDataSourceWithConfig(
+    private fun createHikariConfig(
         url: String,
         username: String,
         password: String,
-    ): HikariDataSource {
-        val config: HikariConfig = HikariConfig().apply {
+    ): HikariConfig =
+        HikariConfig().apply {
             jdbcUrl = url
             this.username = username
             this.password = password
             maximumPoolSize = MAX_POOL_SIZE
             minimumIdle = MIN_IDLE_CONNECTIONS
         }
-        return HikariDataSource(config)
-    }
-
-    private fun createDataSourceWithConfig(
-        driver: String,
-        username: String,
-        password: String,
-        host: String,
-        port: Int,
-        database: String,
-    ): HikariDataSource {
-        val config: HikariConfig = HikariConfig().apply {
-            jdbcUrl = "jdbc:$driver://$host:$port/$database"
-            this.username = username
-            this.password = password
-            maximumPoolSize = MAX_POOL_SIZE
-            minimumIdle = MIN_IDLE_CONNECTIONS
-        }
-        return HikariDataSource(config)
-    }
 
     companion object {
-        const val MYSQL_DRIVER_NAME = "mysql"
-        const val POSTGRESQL_DRIVER_NAME = "postgresql"
         const val MAX_POOL_SIZE = 10
         const val MIN_IDLE_CONNECTIONS = 2
     }

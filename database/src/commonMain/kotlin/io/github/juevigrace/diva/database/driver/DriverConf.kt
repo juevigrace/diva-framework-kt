@@ -6,8 +6,8 @@ sealed class DriverConf(
     open val properties: Map<String, String>,
 ) {
     data class SqliteDriverConf(
-        val url: String,
-        override val properties: Map<String, String> = mapOf("foreign_keys" to "true"),
+        val name: String,
+        override val properties: Map<String, String> = emptyMap(),
     ) : DriverConf(properties)
 
     data class PostgresqlDriverConf(
@@ -30,9 +30,9 @@ sealed class DriverConf(
     ) : DriverConf(properties)
 
     data class H2DriverConf(
-        val url: String = "jdbc:h2:mem:testdb",
-        val username: String = "sa",
-        val password: String = "",
+        val url: String,
+        val username: String,
+        val password: String,
         override val properties: Map<String, String> = emptyMap(),
     ) : DriverConf(properties)
 }
