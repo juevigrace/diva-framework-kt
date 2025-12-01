@@ -10,3 +10,7 @@ interface DriverProvider {
      */
     suspend fun createDriver(schema: Schema): DivaResult<SqlDriver, DivaError>
 }
+
+internal abstract class DriverProviderBase<C : PlatformDriverConf>(
+    protected open val conf: C
+) : DriverProvider

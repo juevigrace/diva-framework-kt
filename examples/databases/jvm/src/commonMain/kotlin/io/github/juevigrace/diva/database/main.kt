@@ -2,8 +2,9 @@ package io.github.juevigrace.diva.database
 
 import io.github.juevigrace.diva.database.driver.DriverConf
 import io.github.juevigrace.diva.database.driver.DriverProvider
-import io.github.juevigrace.diva.database.driver.DriverProviderImpl
-import io.github.juevigrace.diva.database.driver.PlatformDriverConf
+import io.github.juevigrace.diva.database.driver.DriverProviderFactory
+import io.github.juevigrace.diva.database.driver.JvmConf
+import io.github.juevigrace.diva.database.driver.JvmDriverProviderFactory
 import io.github.juevigrace.diva.database.driver.Schema
 import io.github.juevigrace.diva.examples.database.DivaDB
 import io.github.juevigrace.diva.types.DivaError
@@ -12,15 +13,12 @@ import io.github.juevigrace.diva.types.onSuccess
 import migrations.Diva_user
 
 suspend fun main() {
-    val provider: DriverProvider = DriverProviderImpl(
-        PlatformDriverConf.Jvm(
-            DriverConf.SqliteDriverConf("diva.db")
-        )
-    )
+    val factory: DriverProviderFactory = JvmDriverProviderFactory(JvmConf(DriverConf.SqliteDriverConf("diva.db")))
+    val provider: DriverProvider = factory.create()
     var storage: Storage<DivaDB>? = null
 
     provider.createDriver(Schema.Async(DivaDB.Schema)).onSuccess { driver ->
-        storage = StorageImpl(driver, DivaDB(driver))
+        storage = Storage(driver, DivaDB(driver))
     }
     if (storage == null) {
         return

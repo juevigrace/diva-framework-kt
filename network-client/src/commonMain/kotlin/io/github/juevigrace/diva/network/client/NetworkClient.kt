@@ -1,3 +1,3 @@
 package io.github.juevigrace.diva.network.client
 
-interface DivaClient : NetworkClient
+interface NetworkClient

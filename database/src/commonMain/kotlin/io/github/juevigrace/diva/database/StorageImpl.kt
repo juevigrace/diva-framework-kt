@@ -5,7 +5,7 @@ import app.cash.sqldelight.db.SqlDriver
 import io.github.juevigrace.diva.types.DivaError
 import io.github.juevigrace.diva.types.DivaResult
 
-class StorageImpl<S : TransacterBase>(
+internal class StorageImpl<S : TransacterBase>(
     private val driver: SqlDriver,
     db: S
 ) : Storage<S> {
