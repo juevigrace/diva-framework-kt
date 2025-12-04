@@ -6,7 +6,7 @@ plugins {
 
 kotlin {
     js(IR) {
-        outputModuleName = project.name
+        outputModuleName = "diva-${project.name}"
         browser()
         binaries.library()
         generateTypeScriptDefinitions()
@@ -17,7 +17,7 @@ kotlin {
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
-        outputModuleName = project.name
+        outputModuleName = "diva-${project.name}"
         browser()
         binaries.library()
         generateTypeScriptDefinitions()
