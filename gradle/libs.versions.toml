@@ -15,12 +15,7 @@ koin = "4.1.1"
 ktor = "3.3.3"
 logback = "1.5.21"
 maven-publish = "0.35.0"
-navigation-compose = "2.9.1"
 sqldelight = "2.2.1"
-sqlite = "3.45.3.0"
-postgresql = "42.7.8"
-mysql = "9.5.0"
-h2 = "2.4.240"
 hikari = "7.0.2"
 
 [plugins]
@@ -53,7 +48,6 @@ koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = 
 koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
 koin-compose = { group = "io.insert-koin", name = "koin-compose", version.ref = "koin" }
 koin-compose-viewmodel = { group = "io.insert-koin", name = "koin-compose-viewmodel", version.ref = "koin" }
-koin-compose-viewmodel-navigation = { group = "io.insert-koin", name = "koin-compose-viewmodel-navigation", version.ref = "koin" }
 koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
 koin-test = { group = "io.insert-koin", name = "koin-test", version.ref = "koin" }
 
@@ -90,26 +84,14 @@ sqldelight-sqlite-driver = { group = "app.cash.sqldelight", name = "sqlite-drive
 sqldelight-jdbc-driver = { group = "app.cash.sqldelight", name = "jdbc-driver", version.ref = "sqldelight" }
 sqldelight-r2dbc-driver = { group = "app.cash.sqldelight", name = "r2dbc-driver", version.ref = "sqldelight" }
 sqldelight-web-worker-driver = { group = "app.cash.sqldelight", name = "web-worker-driver", version.ref = "sqldelight" }
-sqldelight-dialect-mysql = { group = "app.cash.sqldelight", name = "mysql-dialect", version.ref = "sqldelight" }
-sqldelight-dialect-postgresql = { group = "app.cash.sqldelight", name = "postgresql-dialect", version.ref = "sqldelight" }
-sqldelight-dialect-hsql = { group = "app.cash.sqldelight", name = "hsql-dialect", version.ref = "sqldelight" }
 
 ######### [LIFECYCLE DEPENDENCIES] #########
 
 lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "androidx-lifecycle" }
 lifecycle-viewmodel-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
 lifecycle-viewmodel-savedstate = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel-savedstate", version.ref = "androidx-lifecycle" }
-
-######### [NAVIGATION DEPENDENCIES] #########
-
-navigation-compose = { group = "org.jetbrains.androidx.navigation", name = "navigation-compose", version.ref = "navigation-compose" }
 
 ######### [OTHER THIRD-PARTY DEPENDENCIES] #########
 
 logback-classic = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
-sqlite = { group = "org.xerial", name = "sqlite-jdbc", version.ref = "sqlite" }
-postgresql = { group = "org.postgresql", name = "postgresql", version.ref = "postgresql" }
-mysql = { group = "com.mysql", name = "mysql-connector-j", version.ref = "mysql" }
-h2 = { group = "com.h2database", name = "h2", version.ref = "h2" }
 hikaricp = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikari" }

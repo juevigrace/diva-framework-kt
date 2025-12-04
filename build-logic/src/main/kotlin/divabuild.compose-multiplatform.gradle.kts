@@ -22,9 +22,6 @@ kotlin {
             api(compose.runtimeSaveable)
             api(compose.ui)
             api(compose.uiUtil)
-
-            // Navigation
-            api(libs.navigation.compose)
         }
 
         hasTarget("jvm") {
