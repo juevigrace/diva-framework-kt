@@ -10,5 +10,9 @@ kotlin {
             // Koin
             implementation(libs.koin.core)
         }
+
+        androidMain.dependencies {
+            implementation(libs.koin.android)
+        }
     }
 }

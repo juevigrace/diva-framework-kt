@@ -2,21 +2,11 @@ import divabuild.internal.libs
 
 plugins {
     id("divabuild.kmp-base")
-    id("com.android.library")
+    id("com.android.kotlin.multiplatform.library")
 }
 
 kotlin {
-    androidTarget()
-
-    sourceSets {
-        androidMain.dependencies {
-            api(libs.androidx.core.ktx)
-            api(libs.androidx.activity.compose)
-        }
-    }
-}
-
-android {
+    androidLibrary {
     namespace = "io.github.juevigrace.diva.${project.name.split("-").joinToString(".")}"
 
     compileSdk =
@@ -24,16 +14,23 @@ android {
             .get()
             .toInt()
 
-    defaultConfig {
-        minSdk =
-            libs.versions.android.minSdk
-                .get()
-                .toInt()
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
+    minSdk =
+        libs.versions.android.minSdk
+            .get()
+            .toInt()
 
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+    withJava() // enable java compilation support
+    compilerOptions {
+        jvmTarget.set(
+            org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21
+       )
+    }
+}
+
+    sourceSets {
+        androidMain.dependencies {
+            api(libs.androidx.core.ktx)
+            api(libs.androidx.activity.compose)
+        }
     }
 }
