@@ -1,15 +1,14 @@
+import org.jetbrains.compose.ExperimentalComposeLibrary
+
 plugins {
     id("divabuild.library-ui")
 }
 
 kotlin {
     sourceSets {
-        commonMain.dependencies {
-            // Types
-            implementation(projects.types)
-
-            // Util
-            implementation(projects.util)
+        @OptIn(ExperimentalComposeLibrary::class)
+        commonTest.dependencies {
+            implementation(compose.uiTest)
         }
     }
 }

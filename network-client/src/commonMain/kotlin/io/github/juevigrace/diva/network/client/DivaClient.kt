@@ -1,7 +1,7 @@
 package io.github.juevigrace.diva.network.client
 
-import io.github.juevigrace.diva.types.DivaError
-import io.github.juevigrace.diva.types.DivaResult
+import io.github.juevigrace.diva.core.types.DivaError
+import io.github.juevigrace.diva.core.types.DivaResult
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.HttpClientEngineConfig

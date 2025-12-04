@@ -1,4 +1,4 @@
-package io.github.juevigrace.diva.types
+package io.github.juevigrace.diva.core.types
 
 sealed interface DivaResult<out T, out E> {
     data class Success<T>(val value: T) : DivaResult<T, Nothing>

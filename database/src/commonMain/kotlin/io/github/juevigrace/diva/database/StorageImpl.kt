@@ -2,8 +2,8 @@ package io.github.juevigrace.diva.database
 
 import app.cash.sqldelight.TransacterBase
 import app.cash.sqldelight.db.SqlDriver
-import io.github.juevigrace.diva.types.DivaError
-import io.github.juevigrace.diva.types.DivaResult
+import io.github.juevigrace.diva.core.types.DivaError
+import io.github.juevigrace.diva.core.types.DivaResult
 
 internal class StorageImpl<S : TransacterBase>(
     private val driver: SqlDriver,

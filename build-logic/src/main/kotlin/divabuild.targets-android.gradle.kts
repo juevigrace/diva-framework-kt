@@ -10,8 +10,8 @@ kotlin {
 
     sourceSets {
         androidMain.dependencies {
-            implementation(libs.androidx.core.ktx)
-            implementation(libs.androidx.activity.compose)
+            api(libs.androidx.core.ktx)
+            api(libs.androidx.activity.compose)
         }
     }
 }

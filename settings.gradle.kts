@@ -32,10 +32,9 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
 
 include(
+    ":core",
     ":database",
     ":di",
     ":network-client",
-    ":types",
     ":ui",
-    ":util",
 )

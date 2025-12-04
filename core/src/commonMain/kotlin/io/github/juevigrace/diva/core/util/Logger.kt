@@ -1,4 +1,4 @@
-package io.github.juevigrace.diva.util
+package io.github.juevigrace.diva.core.util
 
 object Logger {
     fun log(message: String) {

@@ -9,12 +9,6 @@ kotlin {
             // Sqldelight
             api(libs.sqldelight.async.extensions)
             api(libs.sqldelight.coroutines.extensions)
-
-            // Types
-            api(projects.types)
-
-            // Util
-            implementation(projects.util)
         }
 
         androidMain.dependencies {

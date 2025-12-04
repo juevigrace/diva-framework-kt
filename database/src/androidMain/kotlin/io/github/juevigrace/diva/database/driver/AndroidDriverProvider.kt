@@ -6,8 +6,8 @@ import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlSchema
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
-import io.github.juevigrace.diva.types.DivaError
-import io.github.juevigrace.diva.types.DivaResult
+import io.github.juevigrace.diva.core.types.DivaError
+import io.github.juevigrace.diva.core.types.DivaResult
 
 internal class AndroidDriverProvider(
     override val conf: AndroidConf,

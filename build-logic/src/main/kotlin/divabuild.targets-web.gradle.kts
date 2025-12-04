@@ -15,7 +15,8 @@ kotlin {
         }
     }
 
-    @OptIn(ExperimentalWasmDsl::class) wasmJs {
+    @OptIn(ExperimentalWasmDsl::class)
+    wasmJs {
         outputModuleName = project.name
         browser()
         binaries.library()

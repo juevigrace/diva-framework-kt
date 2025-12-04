@@ -1,4 +1,5 @@
 import divabuild.internal.hasTarget
+import divabuild.internal.libs
 
 plugins {
     id("divabuild.kmp-base")
@@ -20,9 +21,10 @@ kotlin {
             api(compose.material3AdaptiveNavigationSuite)
             api(compose.runtimeSaveable)
             api(compose.ui)
+            api(compose.uiUtil)
 
             // Navigation
-//            api(libs.navigation.compose)
+            api(libs.navigation.compose)
         }
 
         hasTarget("jvm") {

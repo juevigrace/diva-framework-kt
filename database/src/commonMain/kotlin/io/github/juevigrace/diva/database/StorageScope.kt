@@ -4,8 +4,8 @@ import app.cash.sqldelight.Query
 import app.cash.sqldelight.SuspendingTransacter
 import app.cash.sqldelight.Transacter
 import app.cash.sqldelight.TransacterBase
-import io.github.juevigrace.diva.types.DivaError
-import io.github.juevigrace.diva.types.DivaResult
+import io.github.juevigrace.diva.core.types.DivaError
+import io.github.juevigrace.diva.core.types.DivaResult
 import kotlinx.coroutines.flow.Flow
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext

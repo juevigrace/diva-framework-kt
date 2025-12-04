@@ -3,7 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "workspaces": [
-    "**/build/dist/js/developmentLibrary"
+    "**/build/dist/js/developmentLibrary",
+    "**/build/dist/js/productionLibrary",
+    "**/build/dist/wasmJs"
   ],
   "scripts": {}
 }
