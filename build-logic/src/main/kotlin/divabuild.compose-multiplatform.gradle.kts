@@ -1,5 +1,4 @@
 import divabuild.internal.hasTarget
-import divabuild.internal.libs
 
 plugins {
     id("divabuild.kmp-base")
@@ -18,7 +17,6 @@ kotlin {
             api(compose.foundation)
             api(compose.materialIconsExtended)
             api(compose.material3)
-            api(compose.material3AdaptiveNavigationSuite)
             api(compose.runtimeSaveable)
             api(compose.ui)
             api(compose.uiUtil)
