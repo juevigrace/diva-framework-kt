@@ -7,7 +7,7 @@ plugins {
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            api(project(":core"))
+            api(project(":diva-core"))
         }
     }
 }

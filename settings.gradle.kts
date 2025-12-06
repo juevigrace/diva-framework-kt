@@ -32,9 +32,9 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
 
 include(
-    ":core",
-    ":database",
-    ":di",
-    ":network-client",
-    ":ui",
+    ":diva-core",
+    ":diva-database",
+    ":diva-di",
+    ":diva-network-client",
+    ":diva-ui",
 )

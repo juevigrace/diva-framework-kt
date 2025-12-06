@@ -6,11 +6,10 @@ plugins {
 }
 
 mavenPublishing {
-    val projectName = "diva-${project.name}"
-    coordinates("io.github.juevigrace", projectName, libs.versions.diva.version.get())
+    coordinates("io.github.juevigrace", project.name, libs.versions.diva.version.get())
 
     pom {
-        name.set(projectName)
+        name.set(project.name)
         description.set(
             project.description.orEmpty()
                 .ifEmpty { "Diva framework for making KMP applications development more simple" },

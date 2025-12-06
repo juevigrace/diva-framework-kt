@@ -6,6 +6,10 @@ plugins {
 
 kotlin {
     sourceSets {
+        androidMain.dependencies {
+            api(libs.androidx.activity.compose)
+        }
+
         commonMain.dependencies {
             // ViewModel and Lifecycle
             api(libs.lifecycle.runtime.compose)

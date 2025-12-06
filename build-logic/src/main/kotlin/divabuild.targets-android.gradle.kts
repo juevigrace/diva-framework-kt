@@ -7,30 +7,23 @@ plugins {
 
 kotlin {
     androidLibrary {
-    namespace = "io.github.juevigrace.diva.${project.name.split("-").joinToString(".")}"
+        namespace = "io.github.juevigrace.${project.name.split("-").joinToString(".")}"
 
-    compileSdk =
-        libs.versions.android.compileSdk
-            .get()
-            .toInt()
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
 
-    minSdk =
-        libs.versions.android.minSdk
-            .get()
-            .toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
 
-    withJava() // enable java compilation support
-    compilerOptions {
-        jvmTarget.set(
-            org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21
-       )
+        withJava() // enable java compilation support
+        compilerOptions {
+            jvmTarget.set(
+                org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21
+            )
+        }
     }
-}
 
     sourceSets {
         androidMain.dependencies {
             api(libs.androidx.core.ktx)
-            api(libs.androidx.activity.compose)
         }
     }
 }
