@@ -4,7 +4,7 @@ import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.includes
 
-object DivaApp {
+object DivaDi {
     fun start(configuration: KoinAppDeclaration? = null) {
         startKoin {
             includes(configuration)

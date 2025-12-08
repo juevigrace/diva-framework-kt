@@ -4,6 +4,8 @@ import app.cash.sqldelight.TransacterBase
 import app.cash.sqldelight.db.SqlDriver
 import io.github.juevigrace.diva.core.types.DivaError
 import io.github.juevigrace.diva.core.types.DivaResult
+import io.github.juevigrace.diva.database.driver.DriverProvider
+import io.github.juevigrace.diva.database.driver.Schema
 
 interface Storage<S : TransacterBase> {
     /**
@@ -23,12 +25,18 @@ interface Storage<S : TransacterBase> {
 
     companion object {
         operator fun <S : TransacterBase> invoke(
-            driver: SqlDriver,
-            db: S
-        ): Storage<S> = StorageImpl(
-            driver = driver,
-            db = db
-        )
+            provider: DriverProvider,
+            schema: Schema,
+            onDriverCreated: (SqlDriver) -> S,
+            onError: (DivaResult<Nothing, DivaError>) -> Unit
+        ): Storage<S> {
+            return StorageImpl(
+                provider = provider,
+                schema = schema,
+                onDriverCreated = onDriverCreated,
+                onError = onError
+            )
+        }
     }
 }
 

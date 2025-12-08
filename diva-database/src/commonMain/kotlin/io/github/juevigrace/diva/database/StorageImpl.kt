@@ -4,12 +4,35 @@ import app.cash.sqldelight.TransacterBase
 import app.cash.sqldelight.db.SqlDriver
 import io.github.juevigrace.diva.core.types.DivaError
 import io.github.juevigrace.diva.core.types.DivaResult
+import io.github.juevigrace.diva.database.driver.DriverProvider
+import io.github.juevigrace.diva.database.driver.Schema
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
-internal class StorageImpl<S : TransacterBase>(
-    private val driver: SqlDriver,
-    db: S,
-) : Storage<S> {
-    private val scope: StorageScope<S> = StorageScopeImpl(db)
+internal class StorageImpl<S : TransacterBase> : Storage<S> {
+    private val cScope: CoroutineScope = CoroutineScope(Dispatchers.Default)
+    private lateinit var driver: SqlDriver
+    private lateinit var scope: StorageScope<S>
+
+    constructor(
+        provider: DriverProvider,
+        schema: Schema,
+        onDriverCreated: (SqlDriver) -> S,
+        onError: (DivaResult<Nothing, DivaError>) -> Unit
+    ) {
+        cScope.launch {
+            when (val result: DivaResult<SqlDriver, DivaError> = provider.createDriver(schema)) {
+                is DivaResult.Failure -> {
+                    onError(result)
+                }
+                is DivaResult.Success -> {
+                    driver = result.value
+                    scope = StorageScope(onDriverCreated(driver))
+                }
+            }
+        }
+    }
 
     override suspend fun <T : Any> withDb(
         block: suspend StorageScope<S>.() -> DivaResult<T, DivaError>
@@ -18,7 +41,7 @@ internal class StorageImpl<S : TransacterBase>(
             block(scope)
         } catch (e: Exception) {
             DivaResult.failure(
-                DivaError.Companion.database(
+                DivaError.database(
                     operation = "WITH_DB",
                     table = null,
                     details = e.message,
