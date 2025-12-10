@@ -19,7 +19,7 @@ internal class StorageImpl<S : TransacterBase> : Storage<S> {
         provider: DriverProvider,
         schema: Schema,
         onDriverCreated: (SqlDriver) -> S,
-        onError: (DivaResult<Nothing, DivaError>) -> Unit
+        onError: (DivaResult.Failure<DivaError>) -> Unit
     ) {
         cScope.launch {
             when (val result: DivaResult<SqlDriver, DivaError> = provider.createDriver(schema)) {

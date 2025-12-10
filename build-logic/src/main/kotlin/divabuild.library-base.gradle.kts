@@ -10,3 +10,11 @@ plugins {
 }
 
 version = libs.versions.diva.version
+
+kotlin {
+    sourceSets {
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+        }
+    }
+}

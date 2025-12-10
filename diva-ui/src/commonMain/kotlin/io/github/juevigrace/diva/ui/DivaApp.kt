@@ -12,7 +12,11 @@ import io.github.juevigrace.diva.ui.theme.DivaTheme
 @Composable
 fun DivaApp(
     context: CompositionLocalContext,
-    theme: @Composable (content: @Composable () -> Unit) -> Unit,
+    theme: @Composable (content: @Composable () -> Unit) -> Unit = { content ->
+        DivaTheme {
+            content()
+        }
+    },
     content: @Composable () -> Unit
 ) {
     CompositionLocalProvider(context = context) {
@@ -26,7 +30,11 @@ fun DivaApp(
 @Composable
 fun DivaApp(
     vararg providedValues: ProvidedValue<*>,
-    theme: @Composable (content: @Composable () -> Unit) -> Unit,
+    theme: @Composable (content: @Composable () -> Unit) -> Unit = { content ->
+        DivaTheme {
+            content()
+        }
+    },
     content: @Composable () -> Unit
 ) {
     CompositionLocalProvider(values = providedValues) {
@@ -39,7 +47,11 @@ fun DivaApp(
 
 @Composable
 fun DivaApp(
-    theme: @Composable (content: @Composable () -> Unit) -> Unit,
+    theme: @Composable (content: @Composable () -> Unit) -> Unit = { content ->
+        DivaTheme {
+            content()
+        }
+    },
     content: @Composable () -> Unit
 ) {
     theme {
