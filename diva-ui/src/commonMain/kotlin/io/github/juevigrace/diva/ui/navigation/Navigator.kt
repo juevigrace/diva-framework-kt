@@ -5,11 +5,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.ui.NavDisplay
-import io.github.juevigrace.diva.ui.navigation.routes.Destination
 import kotlinx.coroutines.flow.StateFlow
 
-interface Navigator<T : Destination> {
+internal interface Navigator<T : NavKey> {
     val startDestination: T
     val backStack: StateFlow<List<T>>
     val currentDestination: StateFlow<T>
@@ -19,14 +19,14 @@ interface Navigator<T : Destination> {
     fun popUntil(destination: T)
 
     companion object {
-        operator fun<T : Destination> invoke(startDestination: T): Navigator<T> {
+        operator fun<T : NavKey> invoke(startDestination: T): Navigator<T> {
             return NavigatorImpl(startDestination)
         }
     }
 }
 
 @Composable
-fun<T : Destination> Navigator(
+internal fun<T : NavKey> Navigator(
     startScreen: T,
     entryProvider: (T) -> NavEntry<T>,
     modifier: Modifier = Modifier,
@@ -42,7 +42,7 @@ fun<T : Destination> Navigator(
 }
 
 @Composable
-fun<T : Destination> Navigator(
+internal fun<T : NavKey> Navigator(
     navigator: Navigator<T>,
     entryProvider: (T) -> NavEntry<T>,
     modifier: Modifier = Modifier,
@@ -58,7 +58,7 @@ fun<T : Destination> Navigator(
 }
 
 @Composable
-fun <T : Destination> Navigator(
+internal fun <T : NavKey> Navigator(
     backStack: List<T>,
     onBack: () -> Unit,
     entryProvider: (T) -> NavEntry<T>,

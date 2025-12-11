@@ -1,7 +1,7 @@
 package io.github.juevigrace.diva.ui.navigation
 
-import io.github.juevigrace.diva.ui.navigation.routes.Destination
+import androidx.navigation3.runtime.NavKey
 
-internal class NavigatorImpl<T : Destination>(
+internal class NavigatorImpl<T : NavKey>(
     override val startDestination: T
 ) : NavigatorBase<T>()

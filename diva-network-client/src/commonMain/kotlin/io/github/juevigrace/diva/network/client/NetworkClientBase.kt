@@ -1,7 +1,7 @@
 package io.github.juevigrace.diva.network.client
 
-import io.github.juevigrace.diva.core.types.DivaError
-import io.github.juevigrace.diva.core.types.DivaResult
+import io.github.juevigrace.diva.core.models.DivaError
+import io.github.juevigrace.diva.core.models.DivaResult
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.HttpClientEngineConfig
@@ -20,10 +20,10 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 
 // TODO: response and request body will only be json for now
-abstract class DivaClientBase<C : HttpClientEngineConfig>(
+abstract class NetworkClientBase<C : HttpClientEngineConfig>(
     protected open val engineFactory: HttpClientEngineFactory<C>,
     protected open val conf: HttpClientConfig<C>.() -> Unit
-) : DivaClient {
+) : NetworkClient {
     protected val client: HttpClient = HttpClient(engineFactory, conf)
 
     override suspend fun <T> call(
@@ -44,8 +44,8 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
             }
             call(request, serializer)
         } catch (e: Exception) {
-            DivaResult.Companion.failure(
-                DivaError.Companion.network(
+            DivaResult.failure(
+                DivaError.network(
                     "CALL",
                     url = url,
                     statusCode = 500,
@@ -73,12 +73,12 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
                 headers.forEach { (key, value) ->
                     this.header(key, value)
                 }
-                setBody(Json.Default.encodeToString(bodySerializer, body))
+                setBody(Json.encodeToString(bodySerializer, body))
             }
             call(request, serializer)
         } catch (e: Exception) {
-            DivaResult.Companion.failure(
-                DivaError.Companion.network(
+            DivaResult.failure(
+                DivaError.network(
                     "CALL",
                     url = url,
                     statusCode = 500,
@@ -94,11 +94,11 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
         serializer: KSerializer<T>
     ): DivaResult<T, DivaError> {
         return try {
-            val body: T = Json.Default.decodeFromString(serializer, response.bodyAsText())
-            DivaResult.Companion.success(body)
+            val body: T = Json.decodeFromString(serializer, response.bodyAsText())
+            DivaResult.success(body)
         } catch (e: Exception) {
-            DivaResult.Companion.failure(
-                DivaError.Companion.network(
+            DivaResult.failure(
+                DivaError.network(
                     "CALL",
                     url = response.request.url.toString(),
                     statusCode = response.status.value,

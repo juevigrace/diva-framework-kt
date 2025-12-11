@@ -1,13 +1,13 @@
 package io.github.juevigrace.diva.network.client
 
-import io.github.juevigrace.diva.core.types.DivaError
-import io.github.juevigrace.diva.core.types.DivaResult
+import io.github.juevigrace.diva.core.models.DivaError
+import io.github.juevigrace.diva.core.models.DivaResult
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.serializer
 
-interface DivaClient {
+interface NetworkClient {
     suspend fun <T> call(
         method: HttpMethod,
         url: String,
@@ -27,7 +27,7 @@ interface DivaClient {
     ): DivaResult<T, DivaError>
 }
 
-suspend inline fun<reified T> DivaClient.get(
+suspend inline fun<reified T> NetworkClient.get(
     url: String,
     headers: Map<String, String> = emptyMap(),
     contentType: ContentType = ContentType.Application.Json,
@@ -41,7 +41,7 @@ suspend inline fun<reified T> DivaClient.get(
     )
 }
 
-suspend inline fun<reified T, reified B> DivaClient.post(
+suspend inline fun<reified T, reified B> NetworkClient.post(
     url: String,
     body: B,
     headers: Map<String, String> = emptyMap(),
@@ -58,7 +58,7 @@ suspend inline fun<reified T, reified B> DivaClient.post(
     )
 }
 
-suspend inline fun<reified T, reified B> DivaClient.put(
+suspend inline fun<reified T, reified B> NetworkClient.put(
     url: String,
     body: B,
     headers: Map<String, String> = emptyMap(),
@@ -75,7 +75,7 @@ suspend inline fun<reified T, reified B> DivaClient.put(
     )
 }
 
-suspend inline fun<reified T, reified B> DivaClient.patch(
+suspend inline fun<reified T, reified B> NetworkClient.patch(
     url: String,
     body: B,
     headers: Map<String, String> = emptyMap(),
@@ -92,7 +92,7 @@ suspend inline fun<reified T, reified B> DivaClient.patch(
     )
 }
 
-suspend inline fun<reified T> DivaClient.delete(
+suspend inline fun<reified T> NetworkClient.delete(
     url: String,
     headers: Map<String, String> = emptyMap(),
     contentType: ContentType = ContentType.Application.Json,
@@ -106,7 +106,7 @@ suspend inline fun<reified T> DivaClient.delete(
     )
 }
 
-suspend inline fun<reified T, reified B> DivaClient.delete(
+suspend inline fun<reified T, reified B> NetworkClient.delete(
     url: String,
     body: B,
     headers: Map<String, String> = emptyMap(),

@@ -1,14 +1,10 @@
 package io.github.juevigrace.diva.ui.navigation.tabs
 
-import io.github.juevigrace.diva.ui.navigation.NavigatorBase
-import io.github.juevigrace.diva.ui.navigation.routes.Destination
-import kotlinx.coroutines.flow.MutableStateFlow
+import androidx.navigation3.runtime.NavKey
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 
 // TODO: this is bad
-class TabNavigatorImpl<T : Destination>(
+internal class TabNavigatorImpl<T : NavKey>(
     override val startDestination: T
 ) : TabNavigator<T> {
     override val tabsStack: StateFlow<LinkedHashMap<T, List<T>>>

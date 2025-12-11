@@ -1,12 +1,12 @@
 package io.github.juevigrace.diva.ui.navigation
 
-import io.github.juevigrace.diva.ui.navigation.routes.Destination
+import androidx.navigation3.runtime.NavKey
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-abstract class NavigatorBase<T : Destination> : Navigator<T> {
+internal abstract class NavigatorBase<T : NavKey> : Navigator<T> {
     protected val mutBackStack = MutableStateFlow(listOf(startDestination))
     override val backStack: StateFlow<List<T>> = mutBackStack.asStateFlow()
 

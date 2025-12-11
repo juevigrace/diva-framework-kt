@@ -5,9 +5,9 @@ import app.cash.sqldelight.TransacterBase
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOneOrNull
-import io.github.juevigrace.diva.core.types.DivaError
-import io.github.juevigrace.diva.core.types.DivaResult
-import io.github.juevigrace.diva.core.types.map
+import io.github.juevigrace.diva.core.models.DivaError
+import io.github.juevigrace.diva.core.models.DivaResult
+import io.github.juevigrace.diva.core.models.map
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow

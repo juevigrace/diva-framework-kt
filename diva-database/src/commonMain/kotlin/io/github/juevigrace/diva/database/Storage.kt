@@ -2,8 +2,8 @@ package io.github.juevigrace.diva.database
 
 import app.cash.sqldelight.TransacterBase
 import app.cash.sqldelight.db.SqlDriver
-import io.github.juevigrace.diva.core.types.DivaError
-import io.github.juevigrace.diva.core.types.DivaResult
+import io.github.juevigrace.diva.core.models.DivaError
+import io.github.juevigrace.diva.core.models.DivaResult
 import io.github.juevigrace.diva.database.driver.DriverProvider
 import io.github.juevigrace.diva.database.driver.Schema
 

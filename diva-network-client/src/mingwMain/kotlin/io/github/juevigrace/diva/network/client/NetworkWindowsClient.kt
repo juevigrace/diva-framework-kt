@@ -4,7 +4,7 @@ import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.HttpClientEngineFactory
 import io.ktor.client.engine.winhttp.WinHttpClientEngineConfig
 
-internal class DivaWindowsClient(
+internal class NetworkWindowsClient(
     override val engineFactory: HttpClientEngineFactory<WinHttpClientEngineConfig>,
     override val conf: HttpClientConfig<WinHttpClientEngineConfig>.() -> Unit
-) : DivaClientBase<WinHttpClientEngineConfig>(engineFactory, conf)
+) : NetworkClientBase<WinHttpClientEngineConfig>(engineFactory, conf)

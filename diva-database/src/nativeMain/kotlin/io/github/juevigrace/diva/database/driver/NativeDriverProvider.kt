@@ -5,8 +5,8 @@ import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlSchema
 import app.cash.sqldelight.driver.native.NativeSqliteDriver
-import io.github.juevigrace.diva.core.types.DivaError
-import io.github.juevigrace.diva.core.types.DivaResult
+import io.github.juevigrace.diva.core.models.DivaError
+import io.github.juevigrace.diva.core.models.DivaResult
 
 internal class NativeDriverProvider(
     override val conf: NativeConf,

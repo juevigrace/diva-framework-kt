@@ -4,7 +4,7 @@ import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.HttpClientEngineFactory
 import io.ktor.client.engine.okhttp.OkHttpConfig
 
-internal class DivaAndroidClient(
+internal class NetworkJvmClient(
     override val engineFactory: HttpClientEngineFactory<OkHttpConfig>,
     override val conf: HttpClientConfig<OkHttpConfig>.() -> Unit
-) : DivaClientBase<OkHttpConfig>(engineFactory, conf)
+) : NetworkClientBase<OkHttpConfig>(engineFactory, conf)

@@ -1,4 +1,4 @@
-package io.github.juevigrace.diva.core.types
+package io.github.juevigrace.diva.core.models
 
 sealed class DivaError(
     val message: String,
