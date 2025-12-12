@@ -2,51 +2,49 @@ package io.github.juevigrace.diva.network.client
 
 import io.github.juevigrace.diva.core.models.DivaError
 import io.github.juevigrace.diva.core.models.DivaResult
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.serializer
 
 interface NetworkClient {
+    suspend fun call(
+        method: HttpMethod,
+        url: String,
+        headers: Map<String, String>,
+        contentType: ContentType,
+    ): DivaResult<HttpResponse, DivaError>
+
     suspend fun <T> call(
         method: HttpMethod,
         url: String,
+        body: T,
         headers: Map<String, String>,
         contentType: ContentType,
         serializer: KSerializer<T>,
-    ): DivaResult<T, DivaError>
-
-    suspend fun <T, B> call(
-        method: HttpMethod,
-        url: String,
-        body: B,
-        headers: Map<String, String>,
-        contentType: ContentType,
-        serializer: KSerializer<T>,
-        bodySerializer: KSerializer<B>,
-    ): DivaResult<T, DivaError>
+    ): DivaResult<HttpResponse, DivaError>
 }
 
-suspend inline fun<reified T> NetworkClient.get(
+suspend inline fun NetworkClient.get(
     url: String,
     headers: Map<String, String> = emptyMap(),
     contentType: ContentType = ContentType.Application.Json,
-): DivaResult<T, DivaError> {
+): DivaResult<HttpResponse, DivaError> {
     return call(
         method = HttpMethod.Get,
         url = url,
         headers = headers,
         contentType = contentType,
-        serializer = serializer(),
     )
 }
 
-suspend inline fun<reified T, reified B> NetworkClient.post(
+suspend inline fun<reified T> NetworkClient.post(
     url: String,
-    body: B,
+    body: T,
     headers: Map<String, String> = emptyMap(),
     contentType: ContentType = ContentType.Application.Json,
-): DivaResult<T, DivaError> {
+): DivaResult<HttpResponse, DivaError> {
     return call(
         method = HttpMethod.Post,
         url = url,
@@ -54,16 +52,28 @@ suspend inline fun<reified T, reified B> NetworkClient.post(
         headers = headers,
         contentType = contentType,
         serializer = serializer(),
-        bodySerializer = serializer()
     )
 }
 
-suspend inline fun<reified T, reified B> NetworkClient.put(
+suspend inline fun<reified T> NetworkClient.post(
     url: String,
-    body: B,
     headers: Map<String, String> = emptyMap(),
     contentType: ContentType = ContentType.Application.Json,
-): DivaResult<T, DivaError> {
+): DivaResult<HttpResponse, DivaError> {
+    return call(
+        method = HttpMethod.Post,
+        url = url,
+        headers = headers,
+        contentType = contentType,
+    )
+}
+
+suspend inline fun<reified T> NetworkClient.put(
+    url: String,
+    body: T,
+    headers: Map<String, String> = emptyMap(),
+    contentType: ContentType = ContentType.Application.Json,
+): DivaResult<HttpResponse, DivaError> {
     return call(
         method = HttpMethod.Put,
         url = url,
@@ -71,16 +81,15 @@ suspend inline fun<reified T, reified B> NetworkClient.put(
         headers = headers,
         contentType = contentType,
         serializer = serializer(),
-        bodySerializer = serializer()
     )
 }
 
-suspend inline fun<reified T, reified B> NetworkClient.patch(
+suspend inline fun<reified T> NetworkClient.patch(
     url: String,
-    body: B,
+    body: T,
     headers: Map<String, String> = emptyMap(),
     contentType: ContentType = ContentType.Application.Json,
-): DivaResult<T, DivaError> {
+): DivaResult<HttpResponse, DivaError> {
     return call(
         method = HttpMethod.Patch,
         url = url,
@@ -88,30 +97,28 @@ suspend inline fun<reified T, reified B> NetworkClient.patch(
         headers = headers,
         contentType = contentType,
         serializer = serializer(),
-        bodySerializer = serializer()
     )
 }
 
-suspend inline fun<reified T> NetworkClient.delete(
+suspend inline fun NetworkClient.delete(
     url: String,
     headers: Map<String, String> = emptyMap(),
     contentType: ContentType = ContentType.Application.Json,
-): DivaResult<T, DivaError> {
+): DivaResult<HttpResponse, DivaError> {
     return call(
         method = HttpMethod.Delete,
         url = url,
         headers = headers,
         contentType = contentType,
-        serializer = serializer(),
     )
 }
 
-suspend inline fun<reified T, reified B> NetworkClient.delete(
+suspend inline fun<reified T> NetworkClient.delete(
     url: String,
-    body: B,
+    body: T,
     headers: Map<String, String> = emptyMap(),
     contentType: ContentType = ContentType.Application.Json,
-): DivaResult<T, DivaError> {
+): DivaResult<HttpResponse, DivaError> {
     return call(
         method = HttpMethod.Delete,
         url = url,
@@ -119,6 +126,5 @@ suspend inline fun<reified T, reified B> NetworkClient.delete(
         headers = headers,
         contentType = contentType,
         serializer = serializer(),
-        bodySerializer = serializer()
     )
 }

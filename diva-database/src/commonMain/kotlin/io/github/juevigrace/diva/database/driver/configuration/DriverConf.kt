@@ -1,4 +1,4 @@
-package io.github.juevigrace.diva.database.driver
+package io.github.juevigrace.diva.database.driver.configuration
 
 // TODO: sanitize inputs
 // TODO: modify fields to support more sqldelight options

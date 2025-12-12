@@ -1,7 +1,7 @@
 package io.github.juevigrace.diva.core.models
 
 sealed class DivaError(
-    val message: String,
+    open val message: String,
     open val cause: Throwable? = null,
 ) {
     // Database errors with specific context
@@ -15,6 +15,18 @@ sealed class DivaError(
             append("Database error during $operation")
             table?.let { append(" on table '$it'") }
             details?.let { append(": $it") }
+        },
+        cause = cause,
+    )
+
+    data class ExceptionError(
+        override val message: String,
+        override val cause: Throwable? = null,
+        val origin: String? = null,
+    ) : DivaError(
+        message = buildString {
+            append("Exception during $origin")
+            append(": $message")
         },
         cause = cause,
     )
@@ -60,18 +72,18 @@ sealed class DivaError(
         },
     )
 
-    data class UnknownError(
-        val details: String? = null,
-        override val cause: Throwable? = null,
-    ) : DivaError(
-        message = buildString {
-            append("Unknown error")
-            details?.let { append(": $it") }
-        },
-        cause = cause,
-    )
-
     companion object {
+        fun exception(e: Exception, origin: String? = null): DivaError {
+            return when (e) {
+                is DivaErrorException -> e.divaError
+                else -> ExceptionError(
+                    message = e.message ?: "Unknown exception",
+                    cause = e,
+                    origin = origin
+                )
+            }
+        }
+
         fun database(
             operation: String,
             table: String? = null,
@@ -104,13 +116,6 @@ sealed class DivaError(
             details: String? = null,
         ): ConfigurationError {
             return ConfigurationError(key, details)
-        }
-
-        fun unknown(
-            details: String? = null,
-            cause: Throwable? = null,
-        ): UnknownError {
-            return UnknownError(details, cause)
         }
     }
 }

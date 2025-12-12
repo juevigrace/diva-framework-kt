@@ -4,7 +4,7 @@ import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.HttpClientEngineFactory
 import io.ktor.client.engine.darwin.DarwinClientEngineConfig
 
-internal class NetworkAppleClient(
+internal class AppleNetworkClient(
     override val engineFactory: HttpClientEngineFactory<DarwinClientEngineConfig>,
     override val conf: HttpClientConfig<DarwinClientEngineConfig>.() -> Unit
 ) : NetworkClientBase<DarwinClientEngineConfig>(engineFactory, conf)

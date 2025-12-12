@@ -8,30 +8,36 @@ import app.cash.sqldelight.db.SqlSchema
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import io.github.juevigrace.diva.core.models.DivaError
 import io.github.juevigrace.diva.core.models.DivaResult
+import io.github.juevigrace.diva.core.models.tryResult
+import io.github.juevigrace.diva.database.driver.configuration.AndroidConf
 
 internal class AndroidDriverProvider(
     override val conf: AndroidConf,
 ) : DriverProviderBase<AndroidConf>(conf) {
-    override suspend fun createDriver(schema: Schema): DivaResult<SqlDriver, DivaError> {
-        return try {
+    override fun createDriver(schema: Schema): DivaResult<SqlDriver, DivaError> {
+        return tryResult(
+            onError = { e ->
+                DivaError.exception(
+                    e = e,
+                    origin = "AndroidDriverProvider.createDriver"
+                )
+            }
+        ) {
             val syncSchema: SqlSchema<QueryResult.Value<Unit>> = when (schema) {
                 is Schema.Sync -> schema.value
                 is Schema.Async -> schema.value.synchronous()
             }
-            DivaResult.success(
-                AndroidSqliteDriver(
-                    schema = syncSchema,
-                    context = conf.context,
-                    name = conf.driverConf.name,
-                    callback = if (conf.driverConf.properties.containsKey("foreign_keys")) {
-                        fkCallback(syncSchema)
-                    } else {
-                        object : AndroidSqliteDriver.Callback(syncSchema) {}
-                    },
-                ),
+            val driver: SqlDriver = AndroidSqliteDriver(
+                schema = syncSchema,
+                context = conf.context,
+                name = conf.driverConf.name,
+                callback = if (conf.driverConf.properties.containsKey("foreign_keys")) {
+                    fkCallback(syncSchema)
+                } else {
+                    object : AndroidSqliteDriver.Callback(syncSchema) {}
+                },
             )
-        } catch (e: Exception) {
-            DivaResult.failure(DivaError.database("CREATE", conf.driverConf.name, e.message, e))
+            DivaResult.success(driver)
         }
     }
 

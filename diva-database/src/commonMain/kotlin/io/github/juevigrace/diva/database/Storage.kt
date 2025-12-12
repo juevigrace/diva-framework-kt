@@ -28,13 +28,11 @@ interface Storage<S : TransacterBase> {
             provider: DriverProvider,
             schema: Schema,
             onDriverCreated: (SqlDriver) -> S,
-            onError: (DivaResult.Failure<DivaError>)-> Unit
         ): Storage<S> {
             return StorageImpl(
                 provider = provider,
                 schema = schema,
                 onDriverCreated = onDriverCreated,
-                onError = onError
             )
         }
     }

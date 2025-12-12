@@ -16,28 +16,28 @@ sealed interface DivaResult<out T, out E> {
     }
 }
 
-fun <T, E, R> DivaResult<T, E>.map(transform: (T) -> R): DivaResult<R, E> {
+inline fun <T, E, R> DivaResult<T, E>.map(transform: (T) -> R): DivaResult<R, E> {
     return when (this) {
         is DivaResult.Success -> DivaResult.Success(transform(value))
         is DivaResult.Failure -> this
     }
 }
 
-fun <T, E, R> DivaResult<T, E>.flatMap(transform: (T) -> DivaResult<R, E>): DivaResult<R, E> {
+inline fun <T, E, R> DivaResult<T, E>.flatMap(transform: (T) -> DivaResult<R, E>): DivaResult<R, E> {
     return when (this) {
         is DivaResult.Success -> transform(value)
         is DivaResult.Failure -> this
     }
 }
 
-fun <T, E> DivaResult<T, E>.mapError(transform: (E) -> E): DivaResult<T, E> {
+inline fun <T, E> DivaResult<T, E>.mapError(transform: (E) -> E): DivaResult<T, E> {
     return when (this) {
         is DivaResult.Success -> this
         is DivaResult.Failure -> DivaResult.Failure(transform(err))
     }
 }
 
-fun <T, E, R> DivaResult<T, E>.flatMapError(transform: (E) -> DivaResult<T, R>): DivaResult<T, R> {
+inline fun <T, E, R> DivaResult<T, E>.flatMapError(transform: (E) -> DivaResult<T, R>): DivaResult<T, R> {
     return when (this) {
         is DivaResult.Success -> this
         is DivaResult.Failure -> transform(err)
@@ -66,7 +66,7 @@ fun <T, E> DivaResult<T, E>.getErrorOrNull(): E? {
     }
 }
 
-fun <T, E> DivaResult<T, E>.getOrElse(default: () -> T): T {
+inline fun <T, E> DivaResult<T, E>.getOrElse(default: () -> T): T {
     return when (this) {
         is DivaResult.Success -> value
         is DivaResult.Failure -> default()
@@ -80,14 +80,14 @@ fun <T, E> DivaResult<T, E>.getOrThrow(): T {
     }
 }
 
-fun <T, E, R> DivaResult<T, E>.fold(onSuccess: (T) -> R, onFailure: (E) -> R): R {
+inline fun <T, E, R> DivaResult<T, E>.fold(onSuccess: (T) -> R, onFailure: (E) -> R): R {
     return when (this) {
         is DivaResult.Success -> onSuccess(value)
         is DivaResult.Failure -> onFailure(err)
     }
 }
 
-fun <T, E> DivaResult<T, E>.onSuccess(action: (T) -> Unit): DivaResult<T, E> {
+inline fun <T, E> DivaResult<T, E>.onSuccess(action: (T) -> Unit): DivaResult<T, E> {
     return when (this) {
         is DivaResult.Success -> {
             action(value)
@@ -98,12 +98,20 @@ fun <T, E> DivaResult<T, E>.onSuccess(action: (T) -> Unit): DivaResult<T, E> {
     }
 }
 
-fun <T, E> DivaResult<T, E>.onFailure(action: (E) -> Unit): DivaResult<T, E> {
+inline fun <T, E> DivaResult<T, E>.onFailure(action: (E) -> Unit): DivaResult<T, E> {
     return when (this) {
         is DivaResult.Success -> this
         is DivaResult.Failure -> {
             action(err)
             this
         }
+    }
+}
+
+inline fun <T, E> tryResult(onError: (Exception) -> E, block: () -> DivaResult<T, E>): DivaResult<T, E> {
+    return try {
+        block()
+    } catch (e: Exception) {
+        DivaResult.failure(onError(e))
     }
 }

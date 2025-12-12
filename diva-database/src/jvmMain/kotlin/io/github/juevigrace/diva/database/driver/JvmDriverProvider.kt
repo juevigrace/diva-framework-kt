@@ -5,35 +5,50 @@ import app.cash.sqldelight.async.coroutines.synchronous
 import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlSchema
+import app.cash.sqldelight.driver.jdbc.JdbcDriver
 import app.cash.sqldelight.driver.jdbc.asJdbcDriver
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.github.juevigrace.diva.core.models.DivaError
 import io.github.juevigrace.diva.core.models.DivaResult
+import io.github.juevigrace.diva.core.models.flatMap
+import io.github.juevigrace.diva.core.models.tryResult
+import io.github.juevigrace.diva.database.driver.configuration.DriverConf
+import io.github.juevigrace.diva.database.driver.configuration.JvmConf
+import kotlinx.coroutines.runBlocking
 
 internal class JvmDriverProvider(
     override val conf: JvmConf
 ) : DriverProviderBase<JvmConf>(conf) {
-    override suspend fun createDriver(schema: Schema): DivaResult<SqlDriver, DivaError> {
-        return try {
+    override fun createDriver(schema: Schema): DivaResult<SqlDriver, DivaError> {
+        return tryResult(
+            onError = { e ->
+                DivaError.exception(
+                    e = e,
+                    origin = "JvmDriverProvider.createDriver",
+                )
+            }
+        ) {
             val syncSchema: SqlSchema<QueryResult.Value<Unit>> = when (schema) {
                 is Schema.Sync -> schema.value
                 is Schema.Async -> schema.value.synchronous()
             }
-            when (val result: DivaResult<SqlDriver, DivaError> = createDriverFromDataSource()) {
-                is DivaResult.Failure -> result
-                is DivaResult.Success -> {
-                    syncSchema.awaitCreate(result.value)
-                    DivaResult.success(result.value)
-                }
+            createDriverFromDataSource().flatMap { driver ->
+                runBlocking { syncSchema.awaitCreate(driver) }
+                DivaResult.success(driver)
             }
-        } catch (e: Exception) {
-            DivaResult.failure(DivaError.database("CREATE", null, e.message, e))
         }
     }
 
     private fun createDriverFromDataSource(): DivaResult<SqlDriver, DivaError> {
-        return try {
+        return tryResult(
+            onError = { e ->
+                DivaError.exception(
+                    e = e,
+                    origin = "JvmDriverProvider.createDriverFromDataSource",
+                )
+            }
+        ) {
             val config: HikariConfig = when (conf.driverConf) {
                 is DriverConf.SqliteDriverConf -> {
                     createHikariConfig(
@@ -64,9 +79,8 @@ internal class JvmDriverProvider(
                     )
                 }
             }
-            DivaResult.success(HikariDataSource(config).asJdbcDriver())
-        } catch (e: Exception) {
-            DivaResult.failure(DivaError.database("CREATE_DATASOURCE", null, e.message, e))
+            val driver: JdbcDriver = HikariDataSource(config).asJdbcDriver()
+            DivaResult.success(driver)
         }
     }
 

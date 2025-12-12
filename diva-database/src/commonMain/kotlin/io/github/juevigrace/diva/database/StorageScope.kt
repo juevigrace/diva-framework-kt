@@ -4,8 +4,12 @@ import app.cash.sqldelight.Query
 import app.cash.sqldelight.SuspendingTransacter
 import app.cash.sqldelight.Transacter
 import app.cash.sqldelight.TransacterBase
+import app.cash.sqldelight.TransactionWithReturn
+import app.cash.sqldelight.TransactionWithoutReturn
 import io.github.juevigrace.diva.core.models.DivaError
 import io.github.juevigrace.diva.core.models.DivaResult
+import io.github.juevigrace.diva.core.models.Option
+import io.github.juevigrace.diva.core.models.tryResult
 import kotlinx.coroutines.flow.Flow
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -17,23 +21,23 @@ import kotlin.coroutines.EmptyCoroutineContext
 interface StorageScope<S : TransacterBase> {
     val db: S
 
-    suspend fun <T : Any> getOne(query: Query<T>): DivaResult<T, DivaError>
+    suspend fun <T : Any> getOne(query: Query<T>): DivaResult<Option<T>, DivaError>
 
     suspend fun <T : Any, R : Any> getOne(
         query: Query<T>,
         mapper: (T) -> R,
-    ): DivaResult<R, DivaError>
+    ): DivaResult<Option<R>, DivaError>
 
     fun <T : Any> getOneAsFlow(
         query: Query<T>,
         ctx: CoroutineContext = EmptyCoroutineContext,
-    ): Flow<DivaResult<T, DivaError>>
+    ): Flow<DivaResult<Option<T>, DivaError>>
 
     fun <T : Any, R : Any> getOneAsFlow(
         query: Query<T>,
         mapper: (T) -> R,
         ctx: CoroutineContext = EmptyCoroutineContext,
-    ): Flow<DivaResult<R, DivaError>>
+    ): Flow<DivaResult<Option<R>, DivaError>>
 
     suspend fun <T : Any> getList(query: Query<T>): DivaResult<List<T>, DivaError>
 
@@ -58,42 +62,66 @@ interface StorageScope<S : TransacterBase> {
     }
 }
 
-fun StorageScope<Transacter>.transaction(block: () -> Unit): DivaResult<Unit, DivaError> {
-    return try {
-        db.transaction { block() }
-        DivaResult.success(Unit)
-    } catch (e: Exception) {
-        DivaResult.failure(DivaError.database("TRANSACTION", null, e.message, e))
+inline fun StorageScope<Transacter>.transaction(
+    crossinline block: TransactionWithoutReturn.() -> Unit
+): DivaResult<Unit, DivaError> {
+    return tryResult(
+        onError = { e ->
+            DivaError.exception(
+                e = e,
+                origin = "StorageScope.transaction"
+            )
+        }
+    ) {
+        val transactionResult: Unit = db.transaction { block() }
+        DivaResult.success(transactionResult)
     }
 }
 
-fun <T : Any> StorageScope<Transacter>.transactionWithResult(
-    block: () -> T
+inline fun <T : Any> StorageScope<Transacter>.transactionWithResult(
+    crossinline block: TransactionWithReturn<T>.() -> T
 ): DivaResult<T, DivaError> {
-    return try {
+    return tryResult(
+        onError = { e ->
+            DivaError.exception(
+                e = e,
+                origin = "StorageScope.transactionWithResult"
+            )
+        }
+    ) {
         val result: T = db.transactionWithResult { block() }
         DivaResult.success(result)
-    } catch (e: Exception) {
-        DivaResult.failure(DivaError.database("TRANSACTION_WITH_RESULT", null, e.message, e))
     }
 }
 
-suspend fun StorageScope<SuspendingTransacter>.transaction(block: suspend () -> Unit): DivaResult<Unit, DivaError> {
-    return try {
-        db.transaction { block() }
-        DivaResult.success(Unit)
-    } catch (e: Exception) {
-        DivaResult.failure(DivaError.database("TRANSACTION", null, e.message, e))
+suspend inline fun StorageScope<SuspendingTransacter>.transaction(
+    crossinline block: () -> Unit
+): DivaResult<Unit, DivaError> {
+    return tryResult(
+        onError = { e ->
+            DivaError.exception(
+                e = e,
+                origin = "StorageScope.transaction"
+            )
+        }
+    ) {
+        val transactionResult: Unit = db.transaction { block() }
+        DivaResult.success(transactionResult)
     }
 }
 
-suspend fun <T : Any> StorageScope<SuspendingTransacter>.transactionWithResult(
-    block: suspend () -> T
+suspend inline fun <T : Any> StorageScope<SuspendingTransacter>.transactionWithResult(
+    crossinline block: suspend () -> T
 ): DivaResult<T, DivaError> {
-    return try {
+    return tryResult(
+        onError = { e ->
+            DivaError.exception(
+                e = e,
+                origin = "StorageScope.transactionWithResult"
+            )
+        }
+    ) {
         val result: T = db.transactionWithResult { block() }
         DivaResult.success(result)
-    } catch (e: Exception) {
-        DivaResult.failure(DivaError.database("TRANSACTION_WITH_RESULT", null, e.message, e))
     }
 }

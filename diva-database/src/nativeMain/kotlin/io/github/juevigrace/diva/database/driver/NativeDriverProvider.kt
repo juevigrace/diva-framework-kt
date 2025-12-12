@@ -7,26 +7,30 @@ import app.cash.sqldelight.db.SqlSchema
 import app.cash.sqldelight.driver.native.NativeSqliteDriver
 import io.github.juevigrace.diva.core.models.DivaError
 import io.github.juevigrace.diva.core.models.DivaResult
+import io.github.juevigrace.diva.core.models.tryResult
+import io.github.juevigrace.diva.database.driver.configuration.NativeConf
 
 internal class NativeDriverProvider(
     override val conf: NativeConf,
 ) : DriverProviderBase<NativeConf>(conf) {
-    override suspend fun createDriver(schema: Schema): DivaResult<SqlDriver, DivaError> {
-        return try {
-            val syncSchema: SqlSchema<QueryResult.Value<Unit>> =
-                when (schema) {
-                    is Schema.Sync -> schema.value
-                    is Schema.Async -> schema.value.synchronous()
-                }
-
-            DivaResult.success(
-                NativeSqliteDriver(
-                    schema = syncSchema,
-                    name = conf.driverConf.name,
-                ),
+    override fun createDriver(schema: Schema): DivaResult<SqlDriver, DivaError> {
+        return tryResult(
+            onError = { e ->
+                DivaError.exception(
+                    e = e,
+                    origin = "NativeDriverProvider.createDriver",
+                )
+            }
+        ) {
+            val syncSchema: SqlSchema<QueryResult.Value<Unit>> = when (schema) {
+                is Schema.Sync -> schema.value
+                is Schema.Async -> schema.value.synchronous()
+            }
+            val driver: SqlDriver = NativeSqliteDriver(
+                schema = syncSchema,
+                name = conf.driverConf.name,
             )
-        } catch (e: Exception) {
-            DivaResult.failure(DivaError.database("CREATE", conf.driverConf.name, e.message, e))
+            DivaResult.success(driver)
         }
     }
 }
