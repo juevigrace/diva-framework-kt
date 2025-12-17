@@ -38,19 +38,6 @@ internal class StorageScopeImpl<S : TransacterBase>(
         return getOneInternal(query).map { entity -> Option.of(entity) }
     }
 
-    override suspend fun <T : Any, R : Any> getOne(
-        query: Query<T>,
-        mapper: (T) -> R
-    ): DivaResult<Option<R>, DivaError> {
-        return getOneInternal(query).map { entity ->
-            if (entity == null) {
-                Option.None
-            } else {
-                Option.of(mapper(entity))
-            }
-        }
-    }
-
     private fun<T : Any> getOneAsFlowInternal(query: Query<T>, ctx: CoroutineContext): Flow<DivaResult<T?, DivaError>> {
         return flow {
             query.asFlow()
@@ -106,13 +93,6 @@ internal class StorageScopeImpl<S : TransacterBase>(
             val list: List<T> = query.executeAsList()
             DivaResult.success(list)
         }
-    }
-
-    override suspend fun <T : Any, R : Any> getList(
-        query: Query<T>,
-        mapper: (T) -> R
-    ): DivaResult<List<R>, DivaError> {
-        return getList(query).map { list -> list.map(mapper) }
     }
 
     override fun <T : Any> getListAsFlow(
