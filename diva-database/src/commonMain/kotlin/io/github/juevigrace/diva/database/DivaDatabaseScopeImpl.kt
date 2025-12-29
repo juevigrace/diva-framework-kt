@@ -17,9 +17,9 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlin.coroutines.CoroutineContext
 
-internal class StorageScopeImpl<S : TransacterBase>(
+internal class DivaDatabaseScopeImpl<S : TransacterBase>(
     override val db: S
-) : StorageScope<S> {
+) : DivaDatabaseScope<S> {
     private fun <T : Any> getOneInternal(query: Query<T>): DivaResult<T?, DivaError> {
         return tryResult(
             onError = { e ->

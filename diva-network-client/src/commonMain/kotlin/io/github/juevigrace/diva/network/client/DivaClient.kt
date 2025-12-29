@@ -8,7 +8,7 @@ import io.ktor.http.HttpMethod
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.serializer
 
-interface NetworkClient {
+interface DivaClient {
     suspend fun call(
         method: HttpMethod,
         url: String,
@@ -26,7 +26,7 @@ interface NetworkClient {
     ): DivaResult<HttpResponse, DivaError>
 }
 
-suspend inline fun NetworkClient.get(
+suspend inline fun DivaClient.get(
     url: String,
     headers: Map<String, String> = emptyMap(),
     contentType: ContentType = ContentType.Application.Json,
@@ -39,7 +39,7 @@ suspend inline fun NetworkClient.get(
     )
 }
 
-suspend inline fun<reified T> NetworkClient.post(
+suspend inline fun<reified T> DivaClient.post(
     url: String,
     body: T,
     headers: Map<String, String> = emptyMap(),
@@ -55,7 +55,7 @@ suspend inline fun<reified T> NetworkClient.post(
     )
 }
 
-suspend inline fun<reified T> NetworkClient.post(
+suspend inline fun<reified T> DivaClient.post(
     url: String,
     headers: Map<String, String> = emptyMap(),
     contentType: ContentType = ContentType.Application.Json,
@@ -68,7 +68,7 @@ suspend inline fun<reified T> NetworkClient.post(
     )
 }
 
-suspend inline fun<reified T> NetworkClient.put(
+suspend inline fun<reified T> DivaClient.put(
     url: String,
     body: T,
     headers: Map<String, String> = emptyMap(),
@@ -84,7 +84,7 @@ suspend inline fun<reified T> NetworkClient.put(
     )
 }
 
-suspend inline fun<reified T> NetworkClient.patch(
+suspend inline fun<reified T> DivaClient.patch(
     url: String,
     body: T,
     headers: Map<String, String> = emptyMap(),
@@ -100,7 +100,7 @@ suspend inline fun<reified T> NetworkClient.patch(
     )
 }
 
-suspend inline fun NetworkClient.delete(
+suspend inline fun DivaClient.delete(
     url: String,
     headers: Map<String, String> = emptyMap(),
     contentType: ContentType = ContentType.Application.Json,
@@ -113,7 +113,7 @@ suspend inline fun NetworkClient.delete(
     )
 }
 
-suspend inline fun<reified T> NetworkClient.delete(
+suspend inline fun<reified T> DivaClient.delete(
     url: String,
     body: T,
     headers: Map<String, String> = emptyMap(),

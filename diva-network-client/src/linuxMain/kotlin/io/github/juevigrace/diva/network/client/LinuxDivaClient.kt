@@ -4,7 +4,7 @@ import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.HttpClientEngineFactory
 import io.ktor.client.engine.curl.CurlClientEngineConfig
 
-internal class LinuxNetworkClient(
+internal class LinuxDivaClient(
     override val engineFactory: HttpClientEngineFactory<CurlClientEngineConfig>,
     override val conf: HttpClientConfig<CurlClientEngineConfig>.() -> Unit
-) : NetworkClientBase<CurlClientEngineConfig>(engineFactory, conf)
+) : DivaClientBase<CurlClientEngineConfig>(engineFactory, conf)

@@ -9,10 +9,10 @@ import io.github.juevigrace.diva.core.models.tryResult
 import io.github.juevigrace.diva.database.driver.DriverProvider
 import io.github.juevigrace.diva.database.driver.Schema
 
-internal class StorageImpl<S : TransacterBase> : Storage<S> {
+internal class DivaDatabaseImpl<S : TransacterBase> : DivaDatabase<S> {
     private var driverErr: DivaError? = null
     private lateinit var driver: SqlDriver
-    private lateinit var scope: StorageScope<S>
+    private lateinit var scope: DivaDatabaseScope<S>
 
     constructor(
         provider: DriverProvider,
@@ -25,13 +25,13 @@ internal class StorageImpl<S : TransacterBase> : Storage<S> {
             },
             onSuccess = { sqlDriver ->
                 driver = sqlDriver
-                scope = StorageScope(onDriverCreated(driver))
+                scope = DivaDatabaseScope(onDriverCreated(driver))
             }
         )
     }
 
     override suspend fun <T : Any> withDb(
-        block: suspend StorageScope<S>.() -> DivaResult<T, DivaError>
+        block: suspend DivaDatabaseScope<S>.() -> DivaResult<T, DivaError>
     ): DivaResult<T, DivaError> {
         if (driverErr != null) {
             return DivaResult.failure(driverErr!!)

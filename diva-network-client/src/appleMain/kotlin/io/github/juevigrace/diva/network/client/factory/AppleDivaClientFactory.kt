@@ -1,16 +1,16 @@
 package io.github.juevigrace.diva.network.client.factory
 
-import io.github.juevigrace.diva.network.client.AppleNetworkClient
-import io.github.juevigrace.diva.network.client.NetworkClient
+import io.github.juevigrace.diva.network.client.AppleDivaClient
+import io.github.juevigrace.diva.network.client.DivaClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.HttpClientEngineFactory
 import io.ktor.client.engine.darwin.DarwinClientEngineConfig
 
-class AppleNetworkClientFactory(
+class AppleDivaClientFactory(
     override val engineFactory: HttpClientEngineFactory<DarwinClientEngineConfig>,
     override val conf: HttpClientConfig<DarwinClientEngineConfig>.() -> Unit
-) : NetworkClientFactoryBase<DarwinClientEngineConfig>(engineFactory, conf) {
-    override fun create(): NetworkClient {
-        return AppleNetworkClient(engineFactory, conf)
+) : DivaClientFactoryBase<DarwinClientEngineConfig>(engineFactory, conf) {
+    override fun create(): DivaClient {
+        return AppleDivaClient(engineFactory, conf)
     }
 }

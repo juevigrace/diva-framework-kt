@@ -21,10 +21,10 @@ import kotlinx.serialization.json.Json
 import kotlin.collections.component1
 import kotlin.collections.component2
 
-abstract class NetworkClientBase<C : HttpClientEngineConfig>(
+abstract class DivaClientBase<C : HttpClientEngineConfig>(
     protected open val engineFactory: HttpClientEngineFactory<C>,
     protected open val conf: HttpClientConfig<C>.() -> Unit
-) : NetworkClient {
+) : DivaClient {
     protected val client: HttpClient = HttpClient(engineFactory, conf)
 
     override suspend fun call(

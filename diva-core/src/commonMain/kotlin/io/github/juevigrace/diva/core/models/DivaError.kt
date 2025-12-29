@@ -1,5 +1,6 @@
 package io.github.juevigrace.diva.core.models
 
+// TODO: improve error types
 sealed class DivaError(
     open val message: String,
     open val cause: Throwable? = null,
@@ -34,9 +35,9 @@ sealed class DivaError(
     // Network errors with specific context
     data class NetworkError(
         val operation: String, // e.g., "GET", "POST", "PUT", "DELETE"
-        val url: String? = null, // e.g., "https://api.example.com/users"
-        val statusCode: Int? = null, // e.g., 404, 500, 401
-        val details: String? = null, // e.g., "timeout", "connection refused"
+        val url: String, // e.g., "https://api.example.com/users"
+        val statusCode: Int, // e.g., 404, 500, 401
+        val details: String, // e.g., "timeout", "connection refused"
         override val cause: Throwable? = null,
     ) : DivaError(
         message = buildString {
@@ -95,9 +96,9 @@ sealed class DivaError(
 
         fun network(
             operation: String,
-            url: String? = null,
-            statusCode: Int? = null,
-            details: String? = null,
+            url: String,
+            statusCode: Int,
+            details: String,
             cause: Throwable? = null,
         ): NetworkError {
             return NetworkError(operation, url, statusCode, details, cause)

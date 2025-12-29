@@ -1,16 +1,16 @@
 package io.github.juevigrace.diva.network.client.factory
 
-import io.github.juevigrace.diva.network.client.LinuxNetworkClient
-import io.github.juevigrace.diva.network.client.NetworkClient
+import io.github.juevigrace.diva.network.client.LinuxDivaClient
+import io.github.juevigrace.diva.network.client.DivaClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.HttpClientEngineFactory
 import io.ktor.client.engine.curl.CurlClientEngineConfig
 
-class LinuxNetworkClientFactory(
+class LinuxDivaClientFactory(
     override val engineFactory: HttpClientEngineFactory<CurlClientEngineConfig>,
     override val conf: HttpClientConfig<CurlClientEngineConfig>.() -> Unit,
-) : NetworkClientFactoryBase<CurlClientEngineConfig>(engineFactory, conf) {
-    override fun create(): NetworkClient {
-        return LinuxNetworkClient(engineFactory, conf)
+) : DivaClientFactoryBase<CurlClientEngineConfig>(engineFactory, conf) {
+    override fun create(): DivaClient {
+        return LinuxDivaClient(engineFactory, conf)
     }
 }

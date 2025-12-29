@@ -4,7 +4,7 @@ import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.HttpClientEngineFactory
 import io.ktor.client.engine.js.JsClientEngineConfig
 
-internal class JsNetworkClient(
+internal class WasmJsDivaClient(
     override val engineFactory: HttpClientEngineFactory<JsClientEngineConfig>,
     override val conf: HttpClientConfig<JsClientEngineConfig>.() -> Unit
-) : NetworkClientBase<JsClientEngineConfig>(engineFactory, conf)
+) : DivaClientBase<JsClientEngineConfig>(engineFactory, conf)

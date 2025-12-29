@@ -13,7 +13,7 @@ import kotlin.coroutines.EmptyCoroutineContext
  * Scope interface containing all database operations.
  * These functions can only be used within a withDb block.
  */
-interface StorageScope<S : TransacterBase> {
+interface DivaDatabaseScope<S : TransacterBase> {
     val db: S
 
     suspend fun <T : Any> getOne(query: Query<T>): DivaResult<Option<T>, DivaError>
@@ -43,6 +43,6 @@ interface StorageScope<S : TransacterBase> {
     ): Flow<DivaResult<List<R>, DivaError>>
 
     companion object {
-        operator fun <S : TransacterBase> invoke(db: S): StorageScope<S> = StorageScopeImpl(db)
+        operator fun <S : TransacterBase> invoke(db: S): DivaDatabaseScope<S> = DivaDatabaseScopeImpl(db)
     }
 }
