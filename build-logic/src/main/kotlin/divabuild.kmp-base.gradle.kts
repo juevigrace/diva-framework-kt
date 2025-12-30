@@ -7,8 +7,8 @@ plugins {
 kotlin {
     jvmToolchain(21)
     compilerOptions {
-        apiVersion = KotlinVersion.KOTLIN_2_3
-        languageVersion = KotlinVersion.KOTLIN_2_3
+        apiVersion = KotlinVersion.KOTLIN_2_2
+        languageVersion = KotlinVersion.KOTLIN_2_2
         progressiveMode = languageVersion.map { it >= KotlinVersion.DEFAULT }
         freeCompilerArgs.addAll("-Xexpect-actual-classes")
     }

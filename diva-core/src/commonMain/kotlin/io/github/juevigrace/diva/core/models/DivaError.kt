@@ -42,9 +42,9 @@ sealed class DivaError(
     ) : DivaError(
         message = buildString {
             append("Network error during $operation")
-            url?.let { append(" to '$it'") }
-            statusCode?.let { append(" (status $it)") }
-            details?.let { append(": $it") }
+            append(" to '$url'")
+            append(" (status $statusCode)")
+            append(": $details")
         },
         cause = cause,
     )
