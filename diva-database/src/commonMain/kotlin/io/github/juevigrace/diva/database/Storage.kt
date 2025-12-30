@@ -6,8 +6,8 @@ import io.github.juevigrace.diva.core.models.Option
 import kotlinx.coroutines.flow.Flow
 
 interface Storage<T> {
-    suspend fun getAll(): DivaResult<Option<List<T>>, DivaError>
-    suspend fun getAllFlow(): Flow<DivaResult<Option<List<T>>, DivaError>>
+    suspend fun getAll(): DivaResult<List<T>, DivaError>
+    suspend fun getAllFlow(): Flow<DivaResult<List<T>, DivaError>>
     suspend fun getById(id: String): DivaResult<Option<T>, DivaError>
     suspend fun getByIdFlow(id: String): Flow<DivaResult<Option<T>, DivaError>>
     suspend fun insert(item: T): DivaResult<Unit, DivaError>
