@@ -8,6 +8,8 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 interface Storage<T : Any> {
+    suspend fun count(): DivaResult<Long, DivaError>
+
     suspend fun getAll(limit: Int = 0, offset: Int = 0): DivaResult<List<T>, DivaError>
 
     suspend fun getAllFlow(limit: Int = 0, offset: Int = 0): Flow<DivaResult<List<T>, DivaError>>
