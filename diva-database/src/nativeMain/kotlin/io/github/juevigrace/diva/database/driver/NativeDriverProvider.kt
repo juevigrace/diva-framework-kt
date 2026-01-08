@@ -5,9 +5,9 @@ import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlSchema
 import app.cash.sqldelight.driver.native.NativeSqliteDriver
-import io.github.juevigrace.diva.core.models.DivaError
-import io.github.juevigrace.diva.core.models.DivaResult
-import io.github.juevigrace.diva.core.models.tryResult
+import io.github.juevigrace.diva.core.errors.DivaError
+import io.github.juevigrace.diva.core.DivaResult
+import io.github.juevigrace.diva.core.tryResult
 import io.github.juevigrace.diva.database.driver.configuration.NativeConf
 
 internal class NativeDriverProvider(

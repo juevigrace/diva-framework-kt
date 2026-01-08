@@ -9,10 +9,10 @@ import app.cash.sqldelight.driver.jdbc.JdbcDriver
 import app.cash.sqldelight.driver.jdbc.asJdbcDriver
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.github.juevigrace.diva.core.models.DivaError
-import io.github.juevigrace.diva.core.models.DivaResult
-import io.github.juevigrace.diva.core.models.flatMap
-import io.github.juevigrace.diva.core.models.tryResult
+import io.github.juevigrace.diva.core.errors.DivaError
+import io.github.juevigrace.diva.core.DivaResult
+import io.github.juevigrace.diva.core.flatMap
+import io.github.juevigrace.diva.core.tryResult
 import io.github.juevigrace.diva.database.driver.configuration.DriverConf
 import io.github.juevigrace.diva.database.driver.configuration.JvmConf
 import kotlinx.coroutines.runBlocking

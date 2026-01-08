@@ -6,11 +6,11 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOneOrNull
 import app.cash.sqldelight.db.SqlDriver
-import io.github.juevigrace.diva.core.models.DivaError
-import io.github.juevigrace.diva.core.models.DivaResult
-import io.github.juevigrace.diva.core.models.Option
-import io.github.juevigrace.diva.core.models.map
-import io.github.juevigrace.diva.core.models.tryResult
+import io.github.juevigrace.diva.core.errors.DivaError
+import io.github.juevigrace.diva.core.DivaResult
+import io.github.juevigrace.diva.core.Option
+import io.github.juevigrace.diva.core.map
+import io.github.juevigrace.diva.core.tryResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow

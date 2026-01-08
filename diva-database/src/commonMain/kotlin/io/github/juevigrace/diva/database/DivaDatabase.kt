@@ -3,9 +3,9 @@ package io.github.juevigrace.diva.database
 import app.cash.sqldelight.Query
 import app.cash.sqldelight.TransacterBase
 import app.cash.sqldelight.db.SqlDriver
-import io.github.juevigrace.diva.core.models.DivaError
-import io.github.juevigrace.diva.core.models.DivaResult
-import io.github.juevigrace.diva.core.models.Option
+import io.github.juevigrace.diva.core.errors.DivaError
+import io.github.juevigrace.diva.core.DivaResult
+import io.github.juevigrace.diva.core.Option
 import kotlinx.coroutines.flow.Flow
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext

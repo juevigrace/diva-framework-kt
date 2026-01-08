@@ -1,4 +1,4 @@
-package io.github.juevigrace.diva.core.models
+package io.github.juevigrace.diva.core
 
 sealed interface Option<out T> {
     data class Some<T>(val value: T) : Option<T>

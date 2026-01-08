@@ -1,20 +1,23 @@
-package io.github.juevigrace.diva.core.models
+package io.github.juevigrace.diva.core.errors
 
-// TODO: improve error types
+import io.github.juevigrace.diva.core.database.DatabaseOperation
+import io.github.juevigrace.diva.core.network.HttpRequestMethod
+import io.github.juevigrace.diva.core.network.HttpStatusCodes
+
 sealed class DivaError(
     open val message: String,
     open val cause: Throwable? = null,
 ) {
     // Database errors with specific context
     data class DatabaseError(
-        val operation: String, // e.g., "INSERT", "SELECT", "UPDATE", "DELETE"
-        val table: String? = null, // e.g., "users", "orders"
+        val operation: DatabaseOperation, // e.g., "INSERT", "SELECT", "UPDATE", "DELETE"
+        val table: String, // e.g., "users", "orders"
         val details: String? = null, // e.g., "constraint violation", "connection timeout"
         override val cause: Throwable? = null,
     ) : DivaError(
         message = buildString {
-            append("Database error during $operation")
-            table?.let { append(" on table '$it'") }
+            append("Database error during ${operation.name}")
+            append(" on table '$table'")
             details?.let { append(": $it") }
         },
         cause = cause,
@@ -34,41 +37,41 @@ sealed class DivaError(
 
     // Network errors with specific context
     data class NetworkError(
-        val operation: String, // e.g., "GET", "POST", "PUT", "DELETE"
+        val method: HttpRequestMethod, // e.g., "GET", "POST", "PUT", "DELETE"
         val url: String, // e.g., "https://api.example.com/users"
-        val statusCode: Int, // e.g., 404, 500, 401
+        val statusCode: HttpStatusCodes, // e.g., 404, 500, 401
         val details: String, // e.g., "timeout", "connection refused"
         override val cause: Throwable? = null,
     ) : DivaError(
         message = buildString {
-            append("Network error during $operation")
+            append("Network error during ${method.name}")
             append(" to '$url'")
-            append(" (status $statusCode)")
+            append(" (status ${statusCode.code})")
             append(": $details")
         },
         cause = cause,
     )
 
     data class ValidationError(
-        val field: String? = null, // e.g., "email", "password"
-        val constraint: String? = null, // e.g., "required", "invalid format"
+        val field: String, // e.g., "email", "password"
+        val constraint: String, // e.g., "required", "invalid format"
         val details: String? = null, // e.g., "must be at least 8 characters"
     ) : DivaError(
         message = buildString {
             append("Validation error")
-            field?.let { append(" for field '$it'") }
-            constraint?.let { append(": $it") }
+            append(" for field '$field'")
+            append(": $constraint")
             details?.let { append(" - $it") }
         },
     )
 
     data class ConfigurationError(
-        val key: String? = null, // e.g., "database.url", "api.key"
+        val key: String, // e.g., "database.url", "api.key"
         val details: String? = null, // e.g., "missing required config", "invalid format"
     ) : DivaError(
         message = buildString {
             append("Configuration error")
-            key?.let { append(" for '$it'") }
+            append(" for '$key'")
             details?.let { append(": $it") }
         },
     )
@@ -83,40 +86,6 @@ sealed class DivaError(
                     origin = origin
                 )
             }
-        }
-
-        fun database(
-            operation: String,
-            table: String? = null,
-            details: String? = null,
-            cause: Throwable? = null,
-        ): DatabaseError {
-            return DatabaseError(operation, table, details, cause)
-        }
-
-        fun network(
-            operation: String,
-            url: String,
-            statusCode: Int,
-            details: String,
-            cause: Throwable? = null,
-        ): NetworkError {
-            return NetworkError(operation, url, statusCode, details, cause)
-        }
-
-        fun validation(
-            field: String? = null,
-            constraint: String? = null,
-            details: String? = null,
-        ): ValidationError {
-            return ValidationError(field, constraint, details)
-        }
-
-        fun configuration(
-            key: String? = null,
-            details: String? = null,
-        ): ConfigurationError {
-            return ConfigurationError(key, details)
         }
     }
 }

@@ -1,8 +1,10 @@
 package io.github.juevigrace.diva.network.client
 
-import io.github.juevigrace.diva.core.models.DivaError
-import io.github.juevigrace.diva.core.models.DivaResult
-import io.github.juevigrace.diva.core.models.tryResult
+import io.github.juevigrace.diva.core.DivaResult
+import io.github.juevigrace.diva.core.errors.DivaError
+import io.github.juevigrace.diva.core.errors.toDivaError
+import io.github.juevigrace.diva.core.network.HttpStatusCodes
+import io.github.juevigrace.diva.core.tryResult
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.HttpClientEngineConfig
@@ -32,12 +34,15 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
         url: String,
         headers: Map<String, String>,
         contentType: ContentType,
-    ): DivaResult<HttpResponse, DivaError> {
+    ): DivaResult<HttpResponse, DivaError.NetworkError> {
         return tryResult(
             onError = { e ->
-                DivaError.exception(
-                    e = e,
-                    origin = "NetworkClient.call"
+                DivaError.NetworkError(
+                    method = method.toHttpRequestMethod(),
+                    url = url,
+                    statusCode = HttpStatusCodes.InternalServerError,
+                    details = e.toDivaError("DivaClient.call").message,
+                    cause = e,
                 )
             },
         ) {
@@ -58,12 +63,15 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
         headers: Map<String, String>,
         contentType: ContentType,
         serializer: KSerializer<T>,
-    ): DivaResult<HttpResponse, DivaError> {
+    ): DivaResult<HttpResponse, DivaError.NetworkError> {
         return tryResult(
             onError = { e ->
-                DivaError.exception(
-                    e = e,
-                    origin = "NetworkClient.call"
+                DivaError.NetworkError(
+                    method = method.toHttpRequestMethod(),
+                    url = url,
+                    statusCode = HttpStatusCodes.InternalServerError,
+                    details = e.toDivaError("DivaClient.call").message,
+                    cause = e,
                 )
             },
         ) {

@@ -1,7 +1,7 @@
 package io.github.juevigrace.diva.network.client
 
-import io.github.juevigrace.diva.core.models.DivaError
-import io.github.juevigrace.diva.core.models.DivaResult
+import io.github.juevigrace.diva.core.DivaResult
+import io.github.juevigrace.diva.core.errors.DivaError
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
@@ -14,7 +14,7 @@ interface DivaClient {
         url: String,
         headers: Map<String, String>,
         contentType: ContentType,
-    ): DivaResult<HttpResponse, DivaError>
+    ): DivaResult<HttpResponse, DivaError.NetworkError>
 
     suspend fun <T> call(
         method: HttpMethod,
@@ -23,14 +23,14 @@ interface DivaClient {
         headers: Map<String, String>,
         contentType: ContentType,
         serializer: KSerializer<T>,
-    ): DivaResult<HttpResponse, DivaError>
+    ): DivaResult<HttpResponse, DivaError.NetworkError>
 }
 
 suspend inline fun DivaClient.get(
     url: String,
     headers: Map<String, String> = emptyMap(),
     contentType: ContentType = ContentType.Application.Json,
-): DivaResult<HttpResponse, DivaError> {
+): DivaResult<HttpResponse, DivaError.NetworkError> {
     return call(
         method = HttpMethod.Get,
         url = url,
@@ -44,7 +44,7 @@ suspend inline fun<reified T> DivaClient.post(
     body: T,
     headers: Map<String, String> = emptyMap(),
     contentType: ContentType = ContentType.Application.Json,
-): DivaResult<HttpResponse, DivaError> {
+): DivaResult<HttpResponse, DivaError.NetworkError> {
     return call(
         method = HttpMethod.Post,
         url = url,
@@ -59,7 +59,7 @@ suspend inline fun<reified T> DivaClient.post(
     url: String,
     headers: Map<String, String> = emptyMap(),
     contentType: ContentType = ContentType.Application.Json,
-): DivaResult<HttpResponse, DivaError> {
+): DivaResult<HttpResponse, DivaError.NetworkError> {
     return call(
         method = HttpMethod.Post,
         url = url,
@@ -73,7 +73,7 @@ suspend inline fun<reified T> DivaClient.put(
     body: T,
     headers: Map<String, String> = emptyMap(),
     contentType: ContentType = ContentType.Application.Json,
-): DivaResult<HttpResponse, DivaError> {
+): DivaResult<HttpResponse, DivaError.NetworkError> {
     return call(
         method = HttpMethod.Put,
         url = url,
@@ -89,7 +89,7 @@ suspend inline fun<reified T> DivaClient.patch(
     body: T,
     headers: Map<String, String> = emptyMap(),
     contentType: ContentType = ContentType.Application.Json,
-): DivaResult<HttpResponse, DivaError> {
+): DivaResult<HttpResponse, DivaError.NetworkError> {
     return call(
         method = HttpMethod.Patch,
         url = url,
@@ -104,7 +104,7 @@ suspend inline fun DivaClient.delete(
     url: String,
     headers: Map<String, String> = emptyMap(),
     contentType: ContentType = ContentType.Application.Json,
-): DivaResult<HttpResponse, DivaError> {
+): DivaResult<HttpResponse, DivaError.NetworkError> {
     return call(
         method = HttpMethod.Delete,
         url = url,
@@ -118,7 +118,7 @@ suspend inline fun<reified T> DivaClient.delete(
     body: T,
     headers: Map<String, String> = emptyMap(),
     contentType: ContentType = ContentType.Application.Json,
-): DivaResult<HttpResponse, DivaError> {
+): DivaResult<HttpResponse, DivaError.NetworkError> {
     return call(
         method = HttpMethod.Delete,
         url = url,

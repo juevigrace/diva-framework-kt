@@ -1,4 +1,4 @@
-package io.github.juevigrace.diva.core.models
+package io.github.juevigrace.diva.core.errors
 
 fun Exception.toDivaError(origin: String? = null): DivaError {
     return if (this is DivaErrorException) {

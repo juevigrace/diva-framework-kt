@@ -1,8 +1,8 @@
 package io.github.juevigrace.diva.database.driver
 
 import app.cash.sqldelight.db.SqlDriver
-import io.github.juevigrace.diva.core.models.DivaError
-import io.github.juevigrace.diva.core.models.DivaResult
+import io.github.juevigrace.diva.core.errors.DivaError
+import io.github.juevigrace.diva.core.DivaResult
 
 interface DriverProvider {
     /**
