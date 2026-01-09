@@ -2,13 +2,20 @@ package io.github.juevigrace.diva.network.client
 
 import io.github.juevigrace.diva.core.DivaResult
 import io.github.juevigrace.diva.core.errors.DivaError
+import io.github.juevigrace.diva.core.errors.DivaErrorException
 import io.github.juevigrace.diva.core.errors.toDivaError
 import io.github.juevigrace.diva.core.network.HttpStatusCodes
 import io.github.juevigrace.diva.core.tryResult
+import io.github.juevigrace.diva.network.client.config.DivaClientConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
+import io.ktor.client.call.body
 import io.ktor.client.engine.HttpClientEngineConfig
 import io.ktor.client.engine.HttpClientEngineFactory
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.plugins.observer.ResponseObserver
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
 import io.ktor.client.request.request
@@ -17,21 +24,26 @@ import io.ktor.client.request.url
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
+import io.ktor.http.Url
+import io.ktor.http.buildUrl
 import io.ktor.http.contentType
+import io.ktor.http.parseUrl
+import io.ktor.http.path
+import io.ktor.http.takeFrom
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
-import kotlin.collections.component1
-import kotlin.collections.component2
 
 abstract class DivaClientBase<C : HttpClientEngineConfig>(
     protected open val engineFactory: HttpClientEngineFactory<C>,
-    protected open val conf: HttpClientConfig<C>.() -> Unit
+    protected open val config: DivaClientConfig,
+    protected open val httpClientConfig: HttpClientConfig<C>.() -> Unit
 ) : DivaClient {
-    protected val client: HttpClient = HttpClient(engineFactory, conf)
+    protected val client: HttpClient = HttpClient(engineFactory, httpClientConfig)
 
     override suspend fun call(
         method: HttpMethod,
-        url: String,
+        path: String,
         headers: Map<String, String>,
         contentType: ContentType,
     ): DivaResult<HttpResponse, DivaError.NetworkError> {
@@ -39,13 +51,14 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
             onError = { e ->
                 DivaError.NetworkError(
                     method = method.toHttpRequestMethod(),
-                    url = url,
+                    url = path,
                     statusCode = HttpStatusCodes.InternalServerError,
                     details = e.toDivaError("DivaClient.call").message,
                     cause = e,
                 )
             },
         ) {
+            val url: Url = parseFromPath(path)
             val request: HttpResponse = createRequest(
                 method = method,
                 url = url,
@@ -58,7 +71,7 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
 
     override suspend fun <T> call(
         method: HttpMethod,
-        url: String,
+        path: String,
         body: T,
         headers: Map<String, String>,
         contentType: ContentType,
@@ -68,13 +81,14 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
             onError = { e ->
                 DivaError.NetworkError(
                     method = method.toHttpRequestMethod(),
-                    url = url,
+                    url = path,
                     statusCode = HttpStatusCodes.InternalServerError,
                     details = e.toDivaError("DivaClient.call").message,
                     cause = e,
                 )
             },
         ) {
+            val url: Url = parseFromPath(path)
             val request: HttpResponse = createRequest(
                 method = method,
                 url = url,
@@ -88,9 +102,27 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
         }
     }
 
+    @Throws(DivaErrorException::class)
+    protected fun parseFromPath(path: String): Url {
+        val url: Url = if (path.startsWith("/")) {
+            buildUrl {
+                takeFrom(config.baseUrl)
+                path(path)
+            }
+        } else {
+            parseUrl(path) ?: throw DivaErrorException(
+                DivaError.ValidationError(
+                    "path",
+                    "Path is not valid a url (Path: $path)"
+                )
+            )
+        }
+        return url
+    }
+
     private suspend fun createRequest(
         method: HttpMethod,
-        url: String,
+        url: Url,
         headers: Map<String, String>,
         contentType: ContentType,
         bodyLambda: HttpRequestBuilder.() -> Unit = {}
@@ -104,5 +136,37 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
             }
             bodyLambda()
         }
+    }
+}
+
+fun<T : HttpClientEngineConfig> HttpClientConfig<T>.defaultConfig(config: DivaClientConfig) {
+    install(Logging) {
+        logger = config.logger
+        level = config.logLevel
+    }
+
+    install(HttpTimeout) {
+        requestTimeoutMillis = config.requestTimeout
+        connectTimeoutMillis = config.connectTimeout
+        socketTimeoutMillis = config.socketTimeout
+    }
+
+    install(ResponseObserver) {
+        onResponse { response ->
+            println("HTTP response: $response")
+            println("HTTP body: ${response.body<Any>()}")
+            println("HTTP status: ${response.status.value}")
+        }
+    }
+
+    install(ContentNegotiation) {
+        json(
+            Json {
+                prettyPrint = true
+                ignoreUnknownKeys = true
+                encodeDefaults = true
+                explicitNulls = true
+            },
+        )
     }
 }
