@@ -6,21 +6,21 @@ import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlSchema
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
-import io.github.juevigrace.diva.core.errors.DivaError
 import io.github.juevigrace.diva.core.DivaResult
+import io.github.juevigrace.diva.core.database.DatabaseAction
+import io.github.juevigrace.diva.core.errors.DivaError
+import io.github.juevigrace.diva.core.errors.asDatabaseError
+import io.github.juevigrace.diva.core.errors.toDivaError
 import io.github.juevigrace.diva.core.tryResult
 import io.github.juevigrace.diva.database.driver.configuration.AndroidConf
 
 internal class AndroidDriverProvider(
     override val conf: AndroidConf,
 ) : DriverProviderBase<AndroidConf>(conf) {
-    override fun createDriver(schema: Schema): DivaResult<SqlDriver, DivaError> {
+    override fun createDriver(schema: Schema): DivaResult<SqlDriver, DivaError.DatabaseError> {
         return tryResult(
             onError = { e ->
-                DivaError.exception(
-                    e = e,
-                    origin = "AndroidDriverProvider.createDriver"
-                )
+                e.toDivaError("DriverProvider.createDriver").asDatabaseError(DatabaseAction.START)
             }
         ) {
             val syncSchema: SqlSchema<QueryResult.Value<Unit>> = when (schema) {

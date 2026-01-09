@@ -1,6 +1,6 @@
 package io.github.juevigrace.diva.core.errors
 
-import io.github.juevigrace.diva.core.database.DatabaseOperation
+import io.github.juevigrace.diva.core.database.DatabaseAction
 import io.github.juevigrace.diva.core.network.HttpRequestMethod
 import io.github.juevigrace.diva.core.network.HttpStatusCodes
 
@@ -10,14 +10,14 @@ sealed class DivaError(
 ) {
     // Database errors with specific context
     data class DatabaseError(
-        val operation: DatabaseOperation, // e.g., "INSERT", "SELECT", "UPDATE", "DELETE"
-        val table: String, // e.g., "users", "orders"
+        val operation: DatabaseAction, // e.g., "INSERT", "SELECT", "UPDATE", "DELETE"
+        val table: String? = null, // e.g., "users", "orders"
         val details: String? = null, // e.g., "constraint violation", "connection timeout"
         override val cause: Throwable? = null,
     ) : DivaError(
         message = buildString {
             append("Database error during ${operation.name}")
-            append(" on table '$table'")
+            table?.let { append(" on table '$it'") }
             details?.let { append(": $it") }
         },
         cause = cause,

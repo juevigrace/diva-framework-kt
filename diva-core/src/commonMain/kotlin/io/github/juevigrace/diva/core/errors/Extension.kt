@@ -1,6 +1,6 @@
 package io.github.juevigrace.diva.core.errors
 
-import io.github.juevigrace.diva.core.database.DatabaseOperation
+import io.github.juevigrace.diva.core.database.DatabaseAction
 import io.github.juevigrace.diva.core.network.HttpRequestMethod
 import io.github.juevigrace.diva.core.network.HttpStatusCodes
 
@@ -30,8 +30,8 @@ fun DivaError.asNetworkError(
 }
 
 fun DivaError.asDatabaseError(
-    operation: DatabaseOperation,
-    table: String,
+    operation: DatabaseAction,
+    table: String? = null,
 ): DivaError.DatabaseError {
     return this as? DivaError.DatabaseError ?: DivaError.DatabaseError(
         operation = operation,

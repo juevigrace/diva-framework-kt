@@ -11,7 +11,11 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.github.juevigrace.diva.core.errors.DivaError
 import io.github.juevigrace.diva.core.DivaResult
+import io.github.juevigrace.diva.core.database.DatabaseAction
+import io.github.juevigrace.diva.core.errors.asDatabaseError
+import io.github.juevigrace.diva.core.errors.toDivaError
 import io.github.juevigrace.diva.core.flatMap
+import io.github.juevigrace.diva.core.map
 import io.github.juevigrace.diva.core.tryResult
 import io.github.juevigrace.diva.database.driver.configuration.DriverConf
 import io.github.juevigrace.diva.database.driver.configuration.JvmConf
@@ -20,33 +24,27 @@ import kotlinx.coroutines.runBlocking
 internal class JvmDriverProvider(
     override val conf: JvmConf
 ) : DriverProviderBase<JvmConf>(conf) {
-    override fun createDriver(schema: Schema): DivaResult<SqlDriver, DivaError> {
+    override fun createDriver(schema: Schema): DivaResult<SqlDriver, DivaError.DatabaseError> {
         return tryResult(
             onError = { e ->
-                DivaError.exception(
-                    e = e,
-                    origin = "JvmDriverProvider.createDriver",
-                )
+                e.toDivaError("DriverProvider.createDriver").asDatabaseError(DatabaseAction.START)
             }
         ) {
             val syncSchema: SqlSchema<QueryResult.Value<Unit>> = when (schema) {
                 is Schema.Sync -> schema.value
                 is Schema.Async -> schema.value.synchronous()
             }
-            createDriverFromDataSource().flatMap { driver ->
+            createDriverFromDataSource().map { driver ->
                 runBlocking { syncSchema.awaitCreate(driver) }
-                DivaResult.success(driver)
+                driver
             }
         }
     }
 
-    private fun createDriverFromDataSource(): DivaResult<SqlDriver, DivaError> {
+    private fun createDriverFromDataSource(): DivaResult<SqlDriver, DivaError.DatabaseError> {
         return tryResult(
             onError = { e ->
-                DivaError.exception(
-                    e = e,
-                    origin = "JvmDriverProvider.createDriverFromDataSource",
-                )
+                e.toDivaError("DriverProvider.createDriverFromDataSource").asDatabaseError(DatabaseAction.CONFIGURE)
             }
         ) {
             val config: HikariConfig = when (conf.driverConf) {

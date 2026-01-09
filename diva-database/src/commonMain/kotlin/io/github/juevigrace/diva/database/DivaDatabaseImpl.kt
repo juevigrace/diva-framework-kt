@@ -6,66 +6,56 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOneOrNull
 import app.cash.sqldelight.db.SqlDriver
-import io.github.juevigrace.diva.core.errors.DivaError
 import io.github.juevigrace.diva.core.DivaResult
 import io.github.juevigrace.diva.core.Option
-import io.github.juevigrace.diva.core.map
+import io.github.juevigrace.diva.core.database.DatabaseAction
+import io.github.juevigrace.diva.core.errors.DivaError
+import io.github.juevigrace.diva.core.errors.asDatabaseError
+import io.github.juevigrace.diva.core.errors.toDivaError
 import io.github.juevigrace.diva.core.tryResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import kotlin.coroutines.CoroutineContext
 
-internal class DivaDatabaseImpl<S : TransacterBase> (
+internal class DivaDatabaseImpl<S : TransacterBase>(
     private val driver: SqlDriver,
     private val db: S,
 ) : DivaDatabase<S> {
-    override suspend fun <T : Any> getOne(block: S.() -> Query<T>): DivaResult<Option<T>, DivaError> {
+    override suspend fun <T : Any> getOne(block: S.() -> Query<T>): DivaResult<Option<T>, DivaError.DatabaseError> {
         return tryResult(
             onError = { e ->
-                DivaError.exception(
-                    e = e,
-                    origin = "DivaDatabase.getOne"
-                )
+                e.toDivaError("DivaDatabase.getOne").asDatabaseError(DatabaseAction.SELECT)
             }
         ) {
             val result: T? = block(db).executeAsOneOrNull()
-            DivaResult.success(result)
-        }.map { entity -> Option.of(entity) }
+            DivaResult.success(Option.of(result))
+        }
     }
 
     override fun <T : Any> getOneAsFlow(
         ctx: CoroutineContext,
         block: S.() -> Query<T>
-    ): Flow<DivaResult<Option<T>, DivaError>> {
+    ): Flow<DivaResult<Option<T>, DivaError.DatabaseError>> {
         return flow {
-            block(db).asFlow()
-                .mapToOneOrNull(ctx)
-                .catch { e ->
-                    emit(
-                        DivaResult.failure(
-                            DivaError.exception(
-                                e = Exception(e.message, e),
-                                origin = "DivaDatabase.getOneAsFlow"
-                            )
-                        )
+            block(db).asFlow().mapToOneOrNull(ctx).catch { e ->
+                emit(
+                    DivaResult.failure(
+                        Exception(e).toDivaError("DivaDatabase.getOneAsFlow")
+                            .asDatabaseError(DatabaseAction.SELECT)
                     )
-                }
-                .collect { entity ->
-                    emit(DivaResult.success(entity))
-                }
-        }.flowOn(ctx).map { result -> result.map { entity -> Option.of(entity) } }
+                )
+            }.collect { entity ->
+                emit(DivaResult.success(Option.of(entity)))
+            }
+        }.flowOn(ctx)
     }
 
-    override suspend fun <T : Any> getList(block: S.() -> Query<T>): DivaResult<List<T>, DivaError> {
+    override suspend fun <T : Any> getList(block: S.() -> Query<T>): DivaResult<List<T>, DivaError.DatabaseError> {
         return tryResult(
             onError = { e ->
-                DivaError.exception(
-                    e = e,
-                    origin = "DivaDatabase.getList"
-                )
+                e.toDivaError("DivaDatabase.getOne").asDatabaseError(DatabaseAction.SELECT)
             }
         ) {
             val list: List<T> = block(db).executeAsList()
@@ -76,46 +66,38 @@ internal class DivaDatabaseImpl<S : TransacterBase> (
     override fun <T : Any> getListAsFlow(
         ctx: CoroutineContext,
         block: S.() -> Query<T>
-    ): Flow<DivaResult<List<T>, DivaError>> {
+    ): Flow<DivaResult<List<T>, DivaError.DatabaseError>> {
         return flow {
-            block(db).asFlow()
-                .mapToList(ctx)
-                .catch { e ->
-                    emit(
-                        DivaResult.failure(
-                            DivaError.exception(
-                                e = Exception(e.message, e),
-                                origin = "DivaDatabase.getListAsFlow"
-                            )
-                        )
+            block(db).asFlow().mapToList(ctx).catch { e ->
+                emit(
+                    DivaResult.failure(
+                        Exception(e).toDivaError("DivaDatabase.getOneAsFlow")
+                            .asDatabaseError(DatabaseAction.SELECT)
                     )
-                }
-                .collect { list ->
-                    emit(DivaResult.success(list))
-                }
+
+                )
+            }.collect { list ->
+                emit(DivaResult.success(list))
+            }
         }.flowOn(ctx)
     }
 
-    override suspend fun <T : Any> use(block: suspend S.() -> DivaResult<T, DivaError>): DivaResult<T, DivaError> {
+    override suspend fun <T : Any> use(
+        block: suspend S.() -> DivaResult<T, DivaError.DatabaseError>
+    ): DivaResult<T, DivaError.DatabaseError> {
         return tryResult(
             onError = { e ->
-                DivaError.exception(
-                    e = e,
-                    origin = "DivaDatabase.use"
-                )
+                e.toDivaError("DivaDatabase.use").asDatabaseError(DatabaseAction.USE)
             }
         ) {
             block(db)
         }
     }
 
-    override suspend fun checkHealth(): DivaResult<Boolean, DivaError> {
+    override suspend fun checkHealth(): DivaResult<Boolean, DivaError.DatabaseError> {
         return tryResult(
             onError = { e ->
-                DivaError.exception(
-                    e = e,
-                    origin = "Storage.checkHealth"
-                )
+                e.toDivaError("DivaDatabase.checkHealth").asDatabaseError(DatabaseAction.SELECT)
             }
         ) {
             driver.execute(null, "SELECT 1", 0).value
@@ -123,13 +105,10 @@ internal class DivaDatabaseImpl<S : TransacterBase> (
         }
     }
 
-    override suspend fun close(): DivaResult<Unit, DivaError> {
+    override suspend fun close(): DivaResult<Unit, DivaError.DatabaseError> {
         return tryResult(
             onError = { e ->
-                DivaError.exception(
-                    e = e,
-                    origin = "Storage.close"
-                )
+                e.toDivaError("DivaDatabase.close").asDatabaseError(DatabaseAction.CLOSE)
             }
         ) {
             driver.close()
