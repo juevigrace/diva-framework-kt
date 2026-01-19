@@ -10,14 +10,14 @@ sealed interface Option<out T> {
     }
 }
 
-fun <T, R> Option<T>.map(transform: (T) -> R): Option<R> {
+inline fun <T, R> Option<T>.map(transform: (T) -> R): Option<R> {
     return when (this) {
         is Option.Some -> Option.Some(transform(value))
         is Option.None -> Option.None
     }
 }
 
-fun <T, R> Option<T>.flatMap(transform: (T) -> Option<R>): Option<R> {
+inline fun <T, R> Option<T>.flatMap(transform: (T) -> Option<R>): Option<R> {
     return when (this) {
         is Option.Some -> transform(value)
         is Option.None -> Option.None
@@ -40,16 +40,16 @@ fun <T> Option<T>.isPresent(): Boolean {
 
 fun <T> Option<T>.isEmpty(): Boolean = !isPresent()
 
-fun <T> Option<T>.onSome(action: (T) -> Unit): Option<T> {
+inline fun <T> Option<T>.onSome(action: (T) -> Unit): Option<T> {
     if (this is Option.Some) action(value)
     return this
 }
-fun <T> Option<T>.onNone(action: () -> Unit): Option<T> {
+inline fun <T> Option<T>.onNone(action: () -> Unit): Option<T> {
     if (this is Option.None) action()
     return this
 }
 
-fun <T, R> Option<T>.fold(onSome: (T) -> R, onNone: () -> R): R {
+inline fun <T, R> Option<T>.fold(onSome: (T) -> R, onNone: () -> R): R {
     return when (this) {
         is Option.Some -> onSome(value)
         is Option.None -> onNone()

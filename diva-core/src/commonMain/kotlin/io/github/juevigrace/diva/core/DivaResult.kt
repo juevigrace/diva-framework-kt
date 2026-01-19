@@ -5,6 +5,7 @@ sealed interface DivaResult<out T, out E> {
 
     data class Failure<E>(val err: E) : DivaResult<Nothing, E>
 
+    // TODO: delete this
     companion object {
         fun <T> success(value: T): DivaResult<T, Nothing> {
             return Success(value)
@@ -30,7 +31,7 @@ inline fun <T, E, R> DivaResult<T, E>.flatMap(transform: (T) -> DivaResult<R, E>
     }
 }
 
-inline fun <T, E> DivaResult<T, E>.mapError(transform: (E) -> E): DivaResult<T, E> {
+inline fun <T, E, R> DivaResult<T, E>.mapError(transform: (E) -> R): DivaResult<T, R> {
     return when (this) {
         is DivaResult.Success -> this
         is DivaResult.Failure -> DivaResult.Failure(transform(err))
@@ -52,6 +53,7 @@ fun <T, E> DivaResult<T, E>.isFailure(): Boolean {
     return !isSuccess()
 }
 
+// TODO: change for option
 fun <T, E> DivaResult<T, E>.getOrNull(): T? {
     return when (this) {
         is DivaResult.Success -> value
@@ -73,10 +75,10 @@ inline fun <T, E> DivaResult<T, E>.getOrElse(default: () -> T): T {
     }
 }
 
-fun <T, E> DivaResult<T, E>.getOrThrow(): T {
+fun <T, E> DivaResult<T, E>.getOrThrow(onThrow: (E) -> Nothing = { e -> error(e.toString()) }): T {
     return when (this) {
         is DivaResult.Success -> value
-        is DivaResult.Failure -> error(err.toString())
+        is DivaResult.Failure -> onThrow(err)
     }
 }
 

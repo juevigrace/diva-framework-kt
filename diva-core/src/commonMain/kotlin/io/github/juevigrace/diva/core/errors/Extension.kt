@@ -15,6 +15,8 @@ fun Exception.toDivaError(origin: String? = null): DivaError {
     }
 }
 
+// TODO: these casts are incomplete
+
 fun DivaError.asNetworkError(
     method: HttpRequestMethod,
     url: String,

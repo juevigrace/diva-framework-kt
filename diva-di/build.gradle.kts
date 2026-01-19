@@ -1,10 +1,12 @@
 plugins {
-    id("divabuild.library-framework")
+    id("divabuild.library")
 }
 
 kotlin {
     sourceSets {
         commonMain.dependencies {
+            implementation(projects.divaCore)
+
             // Koin
             implementation(libs.koin.core)
         }

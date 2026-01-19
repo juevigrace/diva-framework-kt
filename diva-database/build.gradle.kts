@@ -1,11 +1,12 @@
 plugins {
-    id("divabuild.library-framework")
-    id("divabuild.targets-web")
+    id("divabuild.library")
 }
 
 kotlin {
     sourceSets {
         commonMain.dependencies {
+            implementation(projects.divaCore)
+
             // Sqldelight
             api(libs.sqldelight.async.extensions)
             api(libs.sqldelight.coroutines.extensions)

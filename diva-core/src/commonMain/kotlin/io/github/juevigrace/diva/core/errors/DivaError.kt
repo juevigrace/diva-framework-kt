@@ -4,6 +4,7 @@ import io.github.juevigrace.diva.core.database.DatabaseAction
 import io.github.juevigrace.diva.core.network.HttpRequestMethod
 import io.github.juevigrace.diva.core.network.HttpStatusCodes
 
+// TODO: Add typed constraints to better cast and identify errors
 sealed class DivaError(
     open val message: String,
     open val cause: Throwable? = null,
@@ -16,7 +17,7 @@ sealed class DivaError(
         override val cause: Throwable? = null,
     ) : DivaError(
         message = buildString {
-            append("Database error during ${operation.name}")
+            append("database error: ${operation.name}")
             table?.let { append(" on table '$it'") }
             details?.let { append(": $it") }
         },
@@ -29,8 +30,10 @@ sealed class DivaError(
         val origin: String? = null,
     ) : DivaError(
         message = buildString {
-            append("Exception during $origin")
-            append(": $message")
+            append("error:")
+            origin?.let { append(" origin '$it'") }
+            append(" $message")
+            cause?.let { append(" - $it") }
         },
         cause = cause,
     )
@@ -44,9 +47,7 @@ sealed class DivaError(
         override val cause: Throwable? = null,
     ) : DivaError(
         message = buildString {
-            append("Network error during ${method.name}")
-            append(" to '$url'")
-            append(" (status ${statusCode.code})")
+            append("request error for $method $url")
             append(": $details")
         },
         cause = cause,
@@ -58,9 +59,9 @@ sealed class DivaError(
         val details: String? = null, // e.g., "must be at least 8 characters"
     ) : DivaError(
         message = buildString {
-            append("Validation error")
-            append(" for field '$field'")
-            append(": $constraint")
+            append("validation error:")
+            append(" field '$field'")
+            append(" ($constraint)")
             details?.let { append(" - $it") }
         },
     )
@@ -70,8 +71,8 @@ sealed class DivaError(
         val details: String? = null, // e.g., "missing required config", "invalid format"
     ) : DivaError(
         message = buildString {
-            append("Configuration error")
-            append(" for '$key'")
+            append("configuration error:")
+            append(" key '$key'")
             details?.let { append(": $it") }
         },
     )

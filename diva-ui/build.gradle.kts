@@ -1,20 +1,18 @@
-import org.jetbrains.compose.ExperimentalComposeLibrary
-
 plugins {
-    id("divabuild.library-ui")
+    id("divabuild.compose-multiplatform")
+    id("divabuild.setup-ui")
+    id("divabuild.library-base")
+    id("divabuild.library-targets")
+    id("divabuild.serialization")
 }
 
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            api(libs.androidx.nav3.ui)
-            api(libs.androidx.material3.adaptive)
-            api(libs.androidx.material3.adaptive.nav3)
-        }
+            implementation(projects.divaCore)
 
-        @OptIn(ExperimentalComposeLibrary::class)
-        commonTest.dependencies {
-            implementation(compose.uiTest)
+            api(libs.nav3.ui)
+            api(libs.material3.adaptive.nav3)
         }
     }
 }

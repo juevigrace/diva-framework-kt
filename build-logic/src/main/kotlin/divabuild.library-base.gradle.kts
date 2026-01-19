@@ -3,13 +3,8 @@ import divabuild.internal.libs
 plugins {
     id("divabuild.publishing")
     id("divabuild.kmp-base")
-    id("divabuild.targets-android")
-    id("divabuild.targets-ios")
-    id("divabuild.targets-jvm")
-    id("divabuild.targets-web")
+    id("divabuild.library-package")
 }
-
-version = libs.versions.diva.version
 
 kotlin {
     sourceSets {

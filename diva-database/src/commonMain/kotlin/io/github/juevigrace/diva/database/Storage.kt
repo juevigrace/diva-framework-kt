@@ -10,15 +10,15 @@ import kotlin.uuid.Uuid
 interface Storage<T : Any> {
     suspend fun count(): DivaResult<Long, DivaError.DatabaseError>
 
-    suspend fun getAll(limit: Int = 0, offset: Int = 0): DivaResult<List<T>, DivaError.DatabaseError>
+    suspend fun getAll(limit: Int = 100, offset: Int = 0): DivaResult<List<T>, DivaError.DatabaseError>
 
-    suspend fun getAllFlow(limit: Int = 0, offset: Int = 0): Flow<DivaResult<List<T>, DivaError.DatabaseError>>
+    fun getAllFlow(limit: Int = 100, offset: Int = 0): Flow<DivaResult<List<T>, DivaError.DatabaseError>>
 
     @OptIn(ExperimentalUuidApi::class)
     suspend fun getById(id: Uuid): DivaResult<Option<T>, DivaError.DatabaseError>
 
     @OptIn(ExperimentalUuidApi::class)
-    suspend fun getByIdFlow(id: Uuid): Flow<DivaResult<Option<T>, DivaError.DatabaseError>>
+    fun getByIdFlow(id: Uuid): Flow<DivaResult<Option<T>, DivaError.DatabaseError>>
 
     suspend fun insert(item: T): DivaResult<Unit, DivaError.DatabaseError>
 
