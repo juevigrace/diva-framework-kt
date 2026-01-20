@@ -10,7 +10,7 @@ data class DivaClientConfig(
     val baseUrl: String,
     val logger: Logger = Logger.DEFAULT,
     val logLevel: LogLevel = LogLevel.INFO,
-    val requestTimeout: Long = Duration.parse("30").toLong(DurationUnit.SECONDS),
-    val connectTimeout: Long = Duration.parse("10").toLong(DurationUnit.SECONDS),
-    val socketTimeout: Long = Duration.parse("10").toLong(DurationUnit.SECONDS),
+    val requestTimeout: Long = Duration.parse("30s").toLong(DurationUnit.SECONDS),
+    val connectTimeout: Long = Duration.parse("10s").toLong(DurationUnit.SECONDS),
+    val socketTimeout: Long = Duration.parse("10s").toLong(DurationUnit.SECONDS),
 )
