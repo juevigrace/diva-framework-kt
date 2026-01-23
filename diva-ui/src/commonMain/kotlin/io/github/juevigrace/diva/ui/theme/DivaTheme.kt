@@ -8,10 +8,12 @@ import androidx.compose.runtime.Composable
 fun DivaTheme(
     isDark: Boolean = isSystemInDarkTheme(),
     config: DivaThemeConfig = DivaThemeConfig(),
-    systemUiConfig: @Composable (isDark: Boolean, themeScheme: ThemeScheme) -> Unit = ::ConfigureSystemUI,
+    systemUiConfig: @Composable () -> Unit = {
+        ConfigureSystemUI(isDark, config.themeScheme)
+    },
     content: @Composable () -> Unit
 ) {
-    systemUiConfig(isDark, config.themeScheme)
+    systemUiConfig()
     MaterialTheme(
         colorScheme = if (isDark) config.themeScheme.dark else config.themeScheme.light,
         typography = config.typography,

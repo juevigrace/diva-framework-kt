@@ -55,7 +55,7 @@ suspend inline fun<reified T> DivaClient.post(
     )
 }
 
-suspend inline fun<reified T> DivaClient.post(
+suspend inline fun DivaClient.post(
     path: String,
     headers: Map<String, String> = emptyMap(),
     contentType: ContentType = ContentType.Application.Json,
