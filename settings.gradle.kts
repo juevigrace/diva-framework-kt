@@ -38,3 +38,7 @@ include(
     ":diva-network-client",
     ":diva-ui",
 )
+
+include(
+    ":diva-database-test:diva-database-test-jvm",
+)

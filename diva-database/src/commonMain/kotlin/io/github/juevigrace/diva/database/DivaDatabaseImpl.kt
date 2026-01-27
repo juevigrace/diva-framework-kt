@@ -42,7 +42,8 @@ internal class DivaDatabaseImpl<S : TransacterBase>(
             block(db).asFlow().mapToOneOrNull(ctx).catch { e ->
                 emit(
                     DivaResult.failure(
-                        Exception(e).toDivaError("DivaDatabase.getOneAsFlow")
+                        Exception(e)
+                            .toDivaError("DivaDatabase.getOneAsFlow")
                             .asDatabaseError(DatabaseAction.SELECT)
                     )
                 )
@@ -71,10 +72,10 @@ internal class DivaDatabaseImpl<S : TransacterBase>(
             block(db).asFlow().mapToList(ctx).catch { e ->
                 emit(
                     DivaResult.failure(
-                        Exception(e).toDivaError("DivaDatabase.getOneAsFlow")
+                        Exception(e)
+                            .toDivaError("DivaDatabase.getOneAsFlow")
                             .asDatabaseError(DatabaseAction.SELECT)
                     )
-
                 )
             }.collect { list ->
                 emit(DivaResult.success(list))
@@ -91,6 +92,18 @@ internal class DivaDatabaseImpl<S : TransacterBase>(
             }
         ) {
             block(db)
+        }
+    }
+
+    override suspend fun <T : Any> withDriver(
+        block: suspend SqlDriver.() -> DivaResult<T, DivaError.DatabaseError>
+    ): DivaResult<T, DivaError.DatabaseError> {
+        return tryResult(
+            onError = { e ->
+                e.toDivaError("DivaDatabase.withDriver").asDatabaseError(DatabaseAction.USE)
+            }
+        ) {
+            block(driver)
         }
     }
 

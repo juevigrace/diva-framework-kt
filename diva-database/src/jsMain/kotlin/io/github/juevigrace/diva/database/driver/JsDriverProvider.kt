@@ -3,9 +3,9 @@ package io.github.juevigrace.diva.database.driver
 import app.cash.sqldelight.async.coroutines.awaitCreate
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.worker.WebWorkerDriver
-import io.github.juevigrace.diva.core.errors.DivaError
 import io.github.juevigrace.diva.core.DivaResult
 import io.github.juevigrace.diva.core.database.DatabaseAction
+import io.github.juevigrace.diva.core.errors.DivaError
 import io.github.juevigrace.diva.core.errors.asDatabaseError
 import io.github.juevigrace.diva.core.errors.toDivaError
 import io.github.juevigrace.diva.core.tryResult
@@ -18,7 +18,7 @@ internal class JsDriverProvider : DriverProvider {
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default)
     private val worker =
         Worker(
-            js("""new URL("@cashapp/sqldelight-sqljs-worker/sqljs.worker.js", import.meta.url)"""),
+            js("""new URL("@cashapp/sqldelight-sqljs-worker/sqljs.worker.js", import.meta.url)""")
         )
 
     override fun createDriver(schema: Schema): DivaResult<SqlDriver, DivaError.DatabaseError> {

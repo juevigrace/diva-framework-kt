@@ -1,5 +1,6 @@
 plugins {
     id("divabuild.library-base")
+    id("divabuild.publishing")
     id("divabuild.library-targets")
     id("divabuild.serialization")
     alias(libs.plugins.compose.compiler)

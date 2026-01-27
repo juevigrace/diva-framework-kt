@@ -1,20 +1,15 @@
 package io.github.juevigrace.diva.database.driver
 
-import app.cash.sqldelight.async.coroutines.awaitCreate
 import app.cash.sqldelight.async.coroutines.synchronous
-import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
-import app.cash.sqldelight.db.SqlSchema
-import app.cash.sqldelight.driver.jdbc.JdbcDriver
 import app.cash.sqldelight.driver.jdbc.asJdbcDriver
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.github.juevigrace.diva.core.errors.DivaError
 import io.github.juevigrace.diva.core.DivaResult
 import io.github.juevigrace.diva.core.database.DatabaseAction
+import io.github.juevigrace.diva.core.errors.DivaError
 import io.github.juevigrace.diva.core.errors.asDatabaseError
 import io.github.juevigrace.diva.core.errors.toDivaError
-import io.github.juevigrace.diva.core.flatMap
 import io.github.juevigrace.diva.core.map
 import io.github.juevigrace.diva.core.tryResult
 import io.github.juevigrace.diva.database.driver.configuration.DriverConf
@@ -30,13 +25,14 @@ internal class JvmDriverProvider(
                 e.toDivaError("DriverProvider.createDriver").asDatabaseError(DatabaseAction.START)
             }
         ) {
-            val syncSchema: SqlSchema<QueryResult.Value<Unit>> = when (schema) {
-                is Schema.Sync -> schema.value
-                is Schema.Async -> schema.value.synchronous()
-            }
             createDriverFromDataSource().map { driver ->
-                runBlocking { syncSchema.awaitCreate(driver) }
-                driver
+                runBlocking {
+                    when (schema) {
+                        is Schema.Sync -> schema.value.create(driver)
+                        is Schema.Async -> schema.value.synchronous().create(driver)
+                    }
+                    driver
+                }
             }
         }
     }
@@ -77,7 +73,7 @@ internal class JvmDriverProvider(
                     )
                 }
             }
-            val driver: JdbcDriver = HikariDataSource(config).asJdbcDriver()
+            val driver: SqlDriver = HikariDataSource(config).asJdbcDriver()
             DivaResult.success(driver)
         }
     }

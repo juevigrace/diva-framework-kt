@@ -1,0 +1,100 @@
+count:
+SELECT COUNT(*) FROM diva_user;
+
+insert:
+INSERT INTO diva_user (id, email, username, password_hash, alias, avatar, bio, user_verified, role)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+update:
+UPDATE diva_user
+SET email = ?, username = ?, alias = ?, avatar = ?, bio = ?, updated_at = NOW()
+WHERE id = ? AND deleted_at IS NULL;
+
+updateVerified:
+UPDATE diva_user
+SET user_verified = ?
+WHERE id = ? AND deleted_at IS NULL;
+
+updatePassword:
+UPDATE diva_user
+SET password_hash = ?
+WHERE id = ? AND deleted_at IS NULL;
+
+updateEmail:
+UPDATE diva_user
+SET email = ?
+WHERE id = ? AND deleted_at IS NULL;
+
+delete:
+UPDATE diva_user
+SET deleted_at = NOW()
+WHERE id = ? AND deleted_at IS NULL;
+
+findAll:
+SELECT
+  u.id,
+  u.email,
+  u.username,
+  u.password_hash AS passwordHash,
+  u.alias,
+  u.avatar,
+  u.bio,
+  u.user_verified AS userVerified,
+  u.role,
+  u.created_at AS createdAt,
+  u.updated_at AS updatedAt,
+  u.deleted_at AS deletedAt
+FROM diva_user u
+WHERE u.deleted_at IS NULL
+LIMIT ? OFFSET ?;
+
+findOneById:
+SELECT
+  u.id,
+  u.email,
+  u.username,
+  u.password_hash AS passwordHash,
+  u.alias,
+  u.avatar,
+  u.bio,
+  u.user_verified AS userVerified,
+  u.role,
+  u.created_at AS createdAt,
+  u.updated_at AS updatedAt,
+  u.deleted_at AS deletedAt
+FROM diva_user u
+WHERE u.id = ?;
+
+findOneByEmail:
+SELECT
+  id,
+  email,
+  username,
+  password_hash AS passwordHash,
+  alias,
+  avatar,
+  bio,
+  user_verified AS userVerified,
+  role,
+  created_at AS createdAt,
+  updated_at AS updatedAt,
+  deleted_at AS deletedAt
+FROM diva_user
+WHERE email = ? ;
+
+findOneByUsername:
+SELECT
+  id,
+  email,
+  username,
+  password_hash AS passwordHash,
+  alias,
+  avatar,
+  bio,
+  user_verified AS userVerified,
+  role,
+  created_at AS createdAt,
+  updated_at AS updatedAt,
+  deleted_at AS deletedAt
+FROM diva_user
+WHERE username = ? ;

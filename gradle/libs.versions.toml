@@ -1,5 +1,5 @@
 [versions]
-diva-version = "0.0.6"
+diva-version = "0.0.7"
 agp = "9.0.0"
 android-compileSdk = "36"
 android-minSdk = "24"
@@ -12,13 +12,17 @@ compose-multiplatform = "1.10.0"
 kotlin = "2.3.0"
 kotlinx-coroutines = "1.10.2"
 kotlinx-datetime = "0.7.1"
-kotlinx-serialization = "1.9.0"
+kotlinx-serialization = "1.10.0"
 koin = "4.1.1"
-ktor = "3.3.3"
-logback = "1.5.25"
+ktor = "3.4.0"
+logback = "1.5.26"
 maven-publish = "0.36.0"
 nav3 = "1.0.0-alpha06"
 sqldelight = "2.2.1"
+sqlite = "3.45.3.0"
+postgresql = "42.7.9"
+mysql = "9.5.0"
+h2 = "2.4.240"
 hikari = "7.0.2"
 
 [plugins]
@@ -26,6 +30,7 @@ android-kmp-library = { id = "com.android.kotlin.multiplatform.library", version
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 
@@ -33,6 +38,8 @@ sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 ######### [TEST DEPENDENCIES] #########
 
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
+koin-test = { group = "io.insert-koin", name = "koin-test", version.ref = "koin" }
 
 ######### [ANDROIDX DEPENDENCIES] #########
 
@@ -50,7 +57,6 @@ maven-publish = { module = "com.vanniktech:gradle-maven-publish-plugin", version
 
 koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
 koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
-koin-test = { group = "io.insert-koin", name = "koin-test", version.ref = "koin" }
 
 ######### [KOTLIN/KOTLINX DEPENDENCIES] #########
 
@@ -85,6 +91,7 @@ sqldelight-sqlite-driver = { group = "app.cash.sqldelight", name = "sqlite-drive
 sqldelight-jdbc-driver = { group = "app.cash.sqldelight", name = "jdbc-driver", version.ref = "sqldelight" }
 sqldelight-r2dbc-driver = { group = "app.cash.sqldelight", name = "r2dbc-driver", version.ref = "sqldelight" }
 sqldelight-web-worker-driver = { group = "app.cash.sqldelight", name = "web-worker-driver", version.ref = "sqldelight" }
+sqldelight-postgres-dialect = { group = "app.cash.sqldelight", name = "postgresql-dialect", version.ref = "sqldelight" }
 
 ######### [COMPOSE DEPENDENCIES] #########
 
@@ -116,3 +123,5 @@ lifecycle-viewmodel-savedstate = { group = "org.jetbrains.androidx.lifecycle", n
 
 logback-classic = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
 hikaricp = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikari" }
+sqlite = { group = "org.xerial", name = "sqlite-jdbc", version.ref = "sqlite" }
+postgresql = { group = "org.postgresql", name = "postgresql", version.ref = "postgresql" }

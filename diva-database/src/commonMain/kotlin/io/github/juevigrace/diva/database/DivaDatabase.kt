@@ -29,6 +29,10 @@ interface DivaDatabase<S : TransacterBase> {
         block: suspend S.() -> DivaResult<T, DivaError.DatabaseError>
     ): DivaResult<T, DivaError.DatabaseError>
 
+    suspend fun<T : Any> withDriver(
+        block: suspend SqlDriver.() -> DivaResult<T, DivaError.DatabaseError>
+    ): DivaResult<T, DivaError.DatabaseError>
+
     suspend fun checkHealth(): DivaResult<Boolean, DivaError.DatabaseError>
 
     suspend fun close(): DivaResult<Unit, DivaError.DatabaseError>
