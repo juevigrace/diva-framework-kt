@@ -40,6 +40,10 @@ fun <T> Option<T>.isPresent(): Boolean {
 
 fun <T> Option<T>.isEmpty(): Boolean = !isPresent()
 
+fun <T> Option<T>.ifPresent(action: (T) -> Unit) {
+    if (this is Option.Some) action(value)
+}
+
 inline fun <T> Option<T>.onSome(action: (T) -> Unit): Option<T> {
     if (this is Option.Some) action(value)
     return this

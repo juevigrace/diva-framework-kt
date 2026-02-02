@@ -8,5 +8,5 @@ enum class HttpRequestMethod {
     PATCH,
     HEAD,
     OPTIONS,
-    TRACE
+    UNSPECIFIED
 }

@@ -4,6 +4,7 @@ import io.github.juevigrace.diva.core.DivaResult
 import io.github.juevigrace.diva.core.Option
 import io.github.juevigrace.diva.core.database.DatabaseAction
 import io.github.juevigrace.diva.core.errors.DivaError
+import io.github.juevigrace.diva.core.errors.ErrorCause
 import kotlinx.coroutines.flow.Flow
 import migrations.Diva_user
 import java.time.OffsetDateTime
@@ -59,9 +60,9 @@ class DivaDB(
             if (rows.toInt() == -1 || rows.toInt() == 0) {
                 return@use DivaResult.failure(
                     DivaError.DatabaseError(
-                        operation = DatabaseAction.INSERT,
-                        table = "diva_user",
-                        details = "No rows affected"
+                        action = DatabaseAction.INSERT,
+                        table = Option.Some("diva_user"),
+                        cause = ErrorCause.Database.NoRowsAffected
                     )
                 )
             }
@@ -85,9 +86,9 @@ class DivaDB(
             if (rows.toInt() == 0) {
                 return@use DivaResult.failure(
                     DivaError.DatabaseError(
-                        operation = DatabaseAction.UPDATE,
-                        table = "diva_user",
-                        details = "No rows affected"
+                        action = DatabaseAction.UPDATE,
+                        table = Option.Some("diva_user"),
+                        cause = ErrorCause.Database.NoRowsAffected
                     )
                 )
             }
@@ -104,9 +105,9 @@ class DivaDB(
             if (rows.toInt() == 0) {
                 return@use DivaResult.failure(
                     DivaError.DatabaseError(
-                        operation = DatabaseAction.DELETE,
-                        table = "diva_user",
-                        details = "No rows affected"
+                        action = DatabaseAction.DELETE,
+                        table = Option.Some("diva_user"),
+                        cause = ErrorCause.Database.NoRowsAffected
                     )
                 )
             }

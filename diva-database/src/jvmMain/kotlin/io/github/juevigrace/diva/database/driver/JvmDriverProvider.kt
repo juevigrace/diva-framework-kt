@@ -8,7 +8,7 @@ import com.zaxxer.hikari.HikariDataSource
 import io.github.juevigrace.diva.core.DivaResult
 import io.github.juevigrace.diva.core.database.DatabaseAction
 import io.github.juevigrace.diva.core.errors.DivaError
-import io.github.juevigrace.diva.core.errors.asDatabaseError
+import io.github.juevigrace.diva.core.errors.toDatabaseError
 import io.github.juevigrace.diva.core.errors.toDivaError
 import io.github.juevigrace.diva.core.map
 import io.github.juevigrace.diva.core.tryResult
@@ -22,7 +22,7 @@ internal class JvmDriverProvider(
     override fun createDriver(schema: Schema): DivaResult<SqlDriver, DivaError.DatabaseError> {
         return tryResult(
             onError = { e ->
-                e.toDivaError("DriverProvider.createDriver").asDatabaseError(DatabaseAction.START)
+                e.toDivaError().toDatabaseError(DatabaseAction.D_DRIVER)
             }
         ) {
             createDriverFromDataSource().map { driver ->
@@ -40,7 +40,7 @@ internal class JvmDriverProvider(
     private fun createDriverFromDataSource(): DivaResult<SqlDriver, DivaError.DatabaseError> {
         return tryResult(
             onError = { e ->
-                e.toDivaError("DriverProvider.createDriverFromDataSource").asDatabaseError(DatabaseAction.CONFIGURE)
+                e.toDivaError().toDatabaseError(DatabaseAction.CONFIGURE)
             }
         ) {
             val config: HikariConfig = when (conf.driverConf) {

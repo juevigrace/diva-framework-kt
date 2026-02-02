@@ -1,74 +1,36 @@
 package io.github.juevigrace.diva.core.errors
 
+import io.github.juevigrace.diva.core.Option
 import io.github.juevigrace.diva.core.database.DatabaseAction
 import io.github.juevigrace.diva.core.network.HttpRequestMethod
 import io.github.juevigrace.diva.core.network.HttpStatusCodes
 
-fun Exception.toDivaError(origin: String? = null): DivaError {
-    return if (this is DivaErrorException) {
-        this.divaError
-    } else {
-        DivaError.exception(
-            e = this,
-            origin = origin,
-        )
-    }
+fun Exception.toDivaError(): DivaError {
+    return DivaError.Error(cause = ErrorCause.Ex(this))
 }
 
-// TODO: these casts are incomplete
+fun DivaError.toDatabaseError(
+    action: DatabaseAction,
+    table: Option<String> = Option.None
+): DivaError.DatabaseError {
+    return this as? DivaError.DatabaseError
+        ?: DivaError.DatabaseError(
+            action = action,
+            table = table,
+            cause = cause
+        )
+}
 
-fun DivaError.asNetworkError(
+fun DivaError.toNetworkError(
     method: HttpRequestMethod,
     url: String,
-    statusCode: HttpStatusCodes = HttpStatusCodes.InternalServerError
+    status: HttpStatusCodes = HttpStatusCodes.InternalServerError
 ): DivaError.NetworkError {
-    return this as? DivaError.NetworkError ?: DivaError.NetworkError(
-        method = method,
-        url = url,
-        statusCode = statusCode,
-        details = message,
-        cause = cause,
-    )
-}
-
-fun DivaError.asDatabaseError(
-    operation: DatabaseAction,
-    table: String? = null,
-): DivaError.DatabaseError {
-    return this as? DivaError.DatabaseError ?: DivaError.DatabaseError(
-        operation = operation,
-        table = table,
-        details = message,
-        cause = cause,
-    )
-}
-
-fun DivaError.asValidationError(
-    field: String,
-    constraint: String,
-): DivaError.ValidationError {
-    return this as? DivaError.ValidationError ?: DivaError.ValidationError(
-        field = field,
-        constraint = constraint,
-        details = message,
-    )
-}
-
-fun DivaError.asConfigurationError(
-    key: String,
-): DivaError.ConfigurationError {
-    return this as? DivaError.ConfigurationError ?: DivaError.ConfigurationError(
-        key = key,
-        details = message,
-    )
-}
-
-fun DivaError.asExceptionError(
-    origin: String,
-): DivaError.ExceptionError {
-    return this as? DivaError.ExceptionError ?: DivaError.ExceptionError(
-        message = message,
-        cause = cause,
-        origin = origin,
-    )
+    return this as? DivaError.NetworkError
+        ?: DivaError.NetworkError(
+            method = method,
+            url = url,
+            status = status,
+            cause = cause
+        )
 }

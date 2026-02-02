@@ -6,7 +6,7 @@ import app.cash.sqldelight.driver.worker.WebWorkerDriver
 import io.github.juevigrace.diva.core.DivaResult
 import io.github.juevigrace.diva.core.database.DatabaseAction
 import io.github.juevigrace.diva.core.errors.DivaError
-import io.github.juevigrace.diva.core.errors.asDatabaseError
+import io.github.juevigrace.diva.core.errors.toDatabaseError
 import io.github.juevigrace.diva.core.errors.toDivaError
 import io.github.juevigrace.diva.core.tryResult
 import kotlinx.coroutines.CoroutineScope
@@ -24,7 +24,7 @@ internal class JsDriverProvider : DriverProvider {
     override fun createDriver(schema: Schema): DivaResult<SqlDriver, DivaError.DatabaseError> {
         return tryResult(
             onError = { e ->
-                e.toDivaError("DriverProvider.createDriver").asDatabaseError(DatabaseAction.START, table = "database")
+                e.toDivaError().toDatabaseError(DatabaseAction.D_DRIVER)
             }
         ) {
             val driver: WebWorkerDriver = WebWorkerDriver(worker).also { d ->

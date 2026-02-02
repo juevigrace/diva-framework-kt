@@ -1,9 +1,13 @@
 package io.github.juevigrace.diva.network.client
 
 import io.github.juevigrace.diva.core.DivaResult
+import io.github.juevigrace.diva.core.Option
 import io.github.juevigrace.diva.core.errors.DivaError
-import io.github.juevigrace.diva.core.errors.DivaErrorException
+import io.github.juevigrace.diva.core.errors.ErrorCause
 import io.github.juevigrace.diva.core.errors.toDivaError
+import io.github.juevigrace.diva.core.errors.toNetworkError
+import io.github.juevigrace.diva.core.map
+import io.github.juevigrace.diva.core.mapError
 import io.github.juevigrace.diva.core.network.HttpStatusCodes
 import io.github.juevigrace.diva.core.tryResult
 import io.github.juevigrace.diva.network.client.config.DivaClientConfig
@@ -49,23 +53,29 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
     ): DivaResult<HttpResponse, DivaError.NetworkError> {
         return tryResult(
             onError = { e ->
-                DivaError.NetworkError(
+                e.toDivaError().toNetworkError(
                     method = method.toHttpRequestMethod(),
                     url = path,
-                    statusCode = HttpStatusCodes.InternalServerError,
-                    details = e.toDivaError("DivaClient.call").message,
-                    cause = e,
                 )
             },
         ) {
-            val url: Url = parseFromPath(path)
-            val request: HttpResponse = createRequest(
-                method = method,
-                url = url,
-                headers = headers,
-                contentType = contentType,
-            )
-            DivaResult.success(request)
+            parseFromPath(path)
+                .mapError { err ->
+                    err.toNetworkError(
+                        method = method.toHttpRequestMethod(),
+                        url = path,
+                        status = HttpStatusCodes.BadRequest,
+                    )
+                }
+                .map { url ->
+                    val request: HttpResponse = createRequest(
+                        method = method,
+                        url = url,
+                        headers = headers,
+                        contentType = contentType,
+                    )
+                    request
+                }
         }
     }
 
@@ -79,45 +89,55 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
     ): DivaResult<HttpResponse, DivaError.NetworkError> {
         return tryResult(
             onError = { e ->
-                DivaError.NetworkError(
+                e.toDivaError().toNetworkError(
                     method = method.toHttpRequestMethod(),
                     url = path,
-                    statusCode = HttpStatusCodes.InternalServerError,
-                    details = e.toDivaError("DivaClient.call").message,
-                    cause = e,
                 )
             },
         ) {
-            val url: Url = parseFromPath(path)
-            val request: HttpResponse = createRequest(
-                method = method,
-                url = url,
-                headers = headers,
-                contentType = contentType,
-                bodyLambda = {
-                    setBody(Json.encodeToString(serializer, body))
+            parseFromPath(path)
+                .mapError { err ->
+                    err.toNetworkError(
+                        method = method.toHttpRequestMethod(),
+                        url = path,
+                        status = HttpStatusCodes.BadRequest,
+                    )
                 }
-            )
-            DivaResult.success(request)
+                .map { url ->
+                    val request: HttpResponse = createRequest(
+                        method = method,
+                        url = url,
+                        headers = headers,
+                        contentType = contentType,
+                        bodyLambda = {
+                            setBody(Json.encodeToString(serializer, body))
+                        }
+                    )
+                    request
+                }
         }
     }
 
-    @Throws(DivaErrorException::class)
-    protected fun parseFromPath(path: String): Url {
-        val url: Url = if (path.startsWith("/")) {
-            buildUrl {
-                takeFrom(config.baseUrl)
-                path(path)
+    protected fun parseFromPath(path: String): DivaResult<Url, DivaError> {
+        return tryResult(onError = { e -> e.toDivaError() }) {
+            val url: Url = if (path.startsWith("/")) {
+                buildUrl {
+                    takeFrom(config.baseUrl)
+                    path(path)
+                }
+            } else {
+                parseUrl(path)
+                    ?: return DivaResult.failure(
+                        DivaError.Error(
+                            ErrorCause.Validation.Format(
+                                Option.Some("path"),
+                                path
+                            )
+                        )
+                    )
             }
-        } else {
-            parseUrl(path) ?: throw DivaErrorException(
-                DivaError.ValidationError(
-                    "path",
-                    "Path is not valid a url (Path: $path)"
-                )
-            )
+            DivaResult.success(url)
         }
-        return url
     }
 
     private suspend fun createRequest(

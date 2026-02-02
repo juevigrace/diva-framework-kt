@@ -1,7 +1,6 @@
 package io.github.juevigrace.diva.core.database
 
 enum class DatabaseAction {
-    START,
     CONFIGURE,
     USE,
     CLOSE,
@@ -14,4 +13,8 @@ enum class DatabaseAction {
     DROP,
     TRUNCATE,
     PRAGMA,
+    D_USE,
+    D_GET_ONE,
+    D_GET_LIST,
+    D_DRIVER,
 }
