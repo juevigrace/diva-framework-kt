@@ -5,7 +5,6 @@ import io.github.juevigrace.diva.core.Option
 import io.github.juevigrace.diva.core.errors.DivaError
 import io.github.juevigrace.diva.core.errors.ErrorCause
 import io.github.juevigrace.diva.core.errors.toDivaError
-import io.github.juevigrace.diva.core.errors.toNetworkError
 import io.github.juevigrace.diva.core.map
 import io.github.juevigrace.diva.core.mapError
 import io.github.juevigrace.diva.core.network.HttpStatusCodes
@@ -50,21 +49,28 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
         path: String,
         headers: Map<String, String>,
         contentType: ContentType,
-    ): DivaResult<HttpResponse, DivaError.NetworkError> {
+    ): DivaResult<HttpResponse, DivaError> {
         return tryResult(
             onError = { e ->
-                e.toDivaError().toNetworkError(
-                    method = method.toHttpRequestMethod(),
-                    url = path,
+                e.toDivaError(
+                    ErrorCause.Ex(
+                        ex = e,
+                        details = Option.Some(
+                            "call method ${method.toHttpRequestMethod().name}, path $path"
+                        )
+                    )
                 )
             },
         ) {
             parseFromPath(path)
                 .mapError { err ->
-                    err.toNetworkError(
-                        method = method.toHttpRequestMethod(),
-                        url = path,
-                        status = HttpStatusCodes.BadRequest,
+                    err.copy(
+                        cause = ErrorCause.Network(
+                            method = method.toHttpRequestMethod(),
+                            url = path,
+                            status = HttpStatusCodes.BadRequest,
+                            details = Option.Some(err.message)
+                        )
                     )
                 }
                 .map { url ->
@@ -86,21 +92,28 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
         headers: Map<String, String>,
         contentType: ContentType,
         serializer: KSerializer<T>,
-    ): DivaResult<HttpResponse, DivaError.NetworkError> {
+    ): DivaResult<HttpResponse, DivaError> {
         return tryResult(
             onError = { e ->
-                e.toDivaError().toNetworkError(
-                    method = method.toHttpRequestMethod(),
-                    url = path,
+                e.toDivaError(
+                    ErrorCause.Ex(
+                        ex = e,
+                        details = Option.Some(
+                            "call method ${method.toHttpRequestMethod().name}, path $path"
+                        )
+                    )
                 )
             },
         ) {
             parseFromPath(path)
                 .mapError { err ->
-                    err.toNetworkError(
-                        method = method.toHttpRequestMethod(),
-                        url = path,
-                        status = HttpStatusCodes.BadRequest,
+                    err.copy(
+                        cause = ErrorCause.Network(
+                            method = method.toHttpRequestMethod(),
+                            url = path,
+                            status = HttpStatusCodes.BadRequest,
+                            details = Option.Some(err.message)
+                        )
                     )
                 }
                 .map { url ->
@@ -128,12 +141,7 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
             } else {
                 parseUrl(path)
                     ?: return DivaResult.failure(
-                        DivaError.Error(
-                            ErrorCause.Validation.Format(
-                                Option.Some("path"),
-                                path
-                            )
-                        )
+                        DivaError(ErrorCause.Validation.Parse(field = "path"))
                     )
             }
             DivaResult.success(url)

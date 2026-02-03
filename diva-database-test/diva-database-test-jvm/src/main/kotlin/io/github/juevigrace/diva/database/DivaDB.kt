@@ -16,33 +16,33 @@ import kotlin.uuid.toJavaUuid
 class DivaDB(
     private val db: DivaDatabase<DB>
 ) : Storage<Diva_user> {
-    override suspend fun count(): DivaResult<Long, DivaError.DatabaseError> {
+    override suspend fun count(): DivaResult<Long, DivaError> {
         return db.use {
             val value: Long = userQueries.count().executeAsOne()
             DivaResult.success(value)
         }
     }
 
-    override suspend fun getAll(limit: Int, offset: Int): DivaResult<List<Diva_user>, DivaError.DatabaseError> {
+    override suspend fun getAll(limit: Int, offset: Int): DivaResult<List<Diva_user>, DivaError> {
         return db.getList { userQueries.findAll(limit.toLong(), offset.toLong(), mapper = ::mapToEntity) }
     }
 
-    override fun getAllFlow(limit: Int, offset: Int): Flow<DivaResult<List<Diva_user>, DivaError.DatabaseError>> {
+    override fun getAllFlow(limit: Int, offset: Int): Flow<DivaResult<List<Diva_user>, DivaError>> {
         return db.getListAsFlow { userQueries.findAll(limit.toLong(), offset.toLong(), mapper = ::mapToEntity) }
     }
 
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun getById(id: Uuid): DivaResult<Option<Diva_user>, DivaError.DatabaseError> {
+    override suspend fun getById(id: Uuid): DivaResult<Option<Diva_user>, DivaError> {
         return db.getOne { userQueries.findOneById(id.toJavaUuid(), mapper = ::mapToEntity) }
     }
 
     @OptIn(ExperimentalUuidApi::class)
-    override fun getByIdFlow(id: Uuid): Flow<DivaResult<Option<Diva_user>, DivaError.DatabaseError>> {
+    override fun getByIdFlow(id: Uuid): Flow<DivaResult<Option<Diva_user>, DivaError>> {
         return db.getOneAsFlow { userQueries.findOneById(id.toJavaUuid(), mapper = ::mapToEntity) }
     }
 
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun insert(item: Diva_user): DivaResult<Unit, DivaError.DatabaseError> {
+    override suspend fun insert(item: Diva_user): DivaResult<Unit, DivaError> {
         return db.use {
             val rows: Long = transactionWithResult {
                 userQueries.insert(
@@ -59,10 +59,12 @@ class DivaDB(
             }
             if (rows.toInt() == -1 || rows.toInt() == 0) {
                 return@use DivaResult.failure(
-                    DivaError.DatabaseError(
-                        action = DatabaseAction.INSERT,
-                        table = Option.Some("diva_user"),
-                        cause = ErrorCause.Database.NoRowsAffected
+                    DivaError(
+                        ErrorCause.Database.NoRowsAffected(
+                            action = DatabaseAction.INSERT,
+                            table = Option.Some("diva_user"),
+                        )
+
                     )
                 )
             }
@@ -71,7 +73,7 @@ class DivaDB(
     }
 
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun update(item: Diva_user): DivaResult<Unit, DivaError.DatabaseError> {
+    override suspend fun update(item: Diva_user): DivaResult<Unit, DivaError> {
         return db.use {
             val rows: Long = transactionWithResult {
                 userQueries.update(
@@ -85,10 +87,11 @@ class DivaDB(
             }
             if (rows.toInt() == 0) {
                 return@use DivaResult.failure(
-                    DivaError.DatabaseError(
-                        action = DatabaseAction.UPDATE,
-                        table = Option.Some("diva_user"),
-                        cause = ErrorCause.Database.NoRowsAffected
+                    DivaError(
+                        ErrorCause.Database.NoRowsAffected(
+                            action = DatabaseAction.UPDATE,
+                            table = Option.Some("diva_user"),
+                        )
                     )
                 )
             }
@@ -97,17 +100,18 @@ class DivaDB(
     }
 
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun delete(id: Uuid): DivaResult<Unit, DivaError.DatabaseError> {
+    override suspend fun delete(id: Uuid): DivaResult<Unit, DivaError> {
         return db.use {
             val rows: Long = transactionWithResult {
                 userQueries.delete(id.toJavaUuid()).value
             }
             if (rows.toInt() == 0) {
                 return@use DivaResult.failure(
-                    DivaError.DatabaseError(
-                        action = DatabaseAction.DELETE,
-                        table = Option.Some("diva_user"),
-                        cause = ErrorCause.Database.NoRowsAffected
+                    DivaError(
+                        cause = ErrorCause.Database.NoRowsAffected(
+                            action = DatabaseAction.DELETE,
+                            table = Option.Some("diva_user"),
+                        )
                     )
                 )
             }

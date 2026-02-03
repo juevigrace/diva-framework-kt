@@ -21,9 +21,9 @@ internal class DivaDatabaseImpl<S : TransacterBase>(
     private val db: S,
 ) : DivaDatabase<S> {
     override suspend fun <T : Any> getOne(
-        onError: (Exception) -> DivaError.DatabaseError,
+        onError: (Exception) -> DivaError,
         block: S.() -> Query<T>
-    ): DivaResult<Option<T>, DivaError.DatabaseError> {
+    ): DivaResult<Option<T>, DivaError> {
         return tryResult(
             onError = onError
         ) {
@@ -34,9 +34,9 @@ internal class DivaDatabaseImpl<S : TransacterBase>(
 
     override fun <T : Any> getOneAsFlow(
         ctx: CoroutineContext,
-        onError: (Exception) -> DivaError.DatabaseError,
+        onError: (Exception) -> DivaError,
         block: S.() -> Query<T>
-    ): Flow<DivaResult<Option<T>, DivaError.DatabaseError>> {
+    ): Flow<DivaResult<Option<T>, DivaError>> {
         return flow {
             block(db).asFlow().mapToOneOrNull(ctx).catch { e ->
                 emit(DivaResult.failure(onError(Exception(e))))
@@ -47,9 +47,9 @@ internal class DivaDatabaseImpl<S : TransacterBase>(
     }
 
     override suspend fun <T : Any> getList(
-        onError: (Exception) -> DivaError.DatabaseError,
+        onError: (Exception) -> DivaError,
         block: S.() -> Query<T>
-    ): DivaResult<List<T>, DivaError.DatabaseError> {
+    ): DivaResult<List<T>, DivaError> {
         return tryResult(
             onError = onError
         ) {
@@ -60,9 +60,9 @@ internal class DivaDatabaseImpl<S : TransacterBase>(
 
     override fun <T : Any> getListAsFlow(
         ctx: CoroutineContext,
-        onError: (Exception) -> DivaError.DatabaseError,
+        onError: (Exception) -> DivaError,
         block: S.() -> Query<T>
-    ): Flow<DivaResult<List<T>, DivaError.DatabaseError>> {
+    ): Flow<DivaResult<List<T>, DivaError>> {
         return flow {
             block(db).asFlow().mapToList(ctx).catch { e ->
                 emit(DivaResult.failure(onError(Exception(e))))
@@ -73,9 +73,9 @@ internal class DivaDatabaseImpl<S : TransacterBase>(
     }
 
     override suspend fun <T : Any> use(
-        onError: (Exception) -> DivaError.DatabaseError,
-        block: suspend S.() -> DivaResult<T, DivaError.DatabaseError>
-    ): DivaResult<T, DivaError.DatabaseError> {
+        onError: (Exception) -> DivaError,
+        block: suspend S.() -> DivaResult<T, DivaError>
+    ): DivaResult<T, DivaError> {
         return tryResult(
             onError = onError
         ) {
@@ -84,9 +84,9 @@ internal class DivaDatabaseImpl<S : TransacterBase>(
     }
 
     override suspend fun <T : Any> withDriver(
-        onError: (Exception) -> DivaError.DatabaseError,
-        block: suspend SqlDriver.() -> DivaResult<T, DivaError.DatabaseError>
-    ): DivaResult<T, DivaError.DatabaseError> {
+        onError: (Exception) -> DivaError,
+        block: suspend SqlDriver.() -> DivaResult<T, DivaError>
+    ): DivaResult<T, DivaError> {
         return tryResult(
             onError = onError
         ) {
@@ -95,8 +95,8 @@ internal class DivaDatabaseImpl<S : TransacterBase>(
     }
 
     override suspend fun checkHealth(
-        onError: (Exception) -> DivaError.DatabaseError
-    ): DivaResult<Boolean, DivaError.DatabaseError> {
+        onError: (Exception) -> DivaError
+    ): DivaResult<Boolean, DivaError> {
         return tryResult(
             onError = onError
         ) {
@@ -106,8 +106,8 @@ internal class DivaDatabaseImpl<S : TransacterBase>(
     }
 
     override suspend fun close(
-        onError: (Exception) -> DivaError.DatabaseError
-    ): DivaResult<Unit, DivaError.DatabaseError> {
+        onError: (Exception) -> DivaError
+    ): DivaResult<Unit, DivaError> {
         return tryResult(
             onError = onError
         ) {

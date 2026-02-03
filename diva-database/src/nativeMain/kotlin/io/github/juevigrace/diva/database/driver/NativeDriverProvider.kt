@@ -6,9 +6,10 @@ import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlSchema
 import app.cash.sqldelight.driver.native.NativeSqliteDriver
 import io.github.juevigrace.diva.core.DivaResult
+import io.github.juevigrace.diva.core.Option
 import io.github.juevigrace.diva.core.database.DatabaseAction
 import io.github.juevigrace.diva.core.errors.DivaError
-import io.github.juevigrace.diva.core.errors.toDatabaseError
+import io.github.juevigrace.diva.core.errors.ErrorCause
 import io.github.juevigrace.diva.core.errors.toDivaError
 import io.github.juevigrace.diva.core.tryResult
 import io.github.juevigrace.diva.database.driver.configuration.NativeConf
@@ -16,10 +17,15 @@ import io.github.juevigrace.diva.database.driver.configuration.NativeConf
 internal class NativeDriverProvider(
     override val conf: NativeConf,
 ) : DriverProviderBase<NativeConf>(conf) {
-    override fun createDriver(schema: Schema): DivaResult<SqlDriver, DivaError.DatabaseError> {
+    override fun createDriver(schema: Schema): DivaResult<SqlDriver, DivaError> {
         return tryResult(
             onError = { e ->
-                e.toDivaError().toDatabaseError(DatabaseAction.D_DRIVER)
+                e.toDivaError(
+                    ErrorCause.Ex(
+                        ex = e,
+                        details = Option.Some("create native driver")
+                    )
+                )
             }
         ) {
             val syncSchema: SqlSchema<QueryResult.Value<Unit>> = when (schema) {

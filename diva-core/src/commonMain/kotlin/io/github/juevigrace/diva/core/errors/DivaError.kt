@@ -6,105 +6,116 @@ import io.github.juevigrace.diva.core.ifPresent
 import io.github.juevigrace.diva.core.network.HttpRequestMethod
 import io.github.juevigrace.diva.core.network.HttpStatusCodes
 
-sealed class ErrorCause(
-    open val message: String
-) {
-    sealed class Database(
-        override val message: String
-    ) : ErrorCause(message) {
-        data object NoRowsAffected : Database(
-            message = buildString {
-                append("no rows affected")
-            }
-        )
-        data class Duplicated(
-            val field: Option<String> = Option.None,
-            val value: String,
-        ) : Database(
-            message = buildString {
-                append("duplicated: $value")
-                field.ifPresent { append(" $it") }
-            }
-        )
-    }
-
-    sealed class Validation(
-        override val message: String
-    ) : ErrorCause(message) {
-        data object Required : Validation(message = "required")
-        data class RequiredField(
-            val field: String
-        ) : Validation(message = "required field: $field")
-
-        data class Length(
-            val field: Option<String> = Option.None,
-            val fieldLength: Option<Int> = Option.None,
-            val length: Int,
-        ) : Validation(
-            message = buildString {
-                append("required length ($length)")
-                field.ifPresent { append(": $it") }
-                fieldLength.ifPresent { append(" $it") }
-            }
-        )
-
-        data class Email(
-            val value: String
-        ) : Validation(message = "invalid email: $value")
-
-        data class Format(
-            val field: Option<String> = Option.None,
-            val value: String
-        ) : Validation(
-            message = buildString {
-                append("invalid format: $value")
-                field.ifPresent { append(" $it") }
-            }
-        )
-    }
+sealed interface ErrorCause {
+    override fun toString(): String
 
     data class Ex(
         val ex: Exception,
-    ) : ErrorCause(
-        message = buildString {
-            append("exception: ${ex.message}")
-            ex.cause?.let { append(" cause: ${it.message}") }
+        val details: Option<String> = Option.None,
+    ) : ErrorCause {
+        override fun toString(): String {
+            return buildString {
+                append("exception")
+                ex.message?.let { append(": $it") }
+                ex.cause?.let { append(" - cause: $it") }
+                details.ifPresent { append(" - ($it)") }
+            }
         }
-    )
-}
+    }
 
-sealed class DivaError(
-    open val cause: ErrorCause,
-    open val message: String
-) {
-    data class Error(
-        override val cause: ErrorCause,
-    ) : DivaError(cause, cause.message)
+    sealed class Database(
+        open val action: DatabaseAction,
+        open val table: Option<String> = Option.None,
+        open val details: Option<String> = Option.None,
+    ) : ErrorCause {
+        data class NoRowsAffected(
+            override val action: DatabaseAction,
+            override val table: Option<String> = Option.None,
+            override val details: Option<String> = Option.None,
+        ) : Database(
+            action = action,
+            table = table,
+            details = details
+        )
 
-    data class DatabaseError(
-        val action: DatabaseAction,
-        val table: Option<String> = Option.None,
-        override val cause: ErrorCause,
-    ) : DivaError(
-        cause = cause,
-        message = buildString {
-            append("database error: ${action.name}")
-            table.ifPresent { append(" $it") }
-            append(" - ${cause.message}")
+        data class Duplicated(
+            val field: String,
+            val value: String,
+            override val action: DatabaseAction,
+            override val table: Option<String> = Option.None,
+            override val details: Option<String> = Option.Some("$field: $value"),
+        ) : Database(
+            action = action,
+            table = table,
+            details = details
+        )
+
+        override fun toString(): String {
+            return buildString {
+                append("database error: $action")
+                table.ifPresent { append(" - table $it") }
+                details.ifPresent { append(" - ($it)") }
+            }
         }
-    )
+    }
 
-    data class NetworkError(
+    data class Network(
         val method: HttpRequestMethod,
         val url: String,
         val status: HttpStatusCodes,
-        override val cause: ErrorCause,
-    ) : DivaError(
-        cause = cause,
-        message = buildString {
-            append("network error: ")
-            append("${method.name} ${status.code} $url")
-            append(" - ${cause.message}")
+        val details: Option<String> = Option.None,
+    ) : ErrorCause {
+        override fun toString(): String {
+            return buildString {
+                append("network error: $method ${status.code} $url")
+                details.ifPresent { append(" - ($it)") }
+            }
         }
-    )
+    }
+
+    sealed class Validation(
+        val message: String
+    ) : ErrorCause {
+        data class UnexpectedValue(
+            val field: String,
+            val expectedValue: String,
+            val value: String,
+            val details: Option<String> = Option.None,
+        ) : Validation(
+            message = buildString {
+                append("expected $expectedValue for $field, got $value")
+                details.ifPresent { append(" - ($it)") }
+            }
+        )
+
+        data class MissingValue(
+            val field: String,
+            val details: Option<String> = Option.None
+        ) : Validation(
+            message = buildString {
+                append("missing value for $field")
+                details.ifPresent { append(" - ($it)") }
+            }
+        )
+
+        data class Parse(
+            val field: String,
+            val details: Option<String> = Option.None
+        ) : Validation(
+            message = buildString {
+                append("failed to parse $field")
+                details.ifPresent { append(" - ($it)") }
+            }
+        )
+
+        override fun toString(): String {
+            return "validation error: $message"
+        }
+    }
+}
+
+data class DivaError(
+    val cause: ErrorCause,
+) {
+    val message: String = cause.toString()
 }
