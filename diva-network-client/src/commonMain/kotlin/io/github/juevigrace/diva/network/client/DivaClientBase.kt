@@ -6,8 +6,6 @@ import io.github.juevigrace.diva.core.errors.DivaError
 import io.github.juevigrace.diva.core.errors.ErrorCause
 import io.github.juevigrace.diva.core.errors.toDivaError
 import io.github.juevigrace.diva.core.map
-import io.github.juevigrace.diva.core.mapError
-import io.github.juevigrace.diva.core.network.HttpStatusCodes
 import io.github.juevigrace.diva.core.tryResult
 import io.github.juevigrace.diva.network.client.config.DivaClientConfig
 import io.ktor.client.HttpClient
@@ -53,7 +51,7 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
         return tryResult(
             onError = { e ->
                 e.toDivaError(
-                    ErrorCause.Ex(
+                    ErrorCause.Error.Ex(
                         ex = e,
                         details = Option.Some(
                             "call method ${method.toHttpRequestMethod().name}, path $path"
@@ -62,26 +60,15 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
                 )
             },
         ) {
-            parseFromPath(path)
-                .mapError { err ->
-                    err.copy(
-                        cause = ErrorCause.Network(
-                            method = method.toHttpRequestMethod(),
-                            url = path,
-                            status = HttpStatusCodes.BadRequest,
-                            details = Option.Some(err.message)
-                        )
-                    )
-                }
-                .map { url ->
-                    val request: HttpResponse = createRequest(
-                        method = method,
-                        url = url,
-                        headers = headers,
-                        contentType = contentType,
-                    )
-                    request
-                }
+            parseFromPath(path).map { url ->
+                val request: HttpResponse = createRequest(
+                    method = method,
+                    url = url,
+                    headers = headers,
+                    contentType = contentType,
+                )
+                request
+            }
         }
     }
 
@@ -96,7 +83,7 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
         return tryResult(
             onError = { e ->
                 e.toDivaError(
-                    ErrorCause.Ex(
+                    ErrorCause.Error.Ex(
                         ex = e,
                         details = Option.Some(
                             "call method ${method.toHttpRequestMethod().name}, path $path"
@@ -105,29 +92,18 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
                 )
             },
         ) {
-            parseFromPath(path)
-                .mapError { err ->
-                    err.copy(
-                        cause = ErrorCause.Network(
-                            method = method.toHttpRequestMethod(),
-                            url = path,
-                            status = HttpStatusCodes.BadRequest,
-                            details = Option.Some(err.message)
-                        )
-                    )
-                }
-                .map { url ->
-                    val request: HttpResponse = createRequest(
-                        method = method,
-                        url = url,
-                        headers = headers,
-                        contentType = contentType,
-                        bodyLambda = {
-                            setBody(Json.encodeToString(serializer, body))
-                        }
-                    )
-                    request
-                }
+            parseFromPath(path).map { url ->
+                val request: HttpResponse = createRequest(
+                    method = method,
+                    url = url,
+                    headers = headers,
+                    contentType = contentType,
+                    bodyLambda = {
+                        setBody(Json.encodeToString(serializer, body))
+                    }
+                )
+                request
+            }
         }
     }
 

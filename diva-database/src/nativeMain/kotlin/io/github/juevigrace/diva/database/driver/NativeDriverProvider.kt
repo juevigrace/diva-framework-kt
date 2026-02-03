@@ -7,7 +7,6 @@ import app.cash.sqldelight.db.SqlSchema
 import app.cash.sqldelight.driver.native.NativeSqliteDriver
 import io.github.juevigrace.diva.core.DivaResult
 import io.github.juevigrace.diva.core.Option
-import io.github.juevigrace.diva.core.database.DatabaseAction
 import io.github.juevigrace.diva.core.errors.DivaError
 import io.github.juevigrace.diva.core.errors.ErrorCause
 import io.github.juevigrace.diva.core.errors.toDivaError
@@ -21,7 +20,7 @@ internal class NativeDriverProvider(
         return tryResult(
             onError = { e ->
                 e.toDivaError(
-                    ErrorCause.Ex(
+                    ErrorCause.Error.Ex(
                         ex = e,
                         details = Option.Some("create native driver")
                     )

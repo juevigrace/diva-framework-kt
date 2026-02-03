@@ -25,7 +25,7 @@ internal class JsDriverProvider : DriverProvider {
         return tryResult(
             onError = { e ->
                 e.toDivaError(
-                    ErrorCause.Ex(
+                    ErrorCause.Error.Ex(
                         ex = e,
                         details = Option.Some("create js driver")
                     )

@@ -17,7 +17,7 @@ interface DivaDatabase<S : TransacterBase> {
     suspend fun <T : Any> getOne(
         onError: (Exception) -> DivaError = { e ->
             e.toDivaError(
-                ErrorCause.Ex(
+                ErrorCause.Error.Ex(
                     ex = e,
                     details = Option.Some("db action = ${{DatabaseAction.D_GET_ONE.name}}")
                 )
@@ -30,7 +30,7 @@ interface DivaDatabase<S : TransacterBase> {
         ctx: CoroutineContext = EmptyCoroutineContext,
         onError: (Exception) -> DivaError = { e ->
             e.toDivaError(
-                ErrorCause.Ex(
+                ErrorCause.Error.Ex(
                     ex = e,
                     details = Option.Some("db action = ${DatabaseAction.D_GET_ONE.name}")
                 )
@@ -42,7 +42,7 @@ interface DivaDatabase<S : TransacterBase> {
     suspend fun <T : Any> getList(
         onError: (Exception) -> DivaError = { e ->
             e.toDivaError(
-                ErrorCause.Ex(
+                ErrorCause.Error.Ex(
                     ex = e,
                     details = Option.Some("db action = ${DatabaseAction.D_GET_LIST.name}")
                 )
@@ -55,7 +55,7 @@ interface DivaDatabase<S : TransacterBase> {
         ctx: CoroutineContext = EmptyCoroutineContext,
         onError: (Exception) -> DivaError = { e ->
             e.toDivaError(
-                ErrorCause.Ex(
+                ErrorCause.Error.Ex(
                     ex = e,
                     details = Option.Some("db action = ${DatabaseAction.D_GET_LIST.name}")
                 )
@@ -67,7 +67,7 @@ interface DivaDatabase<S : TransacterBase> {
     suspend fun<T : Any> use(
         onError: (Exception) -> DivaError = { e ->
             e.toDivaError(
-                ErrorCause.Ex(
+                ErrorCause.Error.Ex(
                     ex = e,
                     details = Option.Some("db action = ${DatabaseAction.D_USE.name}")
                 )
@@ -79,7 +79,7 @@ interface DivaDatabase<S : TransacterBase> {
     suspend fun<T : Any> withDriver(
         onError: (Exception) -> DivaError = { e ->
             e.toDivaError(
-                ErrorCause.Ex(
+                ErrorCause.Error.Ex(
                     ex = e,
                     details = Option.Some("db action = ${DatabaseAction.D_DRIVER}")
                 )
@@ -91,7 +91,7 @@ interface DivaDatabase<S : TransacterBase> {
     suspend fun checkHealth(
         onError: (Exception) -> DivaError = { e ->
             e.toDivaError(
-                ErrorCause.Ex(
+                ErrorCause.Error.Ex(
                     ex = e,
                     details = Option.Some("db action = ${DatabaseAction.D_DRIVER}")
                 )
@@ -102,7 +102,7 @@ interface DivaDatabase<S : TransacterBase> {
     suspend fun close(
         onError: (Exception) -> DivaError = { e ->
             e.toDivaError(
-                ErrorCause.Ex(
+                ErrorCause.Error.Ex(
                     ex = e,
                     details = Option.Some("db action = ${DatabaseAction.D_DRIVER}")
                 )

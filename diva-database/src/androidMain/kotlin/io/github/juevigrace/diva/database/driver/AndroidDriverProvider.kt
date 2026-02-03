@@ -21,7 +21,7 @@ internal class AndroidDriverProvider(
         return tryResult(
             onError = { e ->
                 e.toDivaError(
-                    ErrorCause.Ex(
+                    ErrorCause.Error.Ex(
                         ex = e,
                         details = Option.Some("create android driver")
                     )
