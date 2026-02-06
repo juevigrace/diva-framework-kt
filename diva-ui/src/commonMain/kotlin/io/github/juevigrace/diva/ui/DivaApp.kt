@@ -11,8 +11,6 @@ import androidx.compose.runtime.ProvidedValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavKey
-import io.github.juevigrace.diva.ui.navigation.LocalNavigator
-import io.github.juevigrace.diva.ui.navigation.Navigator
 import io.github.juevigrace.diva.ui.theme.DivaTheme
 import io.github.juevigrace.diva.ui.toast.LocalToaster
 import io.github.juevigrace.diva.ui.toast.Toaster
@@ -21,7 +19,6 @@ import io.github.juevigrace.diva.ui.toast.Toaster
 
 @Composable
 fun <T : NavKey> DivaApp(
-    startDestination: T,
     vararg providedValues: ProvidedValue<*> = emptyArray(),
     theme: @Composable (content: @Composable () -> Unit) -> Unit = { content ->
         DivaTheme(content = content)
@@ -30,7 +27,6 @@ fun <T : NavKey> DivaApp(
 ) {
     ProvidableDivaApp(
         *providedValues,
-        LocalNavigator provides Navigator.invoke(startDestination),
         theme = theme,
         content = content
     )

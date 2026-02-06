@@ -7,38 +7,39 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlin.collections.removeLast
 
-interface Navigator<T : NavKey> {
-    val startDestination: T
-    val backStack: StateFlow<List<T>>
-    val currentDestination: StateFlow<T>
+interface Navigator {
+    val startDestination:NavKey
+    val backStack: StateFlow<List<NavKey>>
+    val currentDestination: StateFlow<NavKey>
 
-    fun navigate(destination: T)
+    fun navigate(destination: NavKey)
     fun pop()
-    fun popUntil(destination: T)
+    fun popUntil(destination: NavKey)
 
     companion object {
-        operator fun<T : NavKey> invoke(startDestination: T): Navigator<T> {
+        operator fun invoke(startDestination: NavKey    ): Navigator {
             return NavigatorImpl(startDestination)
         }
     }
 }
 
-internal abstract class NavigatorBase<T : NavKey> : Navigator<T> {
+internal abstract class NavigatorBase : Navigator {
     protected val mutBackStack = MutableStateFlow(listOf(startDestination))
-    override val backStack: StateFlow<List<T>> = mutBackStack.asStateFlow()
+    override val backStack: StateFlow<List<NavKey>> = mutBackStack.asStateFlow()
 
-    protected val mutCurrentDestination: MutableStateFlow<T> = MutableStateFlow(startDestination)
-    override val currentDestination: StateFlow<T> = mutCurrentDestination.asStateFlow()
+    protected val mutCurrentDestination: MutableStateFlow<NavKey> = MutableStateFlow(startDestination)
+    override val currentDestination: StateFlow<NavKey> = mutCurrentDestination.asStateFlow()
 
-    protected fun updateBackStackFromList(list: List<T>) {
+    protected fun updateBackStackFromList(list: List<NavKey>) {
         mutBackStack.update { list }
     }
 
-    override fun navigate(destination: T) {
+    override fun navigate(destination: NavKey) {
         with(mutBackStack.value) {
             if (!contains(destination)) {
-                val mut: MutableList<T> = toMutableList()
+                val mut: MutableList<NavKey> = toMutableList()
                 mut.add(destination)
                 updateBackStackFromList(mut.toList())
                 updateCurrentDestination()
@@ -49,7 +50,7 @@ internal abstract class NavigatorBase<T : NavKey> : Navigator<T> {
     override fun pop() {
         with(mutBackStack.value) {
             if (isNotEmpty()) {
-                val mut: MutableList<T> = toMutableList()
+                val mut: MutableList<NavKey> = toMutableList()
                 mut.removeLast()
                 updateBackStackFromList(mut.toList())
                 updateCurrentDestination()
@@ -57,10 +58,10 @@ internal abstract class NavigatorBase<T : NavKey> : Navigator<T> {
         }
     }
 
-    override fun popUntil(destination: T) {
+    override fun popUntil(destination: NavKey) {
         with(mutBackStack.value) {
             if (isNotEmpty() && contains(destination)) {
-                val mut: MutableList<T> = toMutableList()
+                val mut: MutableList<NavKey> = toMutableList()
                 mut.dropLastWhile { it != destination }
                 updateBackStackFromList(mut.toList())
                 updateCurrentDestination()
@@ -77,8 +78,8 @@ internal abstract class NavigatorBase<T : NavKey> : Navigator<T> {
     }
 }
 
-internal class NavigatorImpl<T : NavKey>(
-    override val startDestination: T
-) : NavigatorBase<T>()
+internal class NavigatorImpl(
+    override val startDestination: NavKey
+) : NavigatorBase()
 
-val LocalNavigator: ProvidableCompositionLocal<Navigator<*>> = compositionLocalOf { error("Navigator not provided") }
+val LocalNavigator: ProvidableCompositionLocal<Navigator> = compositionLocalOf { error("Navigator not provided") }
