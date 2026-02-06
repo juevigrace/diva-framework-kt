@@ -44,3 +44,8 @@ kotlin {
         }
     }
 }
+
+compose.resources {
+    generateResClass = never
+    publicResClass = false
+}

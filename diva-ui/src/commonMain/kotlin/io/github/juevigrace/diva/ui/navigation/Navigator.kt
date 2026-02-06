@@ -1,15 +1,14 @@
 package io.github.juevigrace.diva.ui.navigation
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation3.runtime.NavEntry
+import androidx.compose.runtime.ProvidableCompositionLocal
+import androidx.compose.runtime.compositionLocalOf
 import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.ui.NavDisplay
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
-internal interface Navigator<T : NavKey> {
+interface Navigator<T : NavKey> {
     val startDestination: T
     val backStack: StateFlow<List<T>>
     val currentDestination: StateFlow<T>
@@ -25,49 +24,61 @@ internal interface Navigator<T : NavKey> {
     }
 }
 
-@Composable
-internal fun<T : NavKey> Navigator(
-    startScreen: T,
-    entryProvider: (T) -> NavEntry<T>,
-    modifier: Modifier = Modifier,
-    onBack: (() -> Unit)? = null
-) {
-    val navigator: Navigator<T> = Navigator(startDestination = startScreen)
-    Navigator(
-        modifier = modifier,
-        navigator = navigator,
-        onBack = { onBack?.invoke() ?: navigator.pop() },
-        entryProvider = entryProvider
-    )
+internal abstract class NavigatorBase<T : NavKey> : Navigator<T> {
+    protected val mutBackStack = MutableStateFlow(listOf(startDestination))
+    override val backStack: StateFlow<List<T>> = mutBackStack.asStateFlow()
+
+    protected val mutCurrentDestination: MutableStateFlow<T> = MutableStateFlow(startDestination)
+    override val currentDestination: StateFlow<T> = mutCurrentDestination.asStateFlow()
+
+    protected fun updateBackStackFromList(list: List<T>) {
+        mutBackStack.update { list }
+    }
+
+    override fun navigate(destination: T) {
+        with(mutBackStack.value) {
+            if (!contains(destination)) {
+                val mut: MutableList<T> = toMutableList()
+                mut.add(destination)
+                updateBackStackFromList(mut.toList())
+                updateCurrentDestination()
+            }
+        }
+    }
+
+    override fun pop() {
+        with(mutBackStack.value) {
+            if (isNotEmpty()) {
+                val mut: MutableList<T> = toMutableList()
+                mut.removeLast()
+                updateBackStackFromList(mut.toList())
+                updateCurrentDestination()
+            }
+        }
+    }
+
+    override fun popUntil(destination: T) {
+        with(mutBackStack.value) {
+            if (isNotEmpty() && contains(destination)) {
+                val mut: MutableList<T> = toMutableList()
+                mut.dropLastWhile { it != destination }
+                updateBackStackFromList(mut.toList())
+                updateCurrentDestination()
+            }
+        }
+    }
+
+    protected fun updateCurrentDestination() {
+        if (mutBackStack.value.isNotEmpty()) {
+            mutCurrentDestination.update { mutBackStack.value.last() }
+        } else {
+            mutCurrentDestination.update { startDestination }
+        }
+    }
 }
 
-@Composable
-internal fun<T : NavKey> Navigator(
-    navigator: Navigator<T>,
-    entryProvider: (T) -> NavEntry<T>,
-    modifier: Modifier = Modifier,
-    onBack: () -> Unit = { navigator.pop() }
-) {
-    val backStack: List<T> by navigator.backStack.collectAsStateWithLifecycle()
-    Navigator(
-        modifier = modifier,
-        backStack = backStack,
-        onBack = onBack,
-        entryProvider = entryProvider
-    )
-}
+internal class NavigatorImpl<T : NavKey>(
+    override val startDestination: T
+) : NavigatorBase<T>()
 
-@Composable
-internal fun <T : NavKey> Navigator(
-    backStack: List<T>,
-    onBack: () -> Unit,
-    entryProvider: (T) -> NavEntry<T>,
-    modifier: Modifier = Modifier,
-) {
-    NavDisplay(
-        modifier = modifier,
-        backStack = backStack,
-        onBack = onBack,
-        entryProvider = entryProvider
-    )
-}
+val LocalNavigator: ProvidableCompositionLocal<Navigator<*>> = compositionLocalOf { error("Navigator not provided") }
