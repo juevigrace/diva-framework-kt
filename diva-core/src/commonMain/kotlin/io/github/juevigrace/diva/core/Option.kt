@@ -44,6 +44,10 @@ fun <T> Option<T>.ifPresent(action: (T) -> Unit) {
     if (this is Option.Some) action(value)
 }
 
+fun <T> Option<T>.ifEmpty(action: () -> Unit) {
+    if (this is Option.None) action()
+}
+
 inline fun <T> Option<T>.onSome(action: (T) -> Unit): Option<T> {
     if (this is Option.Some) action(value)
     return this

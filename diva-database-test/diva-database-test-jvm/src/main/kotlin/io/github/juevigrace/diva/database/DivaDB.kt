@@ -15,34 +15,34 @@ import kotlin.uuid.toJavaUuid
 
 class DivaDB(
     private val db: DivaDatabase<DB>
-) : Storage<Diva_user> {
-    override suspend fun count(): DivaResult<Long, DivaError> {
+) {
+    suspend fun count(): DivaResult<Long, DivaError> {
         return db.use {
             val value: Long = userQueries.count().executeAsOne()
             DivaResult.success(value)
         }
     }
 
-    override suspend fun getAll(limit: Int, offset: Int): DivaResult<List<Diva_user>, DivaError> {
+    suspend fun getAll(limit: Int, offset: Int): DivaResult<List<Diva_user>, DivaError> {
         return db.getList { userQueries.findAll(limit.toLong(), offset.toLong(), mapper = ::mapToEntity) }
     }
 
-    override fun getAllFlow(limit: Int, offset: Int): Flow<DivaResult<List<Diva_user>, DivaError>> {
+    fun getAllFlow(limit: Int, offset: Int): Flow<DivaResult<List<Diva_user>, DivaError>> {
         return db.getListAsFlow { userQueries.findAll(limit.toLong(), offset.toLong(), mapper = ::mapToEntity) }
     }
 
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun getById(id: Uuid): DivaResult<Option<Diva_user>, DivaError> {
+    suspend fun getById(id: Uuid): DivaResult<Option<Diva_user>, DivaError> {
         return db.getOne { userQueries.findOneById(id.toJavaUuid(), mapper = ::mapToEntity) }
     }
 
     @OptIn(ExperimentalUuidApi::class)
-    override fun getByIdFlow(id: Uuid): Flow<DivaResult<Option<Diva_user>, DivaError>> {
+    fun getByIdFlow(id: Uuid): Flow<DivaResult<Option<Diva_user>, DivaError>> {
         return db.getOneAsFlow { userQueries.findOneById(id.toJavaUuid(), mapper = ::mapToEntity) }
     }
 
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun insert(item: Diva_user): DivaResult<Unit, DivaError> {
+    suspend fun insert(item: Diva_user): DivaResult<Unit, DivaError> {
         return db.use {
             val rows: Long = transactionWithResult {
                 userQueries.insert(
@@ -73,7 +73,7 @@ class DivaDB(
     }
 
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun update(item: Diva_user): DivaResult<Unit, DivaError> {
+    suspend fun update(item: Diva_user): DivaResult<Unit, DivaError> {
         return db.use {
             val rows: Long = transactionWithResult {
                 userQueries.update(
@@ -100,7 +100,7 @@ class DivaDB(
     }
 
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun delete(id: Uuid): DivaResult<Unit, DivaError> {
+    suspend fun delete(id: Uuid): DivaResult<Unit, DivaError> {
         return db.use {
             val rows: Long = transactionWithResult {
                 userQueries.delete(id.toJavaUuid()).value
