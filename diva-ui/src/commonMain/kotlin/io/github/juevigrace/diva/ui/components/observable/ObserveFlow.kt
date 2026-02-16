@@ -1,4 +1,4 @@
-package io.github.juevigrace.diva.ui.observable
+package io.github.juevigrace.diva.ui.components.observable
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect

@@ -1,10 +1,12 @@
-package io.github.juevigrace.diva.ui.theme
+package io.github.juevigrace.diva.ui.components.theme
 
 import android.app.Activity
 import androidx.activity.compose.LocalActivity
+import androidx.compose.runtime.Composable
 import androidx.core.view.WindowCompat
+import io.github.juevigrace.diva.ui.theme.ThemeScheme
 
-@androidx.compose.runtime.Composable
+@Composable
 actual fun ConfigureSystemUI(
     isDark: Boolean,
     themeScheme: ThemeScheme

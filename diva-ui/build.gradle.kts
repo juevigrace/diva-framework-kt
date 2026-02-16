@@ -25,18 +25,19 @@ kotlin {
             api(libs.material3)
             api(libs.material3.adaptive)
             api(libs.material3.adaptive.navigation.suite)
+            api(libs.material3.adaptive.nav3)
             api(libs.compose.runtime)
             api(libs.compose.runtime.saveable)
             api(libs.compose.ui)
             api(libs.compose.ui.util)
 
             api(libs.nav3.ui)
-            api(libs.material3.adaptive.nav3)
 
             // ViewModel and Lifecycle
             api(libs.lifecycle.runtime.compose)
             api(libs.lifecycle.viewmodel.savedstate)
             api(libs.lifecycle.viewmodel.compose)
+            api(libs.lifecycle.viewmodel.nav3)
         }
 
         jvmMain.dependencies {

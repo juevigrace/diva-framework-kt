@@ -1,8 +1,9 @@
-package io.github.juevigrace.diva.ui.theme
+package io.github.juevigrace.diva.ui.components.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import io.github.juevigrace.diva.ui.theme.DivaThemeConfig
 
 @Composable
 fun DivaTheme(
