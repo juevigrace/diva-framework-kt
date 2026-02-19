@@ -20,7 +20,7 @@ class DivaDBTest {
             JvmConf(
                 DriverConf.PostgresqlDriverConf(
                     host = "localhost",
-                    port = 5433,
+                    port = 5434,
                     username = "postgres",
                     password = "postgres",
                     database = "pg",

@@ -2,6 +2,7 @@ package io.github.juevigrace.diva.ui.components.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavEntry
@@ -9,6 +10,7 @@ import androidx.navigation3.runtime.NavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import io.github.juevigrace.diva.ui.navigation.BackStack
 import io.github.juevigrace.diva.ui.navigation.Navigator
 
 @Composable
@@ -18,8 +20,7 @@ fun <T : NavKey> Navigator(
     entryDecorators: List<NavEntryDecorator<T>> = listOf(rememberSaveableStateHolderNavEntryDecorator()),
     entryProvider: (key: T) -> NavEntry<T>,
 ) {
-    val navigator: Navigator<T> = Navigator.invoke(startDestination)
-
+    val navigator: Navigator<T> = remember { Navigator.newInstance(startDestination) }
     Navigator(
         navigator = navigator,
         modifier = modifier,
@@ -33,15 +34,14 @@ fun <T : NavKey> Navigator(
 fun<T : NavKey> Navigator(
     navigator: Navigator<T>,
     modifier: Modifier = Modifier,
-    onBack: () -> Unit = navigator::pop,
+    onBack: () -> Unit = { navigator.pop() },
     entryDecorators: List<NavEntryDecorator<T>> = listOf(rememberSaveableStateHolderNavEntryDecorator()),
     entryProvider: (key: T) -> NavEntry<T>
 ) {
-    val backStack: List<T> by navigator.backStack.collectAsStateWithLifecycle()
-
+    val backStack: BackStack<T> by navigator.backStack.collectAsStateWithLifecycle()
     NavDisplay(
         modifier = modifier,
-        backStack = backStack,
+        backStack = backStack.entries,
         onBack = onBack,
         entryDecorators = entryDecorators,
         entryProvider = entryProvider
