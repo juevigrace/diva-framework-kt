@@ -6,7 +6,7 @@ import io.ktor.client.engine.HttpClientEngineFactory
 import io.ktor.client.engine.js.JsClientEngineConfig
 
 internal class WasmJsDivaClient(
-    override val engineFactory: HttpClientEngineFactory<JsClientEngineConfig>,
-    override val config: DivaClientConfig,
-    override val httpClientConfig: HttpClientConfig<JsClientEngineConfig>.() -> Unit
+    engineFactory: HttpClientEngineFactory<JsClientEngineConfig>,
+    config: DivaClientConfig,
+    httpClientConfig: HttpClientConfig<JsClientEngineConfig>.() -> Unit = { defaultConfig(config) }
 ) : DivaClientBase<JsClientEngineConfig>(engineFactory, config, httpClientConfig)

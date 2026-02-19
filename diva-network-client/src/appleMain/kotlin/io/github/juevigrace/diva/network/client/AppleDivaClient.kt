@@ -6,7 +6,7 @@ import io.ktor.client.engine.HttpClientEngineFactory
 import io.ktor.client.engine.darwin.DarwinClientEngineConfig
 
 internal class AppleDivaClient(
-    override val engineFactory: HttpClientEngineFactory<DarwinClientEngineConfig>,
-    override val config: DivaClientConfig,
-    override val httpClientConfig: HttpClientConfig<DarwinClientEngineConfig>.() -> Unit
+    engineFactory: HttpClientEngineFactory<DarwinClientEngineConfig>,
+    config: DivaClientConfig,
+    httpClientConfig: HttpClientConfig<DarwinClientEngineConfig>.() -> Unit = { defaultConfig(config) }
 ) : DivaClientBase<DarwinClientEngineConfig>(engineFactory, config, httpClientConfig)

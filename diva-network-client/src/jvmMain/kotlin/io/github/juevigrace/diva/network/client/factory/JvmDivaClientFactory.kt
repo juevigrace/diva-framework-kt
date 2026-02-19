@@ -9,9 +9,9 @@ import io.ktor.client.engine.HttpClientEngineFactory
 import io.ktor.client.engine.okhttp.OkHttpConfig
 
 class JvmDivaClientFactory(
-    override val engineFactory: HttpClientEngineFactory<OkHttpConfig>,
-    override val config: DivaClientConfig,
-    override val httpClientConfig: HttpClientConfig<OkHttpConfig>.() -> Unit = { defaultConfig(config) }
+    engineFactory: HttpClientEngineFactory<OkHttpConfig>,
+    config: DivaClientConfig,
+    httpClientConfig: HttpClientConfig<OkHttpConfig>.() -> Unit = { defaultConfig(config) }
 ) : DivaClientFactoryBase<OkHttpConfig>(engineFactory, config, httpClientConfig) {
     override fun create(): DivaClient {
         return JvmDivaClient(engineFactory, config, httpClientConfig)

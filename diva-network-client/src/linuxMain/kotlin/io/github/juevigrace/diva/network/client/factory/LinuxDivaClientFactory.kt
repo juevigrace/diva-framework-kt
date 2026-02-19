@@ -9,9 +9,9 @@ import io.ktor.client.engine.HttpClientEngineFactory
 import io.ktor.client.engine.curl.CurlClientEngineConfig
 
 class LinuxDivaClientFactory(
-    override val engineFactory: HttpClientEngineFactory<CurlClientEngineConfig>,
-    override val config: DivaClientConfig,
-    override val httpClientConfig: HttpClientConfig<CurlClientEngineConfig>.() -> Unit = { defaultConfig(config) }
+    engineFactory: HttpClientEngineFactory<CurlClientEngineConfig>,
+    config: DivaClientConfig,
+    httpClientConfig: HttpClientConfig<CurlClientEngineConfig>.() -> Unit = { defaultConfig(config) }
 ) : DivaClientFactoryBase<CurlClientEngineConfig>(engineFactory, config, httpClientConfig) {
     override fun create(): DivaClient {
         return LinuxDivaClient(engineFactory, config, httpClientConfig)

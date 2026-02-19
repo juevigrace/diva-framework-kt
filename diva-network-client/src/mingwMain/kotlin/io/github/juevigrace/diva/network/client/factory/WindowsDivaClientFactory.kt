@@ -9,9 +9,9 @@ import io.ktor.client.engine.HttpClientEngineFactory
 import io.ktor.client.engine.winhttp.WinHttpClientEngineConfig
 
 class WindowsDivaClientFactory(
-    override val engineFactory: HttpClientEngineFactory<WinHttpClientEngineConfig>,
-    override val config: DivaClientConfig,
-    override val httpClientConfig: HttpClientConfig<WinHttpClientEngineConfig>.() -> Unit = { defaultConfig(config) }
+    engineFactory: HttpClientEngineFactory<WinHttpClientEngineConfig>,
+    config: DivaClientConfig,
+    httpClientConfig: HttpClientConfig<WinHttpClientEngineConfig>.() -> Unit = { defaultConfig(config) }
 ) : DivaClientFactoryBase<WinHttpClientEngineConfig>(engineFactory, config, httpClientConfig) {
     override fun create(): DivaClient {
         return WindowsDivaClient(engineFactory, config, httpClientConfig)

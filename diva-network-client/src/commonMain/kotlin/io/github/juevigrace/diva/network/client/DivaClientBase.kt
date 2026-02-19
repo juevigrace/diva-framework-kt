@@ -36,9 +36,9 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 
 abstract class DivaClientBase<C : HttpClientEngineConfig>(
-    protected open val engineFactory: HttpClientEngineFactory<C>,
-    protected open val config: DivaClientConfig,
-    protected open val httpClientConfig: HttpClientConfig<C>.() -> Unit
+    protected val engineFactory: HttpClientEngineFactory<C>,
+    protected val config: DivaClientConfig,
+    protected val httpClientConfig: HttpClientConfig<C>.() -> Unit = { defaultConfig(config) }
 ) : DivaClient {
     protected val client: HttpClient = HttpClient(engineFactory, httpClientConfig)
 
