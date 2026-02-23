@@ -36,6 +36,7 @@ include(
     ":diva-database",
     ":diva-di",
     ":diva-network-client",
+    ":diva-preferences",
     ":diva-ui",
 )
 
