@@ -1,5 +1,5 @@
 [versions]
-diva-version = "0.0.10"
+diva-version = "0.0.11"
 agp = "9.0.1"
 android-compileSdk = "36"
 android-minSdk = "24"

@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import org.jetbrains.compose.resources.StringResource
 
 data class ToastMessage(
-    val message: StringResource,
+    val message: String,
     val actionLabel: Option<StringResource> = Option.None,
     val withDismissAction: Boolean = true,
     val duration: SnackbarDuration = if (actionLabel is Option.None) {
@@ -17,7 +17,7 @@ data class ToastMessage(
         SnackbarDuration.Indefinite
     },
     val isError: Boolean = false,
-    val details: Option<StringResource> = Option.None,
+    val details: Option<String> = Option.None,
 )
 
 interface Toaster {

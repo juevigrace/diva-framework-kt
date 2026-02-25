@@ -16,6 +16,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import io.github.juevigrace.diva.core.getOrElse
+import io.github.juevigrace.diva.core.ifPresent
 import io.github.juevigrace.diva.core.map
 import io.github.juevigrace.diva.ui.components.observable.ObserveFlow
 import io.github.juevigrace.diva.ui.toast.Toaster
@@ -60,7 +61,10 @@ fun Toaster(
             isError = msg.isError
             scope.launch {
                 hostState.showSnackbar(
-                    message = getString(msg.message),
+                    message = buildString {
+                        append(msg.message)
+                        msg.details.ifPresent { details -> append(" - $details") }
+                    },
                     actionLabel = msg.actionLabel.map { getString(it) }.getOrElse { null },
                     withDismissAction = msg.withDismissAction,
                     duration = msg.duration
