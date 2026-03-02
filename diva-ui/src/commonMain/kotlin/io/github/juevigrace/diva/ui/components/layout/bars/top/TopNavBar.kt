@@ -1,4 +1,4 @@
-package io.github.juevigrace.diva.ui.components.layout.bars
+package io.github.juevigrace.diva.ui.components.layout.bars.top
 
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets

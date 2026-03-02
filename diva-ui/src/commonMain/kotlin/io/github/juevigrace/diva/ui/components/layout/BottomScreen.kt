@@ -3,13 +3,13 @@ package io.github.juevigrace.diva.ui.components.layout
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import io.github.juevigrace.diva.ui.components.layout.bars.bottom.BottomNavBar
 import io.github.juevigrace.diva.ui.components.toaster.Toaster
 
 @Composable
@@ -30,9 +30,9 @@ fun BottomScreen(
         modifier = modifier,
         topBar = topBar,
         bottomBar = {
-            BottomAppBar(
-                actions = bottomBarActions,
-                floatingActionButton = if (bottomFab) floatingActionButton else null
+            BottomNavBar(
+                floatingActionButton = if (bottomFab) floatingActionButton else null,
+                actions = bottomBarActions
             )
         },
         floatingActionButton = floatingActionButton,
