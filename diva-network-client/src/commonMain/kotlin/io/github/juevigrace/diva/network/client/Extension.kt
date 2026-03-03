@@ -1,5 +1,6 @@
 package io.github.juevigrace.diva.network.client
 
+import io.github.juevigrace.diva.core.errors.ErrorCause
 import io.github.juevigrace.diva.core.network.HttpRequestMethod
 import io.github.juevigrace.diva.core.network.HttpStatusCodes
 import io.ktor.http.HttpMethod
@@ -20,4 +21,32 @@ fun HttpMethod.toHttpRequestMethod(): HttpRequestMethod {
 
 fun HttpStatusCode.toHttpStatusCodes(): HttpStatusCodes {
     return HttpStatusCodes.fromInt(this.value)
+}
+
+fun ErrorCause.toHttpStatusCodes(): HttpStatusCodes {
+    return when (this) {
+        is ErrorCause.Database.Duplicated -> {
+            HttpStatusCodes.Conflict
+        }
+        is ErrorCause.Error.Ex -> {
+            HttpStatusCodes.InternalServerError
+        }
+        is ErrorCause.Error.NotImplemented -> {
+            HttpStatusCodes.NotImplemented
+        }
+        is ErrorCause.Validation.MissingValue, is ErrorCause.Database.NoRowsAffected -> {
+            HttpStatusCodes.NotFound
+        }
+        is ErrorCause.Validation.UnexpectedValue,
+        is ErrorCause.Validation.Parse,
+        is ErrorCause.Validation.Expired,
+        is ErrorCause.Validation.Used -> {
+            HttpStatusCodes.BadRequest
+        }
+        is ErrorCause.Network -> status
+    }
+}
+
+fun HttpStatusCodes.toKtorStatusCodes(): HttpStatusCode {
+    return HttpStatusCode.fromValue(code)
 }
