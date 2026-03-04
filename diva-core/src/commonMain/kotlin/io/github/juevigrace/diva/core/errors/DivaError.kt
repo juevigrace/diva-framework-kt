@@ -196,6 +196,38 @@ sealed class ErrorCause(
             }
         )
     }
+
+    sealed class Actions<A : DivaAction>(
+        open val action: A,
+        override val message: String
+    ) : ErrorCause(message) {
+        data class RequiredAction<A : DivaAction>(
+            override val action: A,
+            val details: Option<String> = Option.None
+        ) : Actions<A>(
+            action = action,
+            message = buildString {
+                append("required action: ${action.key}")
+                details.ifPresent { append(" - ($it)") }
+            }
+        )
+
+        data class UnknownAction<A : DivaAction>(
+            override val action: A,
+            val details: Option<String> = Option.None
+        ) : Actions<A>(
+            action = action,
+            message = buildString {
+                append("unknown action: ${action.key}")
+                details.ifPresent { append(" - ($it)") }
+            }
+        )
+    }
+}
+
+interface DivaAction {
+    val key: String
+    val required: Boolean
 }
 
 data class DivaError(

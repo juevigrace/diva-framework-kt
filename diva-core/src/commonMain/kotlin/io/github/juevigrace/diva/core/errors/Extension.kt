@@ -27,5 +27,6 @@ fun ErrorCause.toHttpStatusCodes(): HttpStatusCodes {
             HttpStatusCodes.BadRequest
         }
         is ErrorCause.Network -> status
+        is ErrorCause.Actions.RequiredAction<*>, is ErrorCause.Actions.UnknownAction<*> -> HttpStatusCodes.BadRequest
     }
 }
