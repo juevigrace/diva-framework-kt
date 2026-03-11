@@ -80,6 +80,7 @@ abstract class NavigatorBase<T : NavKey>(
                 return@update state
             }
             val mut: MutableList<T> = state.entries.toMutableList()
+            // TODO: CANNOT USE THIS
             mut.removeLast()
             mut.add(destination)
             state.copy(entries = mut.toList(), current = Option.of(destination))

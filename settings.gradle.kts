@@ -42,4 +42,5 @@ include(
 
 include(
     ":diva-database-test:diva-database-test-jvm",
+    ":diva-network-client-test",
 )

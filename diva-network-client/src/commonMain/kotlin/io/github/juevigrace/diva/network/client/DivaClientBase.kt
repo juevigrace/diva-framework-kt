@@ -7,7 +7,6 @@ import io.github.juevigrace.diva.core.errors.ErrorCause
 import io.github.juevigrace.diva.core.errors.toDivaError
 import io.github.juevigrace.diva.core.map
 import io.github.juevigrace.diva.core.tryResult
-import io.github.juevigrace.diva.network.client.config.DivaClientConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.call.body
@@ -30,17 +29,26 @@ import io.ktor.http.buildUrl
 import io.ktor.http.contentType
 import io.ktor.http.parseUrl
 import io.ktor.http.path
-import io.ktor.http.takeFrom
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 
 abstract class DivaClientBase<C : HttpClientEngineConfig>(
     protected val engineFactory: HttpClientEngineFactory<C>,
-    protected val config: DivaClientConfig,
-    protected val httpClientConfig: HttpClientConfig<C>.() -> Unit = { defaultConfig(config) }
+    protected val httpClientConfig: HttpClientConfig<C>.() -> Unit = { defaultConfig() }
 ) : DivaClient {
-    protected val client: HttpClient = HttpClient(engineFactory, httpClientConfig)
+    private var client: HttpClient = HttpClient(engineFactory, httpClientConfig)
+
+    override fun config(config: HttpClientConfig<*>.() -> Unit): DivaResult<Unit, DivaError> {
+        return tryResult(
+            onError = { e ->
+                e.toDivaError()
+            }
+        ) {
+            client = client.config(config)
+            DivaResult.success(Unit)
+        }
+    }
 
     override suspend fun call(
         method: HttpMethod,
@@ -111,7 +119,6 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
         return tryResult(onError = { e -> e.toDivaError() }) {
             val url: Url = if (path.startsWith("/")) {
                 buildUrl {
-                    takeFrom(config.baseUrl)
                     path(path)
                 }
             } else {
@@ -143,23 +150,23 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
     }
 }
 
-fun<T : HttpClientEngineConfig> HttpClientConfig<T>.defaultConfig(config: DivaClientConfig) {
+fun<T : HttpClientEngineConfig> HttpClientConfig<T>.defaultConfig() {
     install(Logging) {
-        logger = config.logger
-        level = config.logLevel
+        logger = DivaClient.DEFAULT_LOGGER
+        level = DivaClient.DEFAULT_LOG_LEVEL
     }
 
     install(HttpTimeout) {
-        requestTimeoutMillis = config.requestTimeout
-        connectTimeoutMillis = config.connectTimeout
-        socketTimeoutMillis = config.socketTimeout
+        requestTimeoutMillis = DivaClient.DEFAULT_REQUEST_TIMEOUT
+        connectTimeoutMillis = DivaClient.DEFAULT_CONNECT_TIMEOUT
+        socketTimeoutMillis = DivaClient.DEFAULT_SOCKET_TIMEOUT
     }
 
     install(ResponseObserver) {
         onResponse { response ->
-            println("HTTP response: $response")
-            println("HTTP body: ${response.body<Any>()}")
-            println("HTTP status: ${response.status.value}")
+            DivaClient.DEFAULT_LOGGER.log("HTTP response: $response")
+            DivaClient.DEFAULT_LOGGER.log("HTTP body: ${response.body<Any>()}")
+            DivaClient.DEFAULT_LOGGER.log("HTTP status: ${response.status.value}")
         }
     }
 
