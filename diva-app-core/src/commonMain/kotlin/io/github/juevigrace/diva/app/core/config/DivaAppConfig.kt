@@ -2,7 +2,7 @@ package io.github.juevigrace.diva.app.core.config
 
 import io.github.juevigrace.diva.core.Option
 
-interface AppConfig {
+interface DivaAppConfig {
     val debug: Boolean
         get() = true
 
