@@ -1,4 +1,4 @@
-package io.github.juevigrace.diva.app.core.config
+package io.github.juevigrace.diva.core.config
 
 import io.github.juevigrace.diva.core.Option
 

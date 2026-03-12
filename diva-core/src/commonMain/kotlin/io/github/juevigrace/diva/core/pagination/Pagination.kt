@@ -1,4 +1,4 @@
-package io.github.juevigrace.diva.app.core.pagination
+package io.github.juevigrace.diva.core.pagination
 
 data class Pagination<T>(
     val items: List<T>,

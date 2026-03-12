@@ -1,4 +1,4 @@
-package io.github.juevigrace.diva.app.core.config
+package io.github.juevigrace.diva.core.config
 
 enum class Environment {
     DEVELOPMENT,

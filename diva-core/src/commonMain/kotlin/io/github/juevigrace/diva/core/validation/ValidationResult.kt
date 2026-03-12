@@ -1,4 +1,4 @@
-package io.github.juevigrace.diva.app.core.validation
+package io.github.juevigrace.diva.core.validation
 
 interface Validator<F, T : ValidationResult> {
     fun validate(form: F): T
