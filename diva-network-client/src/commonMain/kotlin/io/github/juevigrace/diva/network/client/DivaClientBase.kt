@@ -5,7 +5,6 @@ import io.github.juevigrace.diva.core.Option
 import io.github.juevigrace.diva.core.errors.DivaError
 import io.github.juevigrace.diva.core.errors.ErrorCause
 import io.github.juevigrace.diva.core.errors.toDivaError
-import io.github.juevigrace.diva.core.map
 import io.github.juevigrace.diva.core.tryResult
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
@@ -16,7 +15,6 @@ import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.observer.ResponseObserver
-import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
 import io.ktor.client.request.request
 import io.ktor.client.request.setBody
@@ -24,10 +22,7 @@ import io.ktor.client.request.url
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
-import io.ktor.http.Url
-import io.ktor.http.buildUrl
 import io.ktor.http.contentType
-import io.ktor.http.parseUrl
 import io.ktor.http.path
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.KSerializer
@@ -68,15 +63,23 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
                 )
             },
         ) {
-            parseFromPath(path).map { url ->
-                val request: HttpResponse = createRequest(
-                    method = method,
-                    url = url,
-                    headers = headers,
-                    contentType = contentType,
-                )
-                request
+            val request = client.request {
+                this.method = method
+
+                if (path.startsWith("/")) {
+                    url {
+                        path(path)
+                    }
+                } else {
+                    url(path)
+                }
+
+                contentType(contentType)
+                headers.forEach { (key, value) ->
+                    this.header(key, value)
+                }
             }
+            DivaResult.success(request)
         }
     }
 
@@ -100,52 +103,24 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
                 )
             },
         ) {
-            parseFromPath(path).map { url ->
-                val request: HttpResponse = createRequest(
-                    method = method,
-                    url = url,
-                    headers = headers,
-                    contentType = contentType,
-                    bodyLambda = {
-                        setBody(Json.encodeToString(serializer, body))
+            val request = client.request {
+                this.method = method
+
+                if (path.startsWith("/")) {
+                    url {
+                        path(path)
                     }
-                )
-                request
-            }
-        }
-    }
-
-    protected fun parseFromPath(path: String): DivaResult<Url, DivaError> {
-        return tryResult(onError = { e -> e.toDivaError() }) {
-            val url: Url = if (path.startsWith("/")) {
-                buildUrl {
-                    path(path)
+                } else {
+                    url(path)
                 }
-            } else {
-                parseUrl(path)
-                    ?: return DivaResult.failure(
-                        DivaError(ErrorCause.Validation.Parse(field = "path"))
-                    )
-            }
-            DivaResult.success(url)
-        }
-    }
 
-    private suspend fun createRequest(
-        method: HttpMethod,
-        url: Url,
-        headers: Map<String, String>,
-        contentType: ContentType,
-        bodyLambda: HttpRequestBuilder.() -> Unit = {}
-    ): HttpResponse {
-        return client.request {
-            this.method = method
-            this.url(url)
-            contentType(contentType)
-            headers.forEach { (key, value) ->
-                this.header(key, value)
+                contentType(contentType)
+                headers.forEach { (key, value) ->
+                    this.header(key, value)
+                }
+                setBody(Json.encodeToString(serializer, body))
             }
-            bodyLambda()
+            DivaResult.success(request)
         }
     }
 }
