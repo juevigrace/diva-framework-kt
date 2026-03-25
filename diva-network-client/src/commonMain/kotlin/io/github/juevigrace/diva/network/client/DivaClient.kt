@@ -43,12 +43,19 @@ interface DivaClient {
 
 suspend inline fun DivaClient.get(
     path: String,
+    queryParams: Map<String, String> = emptyMap(),
     headers: Map<String, String> = emptyMap(),
     contentType: ContentType = ContentType.Application.Json,
 ): DivaResult<HttpResponse, DivaError> {
+    val fullPath = if (queryParams.isNotEmpty()) {
+        val params = queryParams.entries.joinToString("&") { "${it.key}=${it.value}" }
+        "$path?$params"
+    } else {
+        path
+    }
     return call(
         method = HttpMethod.Get,
-        path = path,
+        path = fullPath,
         headers = headers,
         contentType = contentType,
     )
