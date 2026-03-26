@@ -15,6 +15,11 @@ import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.observer.ResponseObserver
+import io.ktor.client.plugins.sse.ClientSSESession
+import io.ktor.client.plugins.sse.sse
+import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
+import io.ktor.client.plugins.websocket.webSocket
+import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
 import io.ktor.client.request.request
 import io.ktor.client.request.setBody
@@ -45,6 +50,48 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
         }
     }
 
+    override suspend fun sse(
+        path: String,
+        headers: Map<String, String>,
+        block: suspend ClientSSESession.() -> Unit
+    ): DivaResult<Unit, DivaError> {
+        return tryResult(
+            onError = { e -> e.toDivaError() }
+        ) {
+            client.sse(
+                request = {
+                    parseAndSetUrl(path)
+                    headers.forEach { (key, value) ->
+                        this.header(key, value)
+                    }
+                }
+            ) {
+                block()
+            }
+            DivaResult.success(Unit)
+        }
+    }
+
+    override suspend fun webSocket(
+        path: String,
+        headers: Map<String, String>,
+        block: suspend DefaultClientWebSocketSession.() -> Unit
+    ): DivaResult<Unit, DivaError> {
+        return tryResult(
+            onError = { e -> e.toDivaError() }
+        ) {
+            client.webSocket(
+                request = {
+                    url(path)
+                    headers.forEach { (key, value) -> header(key, value) }
+                }
+            ) {
+                block()
+            }
+            DivaResult.success(Unit)
+        }
+    }
+
     override suspend fun call(
         method: HttpMethod,
         path: String,
@@ -65,15 +112,7 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
         ) {
             val request = client.request {
                 this.method = method
-
-                if (path.startsWith("/")) {
-                    url {
-                        path(path)
-                    }
-                } else {
-                    url(path)
-                }
-
+                parseAndSetUrl(path)
                 contentType(contentType)
                 headers.forEach { (key, value) ->
                     this.header(key, value)
@@ -105,15 +144,7 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
         ) {
             val request = client.request {
                 this.method = method
-
-                if (path.startsWith("/")) {
-                    url {
-                        path(path)
-                    }
-                } else {
-                    url(path)
-                }
-
+                parseAndSetUrl(path)
                 contentType(contentType)
                 headers.forEach { (key, value) ->
                     this.header(key, value)
@@ -121,6 +152,16 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
                 setBody(Json.encodeToString(serializer, body))
             }
             DivaResult.success(request)
+        }
+    }
+
+    private fun HttpRequestBuilder.parseAndSetUrl(path: String) {
+        if (path.startsWith("/")) {
+            url {
+                path(path)
+            }
+        } else {
+            url(path)
         }
     }
 }

@@ -6,6 +6,8 @@ import io.ktor.client.HttpClientConfig
 import io.ktor.client.plugins.logging.DEFAULT
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
+import io.ktor.client.plugins.sse.ClientSSESession
+import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
@@ -15,6 +17,18 @@ import kotlin.time.Duration
 
 interface DivaClient {
     fun config(config: HttpClientConfig<*>.() -> Unit): DivaResult<Unit, DivaError>
+
+    suspend fun sse(
+        path: String,
+        headers: Map<String, String> = emptyMap(),
+        block: suspend ClientSSESession.() -> Unit
+    ): DivaResult<Unit, DivaError>
+
+    suspend fun webSocket(
+        path: String,
+        headers: Map<String, String> = emptyMap(),
+        block: suspend DefaultClientWebSocketSession.() -> Unit
+    ): DivaResult<Unit, DivaError>
 
     suspend fun call(
         method: HttpMethod,
@@ -39,6 +53,36 @@ interface DivaClient {
         val DEFAULT_CONNECT_TIMEOUT: Long = Duration.parse("10s").inWholeMilliseconds
         val DEFAULT_SOCKET_TIMEOUT: Long = Duration.parse("10s").inWholeMilliseconds
     }
+}
+
+suspend inline fun DivaClient.sse(
+    path: String,
+    queryParams: Map<String, String> = emptyMap(),
+    headers: Map<String, String> = emptyMap(),
+    noinline block: suspend ClientSSESession.() -> Unit
+): DivaResult<Unit, DivaError> {
+    val fullPath = if (queryParams.isNotEmpty()) {
+        val params = queryParams.entries.joinToString("&") { "${it.key}=${it.value}" }
+        "$path?$params"
+    } else {
+        path
+    }
+    return sse(path = fullPath, headers = headers, block = block)
+}
+
+suspend inline fun DivaClient.websocket(
+    path: String,
+    queryParams: Map<String, String> = emptyMap(),
+    headers: Map<String, String> = emptyMap(),
+    noinline block: suspend DefaultClientWebSocketSession.() -> Unit
+): DivaResult<Unit, DivaError> {
+    val fullPath = if (queryParams.isNotEmpty()) {
+        val params = queryParams.entries.joinToString("&") { "${it.key}=${it.value}" }
+        "$path?$params"
+    } else {
+        path
+    }
+    return webSocket(path = fullPath, headers = headers, block = block)
 }
 
 suspend inline fun DivaClient.get(
