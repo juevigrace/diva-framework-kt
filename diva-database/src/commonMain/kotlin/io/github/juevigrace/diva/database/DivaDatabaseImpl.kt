@@ -12,8 +12,7 @@ import io.github.juevigrace.diva.core.errors.DivaError
 import io.github.juevigrace.diva.core.tryResult
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlin.coroutines.CoroutineContext
 
 internal class DivaDatabaseImpl<S : TransacterBase>(
@@ -37,13 +36,14 @@ internal class DivaDatabaseImpl<S : TransacterBase>(
         onError: (Exception) -> DivaError,
         block: S.() -> Query<T>
     ): Flow<DivaResult<Option<T>, DivaError>> {
-        return flow {
-            block(db).asFlow().mapToOneOrNull(ctx).catch { e ->
-                emit(DivaResult.failure(onError(Exception(e))))
-            }.collect { entity ->
-                emit(DivaResult.success(Option.of(entity)))
+        return block(db).asFlow()
+            .mapToOneOrNull(ctx)
+            .catch { e ->
+                DivaResult.failure(onError(Exception(e)))
             }
-        }.flowOn(ctx)
+            .map { entity ->
+                DivaResult.success(Option.of(entity))
+            }
     }
 
     override suspend fun <T : Any> getList(
@@ -63,13 +63,14 @@ internal class DivaDatabaseImpl<S : TransacterBase>(
         onError: (Exception) -> DivaError,
         block: S.() -> Query<T>
     ): Flow<DivaResult<List<T>, DivaError>> {
-        return flow {
-            block(db).asFlow().mapToList(ctx).catch { e ->
-                emit(DivaResult.failure(onError(Exception(e))))
-            }.collect { list ->
-                emit(DivaResult.success(list))
+        return block(db).asFlow()
+            .mapToList(ctx)
+            .catch { e ->
+                DivaResult.failure(onError(Exception(e)))
             }
-        }.flowOn(ctx)
+            .map { list ->
+                DivaResult.success(list)
+            }
     }
 
     override suspend fun <T : Any> use(

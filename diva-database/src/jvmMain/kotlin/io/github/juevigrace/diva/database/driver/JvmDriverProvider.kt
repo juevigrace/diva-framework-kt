@@ -3,6 +3,7 @@ package io.github.juevigrace.diva.database.driver
 import app.cash.sqldelight.async.coroutines.synchronous
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.jdbc.asJdbcDriver
+import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.github.juevigrace.diva.core.DivaResult
@@ -53,38 +54,46 @@ internal class JvmDriverProvider(
                 )
             }
         ) {
-            val config: HikariConfig = when (conf.driverConf) {
+            return when (conf.driverConf) {
                 is DriverConf.SqliteDriverConf -> {
-                    createHikariConfig(
-                        url = "jdbc:sqlite:${conf.driverConf.name}",
-                        username = "",
-                        password = ""
+                    DivaResult.success(
+                        JdbcSqliteDriver(
+                            url = "jdbc:sqlite:${conf.driverConf.name}",
+                            properties = conf.driverConf.properties.toProperties()
+                        )
                     )
                 }
                 is DriverConf.MysqlDriverConf -> {
-                    createHikariConfig(
+                    val config = createHikariConfig(
                         "jdbc:mysql://${conf.driverConf.host}:${conf.driverConf.port}/${conf.driverConf.database}",
                         conf.driverConf.username,
                         conf.driverConf.password,
                     )
+                    DivaResult.success(
+                        HikariDataSource(config).asJdbcDriver()
+                    )
                 }
                 is DriverConf.PostgresqlDriverConf -> {
-                    createHikariConfig(
+                    val config = createHikariConfig(
                         "jdbc:postgresql://${conf.driverConf.host}:${conf.driverConf.port}/${conf.driverConf.database}",
                         conf.driverConf.username,
                         conf.driverConf.password,
                     )
+                    DivaResult.success(
+                        HikariDataSource(config).asJdbcDriver()
+                    )
                 }
                 is DriverConf.H2DriverConf -> {
-                    createHikariConfig(
+                    val config = createHikariConfig(
                         conf.driverConf.url,
                         conf.driverConf.username,
                         conf.driverConf.password,
                     )
+                    DivaResult.success(
+                        HikariDataSource(config).asJdbcDriver()
+                    )
                 }
             }
-            val driver: SqlDriver = HikariDataSource(config).asJdbcDriver()
-            DivaResult.success(driver)
         }
     }
 
