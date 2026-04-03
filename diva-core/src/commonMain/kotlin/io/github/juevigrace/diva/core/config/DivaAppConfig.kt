@@ -18,6 +18,18 @@ interface DivaAppConfig {
     val version: String
         get() = "0.0.1"
 
+    val versionName: String
+        get() = "$version${if (environment != Environment.PRODUCTION) {
+            "-$environment"
+        } else {
+            ""
+        }
+        }${if (debug) {
+            "-debug"
+        } else {
+            ""
+        }}"
+
     val deviceName: String
         get() = "Unknown"
 

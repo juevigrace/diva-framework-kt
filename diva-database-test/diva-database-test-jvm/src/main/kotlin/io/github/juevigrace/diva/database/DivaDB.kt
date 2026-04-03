@@ -2,7 +2,7 @@ package io.github.juevigrace.diva.database
 
 import io.github.juevigrace.diva.core.DivaResult
 import io.github.juevigrace.diva.core.Option
-import io.github.juevigrace.diva.core.database.DatabaseAction
+import io.github.juevigrace.diva.core.database.DatabaseOperation
 import io.github.juevigrace.diva.core.errors.DivaError
 import io.github.juevigrace.diva.core.errors.ErrorCause
 import kotlinx.coroutines.flow.Flow
@@ -61,7 +61,7 @@ class DivaDB(
                 return@use DivaResult.failure(
                     DivaError(
                         ErrorCause.Database.NoRowsAffected(
-                            action = DatabaseAction.INSERT,
+                            action = DatabaseOperation.INSERT,
                             table = Option.Some("diva_user"),
                         )
 
@@ -89,7 +89,7 @@ class DivaDB(
                 return@use DivaResult.failure(
                     DivaError(
                         ErrorCause.Database.NoRowsAffected(
-                            action = DatabaseAction.UPDATE,
+                            action = DatabaseOperation.UPDATE,
                             table = Option.Some("diva_user"),
                         )
                     )
@@ -109,7 +109,7 @@ class DivaDB(
                 return@use DivaResult.failure(
                     DivaError(
                         cause = ErrorCause.Database.NoRowsAffected(
-                            action = DatabaseAction.DELETE,
+                            action = DatabaseOperation.DELETE,
                             table = Option.Some("diva_user"),
                         )
                     )
