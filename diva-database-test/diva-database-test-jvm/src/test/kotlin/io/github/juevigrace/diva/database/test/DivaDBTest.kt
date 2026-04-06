@@ -1,8 +1,6 @@
 package io.github.juevigrace.diva.database.test
 
 import app.cash.sqldelight.db.SqlDriver
-import io.github.juevigrace.diva.core.DivaResult
-import io.github.juevigrace.diva.core.isSuccess
 import io.github.juevigrace.diva.database.DB
 import io.github.juevigrace.diva.database.DivaDB
 import io.github.juevigrace.diva.database.DivaDatabase
@@ -30,11 +28,11 @@ class DivaDBTest {
         ).create()
         private val db: DivaDatabase<DB> by lazy {
             val result = provider.createDriver(Schema.Sync(DB.Schema))
-            assert(result.isSuccess()) {
-                "INITIALIZATION ERROR: ${(result as DivaResult.Failure).err}"
+            assert(result.isSuccess) {
+                "INITIALIZATION ERROR: ${result.getOrNull()}"
             }
 
-            val success: SqlDriver = (result as DivaResult.Success<SqlDriver>).value
+            val success: SqlDriver = result.getOrThrow()
             DivaDatabase(success, DB(success))
         }
 
@@ -44,23 +42,23 @@ class DivaDBTest {
     @Test
     fun `test check health`() = runTest {
         val check = db.checkHealth()
-        assert(check.isSuccess()) {
-            "CHECK HEALTH ERROR: ${(check as DivaResult.Failure).err}"
+        assert(check.isSuccess) {
+            "CHECK HEALTH ERROR: ${check.getOrNull()}"
         }
     }
 
     @Test
     fun `test count users query`() = runTest {
         val count = divaDB.count()
-        assert(count.isSuccess()) {
-            "COUNT ERROR: ${(count as DivaResult.Failure).err}"
+        assert(count.isSuccess) {
+            "COUNT ERROR: ${count.getOrNull()}"
         }
-        println((count as DivaResult.Success<Long>).value)
+        println(count.getOrThrow())
     }
 
     @Test
     fun `test close`() = runTest {
         val close = db.close()
-        assert(close.isSuccess())
+        assert(close.isSuccess)
     }
 }

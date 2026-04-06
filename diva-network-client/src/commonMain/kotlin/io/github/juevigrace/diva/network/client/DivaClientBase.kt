@@ -1,10 +1,7 @@
 package io.github.juevigrace.diva.network.client
 
-import io.github.juevigrace.diva.core.DivaResult
 import io.github.juevigrace.diva.core.Option
-import io.github.juevigrace.diva.core.errors.DivaError
-import io.github.juevigrace.diva.core.errors.ErrorCause
-import io.github.juevigrace.diva.core.errors.toDivaError
+import io.github.juevigrace.diva.core.errors.ConfigureDriverException
 import io.github.juevigrace.diva.core.tryResult
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
@@ -39,14 +36,17 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
 ) : DivaClient {
     private var client: HttpClient = HttpClient(engineFactory, httpClientConfig)
 
-    override fun config(config: HttpClientConfig<*>.() -> Unit): DivaResult<Unit, DivaError> {
+    override fun config(config: HttpClientConfig<*>.() -> Unit): Result<Unit> {
         return tryResult(
             onError = { e ->
-                e.toDivaError()
+                ConfigureDriverException(
+                    details = Option.of("Failed to configure client"),
+                    cause = e
+                )
             }
         ) {
             client = client.config(config)
-            DivaResult.success(Unit)
+            Result.success(Unit)
         }
     }
 
@@ -54,9 +54,9 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
         path: String,
         headers: Map<String, String>,
         block: suspend ClientSSESession.() -> Unit
-    ): DivaResult<Unit, DivaError> {
+    ): Result<Unit> {
         return tryResult(
-            onError = { e -> e.toDivaError() }
+            onError = { e -> e.toDivaNetworkException(url = Option.of(path)) }
         ) {
             client.sse(
                 request = {
@@ -68,7 +68,7 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
             ) {
                 block()
             }
-            DivaResult.success(Unit)
+            Result.success(Unit)
         }
     }
 
@@ -76,9 +76,9 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
         path: String,
         headers: Map<String, String>,
         block: suspend DefaultClientWebSocketSession.() -> Unit
-    ): DivaResult<Unit, DivaError> {
+    ): Result<Unit> {
         return tryResult(
-            onError = { e -> e.toDivaError() }
+            onError = { e -> e.toDivaNetworkException(url = Option.of(path)) }
         ) {
             client.webSocket(
                 request = {
@@ -88,7 +88,7 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
             ) {
                 block()
             }
-            DivaResult.success(Unit)
+            Result.success(Unit)
         }
     }
 
@@ -97,17 +97,10 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
         path: String,
         headers: Map<String, String>,
         contentType: ContentType,
-    ): DivaResult<HttpResponse, DivaError> {
+    ): Result<HttpResponse> {
         return tryResult(
             onError = { e ->
-                e.toDivaError(
-                    ErrorCause.Error.Ex(
-                        ex = e,
-                        details = Option.Some(
-                            "call method ${method.toHttpRequestMethod().name}, path $path"
-                        )
-                    )
-                )
+                e.toDivaNetworkException(url = Option.of(path))
             },
         ) {
             val request = client.request {
@@ -118,7 +111,7 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
                     this.header(key, value)
                 }
             }
-            DivaResult.success(request)
+            Result.success(request)
         }
     }
 
@@ -129,17 +122,10 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
         headers: Map<String, String>,
         contentType: ContentType,
         serializer: KSerializer<T>,
-    ): DivaResult<HttpResponse, DivaError> {
+    ): Result<HttpResponse> {
         return tryResult(
             onError = { e ->
-                e.toDivaError(
-                    ErrorCause.Error.Ex(
-                        ex = e,
-                        details = Option.Some(
-                            "call method ${method.toHttpRequestMethod().name}, path $path"
-                        )
-                    )
-                )
+                e.toDivaNetworkException(url = Option.of(path))
             },
         ) {
             val request = client.request {
@@ -151,7 +137,7 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
                 }
                 setBody(Json.encodeToString(serializer, body))
             }
-            DivaResult.success(request)
+            Result.success(request)
         }
     }
 

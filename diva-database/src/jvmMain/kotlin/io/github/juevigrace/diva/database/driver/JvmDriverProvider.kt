@@ -6,11 +6,8 @@ import app.cash.sqldelight.driver.jdbc.asJdbcDriver
 import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import io.github.juevigrace.diva.core.DivaResult
 import io.github.juevigrace.diva.core.Option
-import io.github.juevigrace.diva.core.errors.DivaError
-import io.github.juevigrace.diva.core.errors.ErrorCause
-import io.github.juevigrace.diva.core.errors.toDivaError
+import io.github.juevigrace.diva.core.errors.ConfigureDriverException
 import io.github.juevigrace.diva.core.map
 import io.github.juevigrace.diva.core.tryResult
 import io.github.juevigrace.diva.database.driver.configuration.DriverConf
@@ -20,15 +17,14 @@ import kotlinx.coroutines.runBlocking
 internal class JvmDriverProvider(
     override val conf: JvmConf
 ) : DriverProviderBase<JvmConf>(conf) {
-    override fun createDriver(schema: Schema): DivaResult<SqlDriver, DivaError> {
+    override fun createDriver(schema: Schema): Result<SqlDriver> {
         return tryResult(
             onError = { e ->
-                e.toDivaError(
-                    ErrorCause.Error.Ex(
-                        ex = e,
-                        details = Option.Some("create jvm driver")
+                e as? ConfigureDriverException
+                    ?: ConfigureDriverException(
+                        details = Option.of("Failed to create driver with configuration: ${conf.driverConf}"),
+                        cause = e
                     )
-                )
             }
         ) {
             createDriverFromDataSource().map { driver ->
@@ -43,20 +39,18 @@ internal class JvmDriverProvider(
         }
     }
 
-    private fun createDriverFromDataSource(): DivaResult<SqlDriver, DivaError> {
+    private fun createDriverFromDataSource(): Result<SqlDriver> {
         return tryResult(
             onError = { e ->
-                e.toDivaError(
-                    ErrorCause.Error.Ex(
-                        ex = e,
-                        details = Option.Some("configure jvm driver")
-                    )
+                ConfigureDriverException(
+                    details = Option.of("Failed to create driver with configuration: ${conf.driverConf}"),
+                    cause = e
                 )
             }
         ) {
             return when (conf.driverConf) {
                 is DriverConf.SqliteDriverConf -> {
-                    DivaResult.success(
+                    Result.success(
                         JdbcSqliteDriver(
                             url = "jdbc:sqlite:${conf.driverConf.name}",
                             properties = conf.driverConf.properties.toProperties()
@@ -69,7 +63,7 @@ internal class JvmDriverProvider(
                         conf.driverConf.username,
                         conf.driverConf.password,
                     )
-                    DivaResult.success(
+                    Result.success(
                         HikariDataSource(config).asJdbcDriver()
                     )
                 }
@@ -79,7 +73,7 @@ internal class JvmDriverProvider(
                         conf.driverConf.username,
                         conf.driverConf.password,
                     )
-                    DivaResult.success(
+                    Result.success(
                         HikariDataSource(config).asJdbcDriver()
                     )
                 }
@@ -89,7 +83,7 @@ internal class JvmDriverProvider(
                         conf.driverConf.username,
                         conf.driverConf.password,
                     )
-                    DivaResult.success(
+                    Result.success(
                         HikariDataSource(config).asJdbcDriver()
                     )
                 }

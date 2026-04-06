@@ -3,11 +3,8 @@ package io.github.juevigrace.diva.database.driver
 import app.cash.sqldelight.async.coroutines.awaitCreate
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.worker.WebWorkerDriver
-import io.github.juevigrace.diva.core.DivaResult
 import io.github.juevigrace.diva.core.Option
-import io.github.juevigrace.diva.core.errors.DivaError
-import io.github.juevigrace.diva.core.errors.ErrorCause
-import io.github.juevigrace.diva.core.errors.toDivaError
+import io.github.juevigrace.diva.core.errors.ConfigureDriverException
 import io.github.juevigrace.diva.core.tryResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -21,14 +18,12 @@ internal class JsDriverProvider : DriverProvider {
             js("""new URL("@cashapp/sqldelight-sqljs-worker/sqljs.worker.js", import.meta.url)""")
         )
 
-    override fun createDriver(schema: Schema): DivaResult<SqlDriver, DivaError> {
+    override fun createDriver(schema: Schema): Result<SqlDriver> {
         return tryResult(
             onError = { e ->
-                e.toDivaError(
-                    ErrorCause.Error.Ex(
-                        ex = e,
-                        details = Option.Some("create js driver")
-                    )
+                ConfigureDriverException(
+                    details = Option.of("Failed to create driver"),
+                    cause = e
                 )
             }
         ) {
@@ -40,7 +35,7 @@ internal class JsDriverProvider : DriverProvider {
                     }
                 }
             }
-            DivaResult.success(driver)
+            Result.success(driver)
         }
     }
 }

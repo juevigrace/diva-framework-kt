@@ -1,8 +1,9 @@
 package io.github.juevigrace.diva.core.errors
 
 import io.github.juevigrace.diva.core.Option
+import io.github.juevigrace.diva.core.getOrElse
+import io.github.juevigrace.diva.core.ifPresent
 
-// Base
 open class DivaNetworkException(
     message: String,
     override val cause: Throwable? = null
@@ -11,28 +12,51 @@ open class DivaNetworkException(
     open val statusCode: Option<Int> = Option.None
     open val details: Option<String> = Option.None
 }
-// Connection issues
+
+class ConfigureClientException(
+    override val details: Option<String> = Option.None,
+    cause: Throwable? = null
+) : DivaNetworkException("Failed to configure client.", cause)
+
+
 class NetworkConnectionException(
-    override val url: Option<String> = Option.None,
+    override val url: Option<String>,
     override val details: Option<String> = Option.None,
     cause: Throwable? = null
-) : DivaNetworkException("Connection failed", cause)
-// Timeout
+) : DivaNetworkException(
+    buildMessage(url, "Connection failed", details),
+    cause
+)
+
 class NetworkTimeoutException(
-    override val url: Option<String> = Option.None,
+    override val url: Option<String>,
     override val details: Option<String> = Option.None,
     cause: Throwable? = null
-) : DivaNetworkException("Request timeout", cause)
-// HTTP errors (4xx, 5xx)
+) : DivaNetworkException(
+    buildMessage(url, "Request timeout", details),
+    cause
+)
+
 class HttpException(
-    override val statusCode: Int,
+    override val statusCode: Option<Int>,
     override val url: Option<String> = Option.None,
     val responseBody: Option<String> = Option.None,
     override val details: Option<String> = Option.None,
     cause: Throwable? = null
-) : DivaNetworkException("HTTP $statusCode", cause)
-// SSL/TLS errors
+) : DivaNetworkException(
+    buildMessage(url, "HTTP ${statusCode.getOrElse { "unknown" }}", details),
+    cause
+)
+
 class SslException(
     override val details: Option<String>,
     cause: Throwable? = null
-) : DivaNetworkException("SSL error", cause)
+) : DivaNetworkException("SSL error: ${details.getOrElse { "unknown" }}", cause)
+
+private fun buildMessage(url: Option<String>, prefix: String, details: Option<String>): String {
+    return buildString {
+        append(prefix)
+        url.ifPresent { append(" for URL: $it") }
+        details.ifPresent { append(" - $it") }
+    }
+}

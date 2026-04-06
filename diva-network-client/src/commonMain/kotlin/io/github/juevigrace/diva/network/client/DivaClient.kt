@@ -1,7 +1,5 @@
 package io.github.juevigrace.diva.network.client
 
-import io.github.juevigrace.diva.core.DivaResult
-import io.github.juevigrace.diva.core.errors.DivaError
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.plugins.logging.DEFAULT
 import io.ktor.client.plugins.logging.LogLevel
@@ -16,26 +14,26 @@ import kotlinx.serialization.serializer
 import kotlin.time.Duration
 
 interface DivaClient {
-    fun config(config: HttpClientConfig<*>.() -> Unit): DivaResult<Unit, DivaError>
+    fun config(config: HttpClientConfig<*>.() -> Unit): Result<Unit>
 
     suspend fun sse(
         path: String,
         headers: Map<String, String> = emptyMap(),
         block: suspend ClientSSESession.() -> Unit
-    ): DivaResult<Unit, DivaError>
+    ): Result<Unit>
 
     suspend fun webSocket(
         path: String,
         headers: Map<String, String> = emptyMap(),
         block: suspend DefaultClientWebSocketSession.() -> Unit
-    ): DivaResult<Unit, DivaError>
+    ): Result<Unit>
 
     suspend fun call(
         method: HttpMethod,
         path: String,
         headers: Map<String, String>,
         contentType: ContentType,
-    ): DivaResult<HttpResponse, DivaError>
+    ): Result<HttpResponse>
 
     suspend fun <T> call(
         method: HttpMethod,
@@ -44,7 +42,7 @@ interface DivaClient {
         headers: Map<String, String>,
         contentType: ContentType,
         serializer: KSerializer<T>,
-    ): DivaResult<HttpResponse, DivaError>
+    ): Result<HttpResponse>
 
     companion object {
         val DEFAULT_LOGGER: Logger = Logger.DEFAULT
@@ -60,7 +58,7 @@ suspend inline fun DivaClient.sse(
     queryParams: Map<String, String> = emptyMap(),
     headers: Map<String, String> = emptyMap(),
     noinline block: suspend ClientSSESession.() -> Unit
-): DivaResult<Unit, DivaError> {
+): Result<Unit> {
     val fullPath = if (queryParams.isNotEmpty()) {
         val params = queryParams.entries.joinToString("&") { "${it.key}=${it.value}" }
         "$path?$params"
@@ -75,7 +73,7 @@ suspend inline fun DivaClient.websocket(
     queryParams: Map<String, String> = emptyMap(),
     headers: Map<String, String> = emptyMap(),
     noinline block: suspend DefaultClientWebSocketSession.() -> Unit
-): DivaResult<Unit, DivaError> {
+): Result<Unit> {
     val fullPath = if (queryParams.isNotEmpty()) {
         val params = queryParams.entries.joinToString("&") { "${it.key}=${it.value}" }
         "$path?$params"
@@ -90,7 +88,7 @@ suspend inline fun DivaClient.get(
     queryParams: Map<String, String> = emptyMap(),
     headers: Map<String, String> = emptyMap(),
     contentType: ContentType = ContentType.Application.Json,
-): DivaResult<HttpResponse, DivaError> {
+): Result<HttpResponse> {
     val fullPath = if (queryParams.isNotEmpty()) {
         val params = queryParams.entries.joinToString("&") { "${it.key}=${it.value}" }
         "$path?$params"
@@ -110,7 +108,7 @@ suspend inline fun<reified T> DivaClient.post(
     body: T,
     headers: Map<String, String> = emptyMap(),
     contentType: ContentType = ContentType.Application.Json,
-): DivaResult<HttpResponse, DivaError> {
+): Result<HttpResponse> {
     return call(
         method = HttpMethod.Post,
         path = path,
@@ -125,7 +123,7 @@ suspend inline fun DivaClient.post(
     path: String,
     headers: Map<String, String> = emptyMap(),
     contentType: ContentType = ContentType.Application.Json,
-): DivaResult<HttpResponse, DivaError> {
+): Result<HttpResponse> {
     return call(
         method = HttpMethod.Post,
         path = path,
@@ -139,7 +137,7 @@ suspend inline fun<reified T> DivaClient.put(
     body: T,
     headers: Map<String, String> = emptyMap(),
     contentType: ContentType = ContentType.Application.Json,
-): DivaResult<HttpResponse, DivaError> {
+): Result<HttpResponse> {
     return call(
         method = HttpMethod.Put,
         path = path,
@@ -155,7 +153,7 @@ suspend inline fun<reified T> DivaClient.patch(
     body: T,
     headers: Map<String, String> = emptyMap(),
     contentType: ContentType = ContentType.Application.Json,
-): DivaResult<HttpResponse, DivaError> {
+): Result<HttpResponse> {
     return call(
         method = HttpMethod.Patch,
         path = path,
@@ -170,7 +168,7 @@ suspend inline fun DivaClient.delete(
     path: String,
     headers: Map<String, String> = emptyMap(),
     contentType: ContentType = ContentType.Application.Json,
-): DivaResult<HttpResponse, DivaError> {
+): Result<HttpResponse> {
     return call(
         method = HttpMethod.Delete,
         path = path,
@@ -184,7 +182,7 @@ suspend inline fun<reified T> DivaClient.delete(
     body: T,
     headers: Map<String, String> = emptyMap(),
     contentType: ContentType = ContentType.Application.Json,
-): DivaResult<HttpResponse, DivaError> {
+): Result<HttpResponse> {
     return call(
         method = HttpMethod.Delete,
         path = path,

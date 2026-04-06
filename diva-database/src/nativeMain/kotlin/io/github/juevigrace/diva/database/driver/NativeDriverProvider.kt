@@ -5,25 +5,20 @@ import app.cash.sqldelight.db.QueryResult
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.db.SqlSchema
 import app.cash.sqldelight.driver.native.NativeSqliteDriver
-import io.github.juevigrace.diva.core.DivaResult
 import io.github.juevigrace.diva.core.Option
-import io.github.juevigrace.diva.core.errors.DivaError
-import io.github.juevigrace.diva.core.errors.ErrorCause
-import io.github.juevigrace.diva.core.errors.toDivaError
+import io.github.juevigrace.diva.core.errors.ConfigureDriverException
 import io.github.juevigrace.diva.core.tryResult
 import io.github.juevigrace.diva.database.driver.configuration.NativeConf
 
 internal class NativeDriverProvider(
     override val conf: NativeConf,
 ) : DriverProviderBase<NativeConf>(conf) {
-    override fun createDriver(schema: Schema): DivaResult<SqlDriver, DivaError> {
+    override fun createDriver(schema: Schema): Result<SqlDriver> {
         return tryResult(
             onError = { e ->
-                e.toDivaError(
-                    ErrorCause.Error.Ex(
-                        ex = e,
-                        details = Option.Some("create native driver")
-                    )
+                ConfigureDriverException(
+                    details = Option.of("Failed to create driver with configuration: ${conf.driverConf}"),
+                    cause = e
                 )
             }
         ) {
@@ -35,7 +30,7 @@ internal class NativeDriverProvider(
                 schema = syncSchema,
                 name = conf.driverConf.name,
             )
-            DivaResult.success(driver)
+            Result.success(driver)
         }
     }
 }

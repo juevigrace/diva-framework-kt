@@ -2,6 +2,8 @@ package io.github.juevigrace.diva.core.errors
 
 import io.github.juevigrace.diva.core.Option
 import io.github.juevigrace.diva.core.database.DatabaseOperation
+import io.github.juevigrace.diva.core.getOrElse
+import io.github.juevigrace.diva.core.ifPresent
 
 open class DivaDatabaseException(
     message: String,
@@ -12,34 +14,75 @@ open class DivaDatabaseException(
     open val details: Option<String> = Option.None
 }
 
-// No rows affected
+class UseDriverException(
+    override val operation: Option<DatabaseOperation>,
+    override val table: Option<String> = Option.None,
+    override val details: Option<String> = Option.None,
+    cause: Throwable? = null
+) : DivaDatabaseException(
+    buildMessage(operation, table, "Driver error", details),
+    cause
+)
+
+class ConfigureDriverException(
+    override val operation: Option<DatabaseOperation> = Option.Some(DatabaseOperation.CONFIGURE),
+    override val details: Option<String> = Option.None,
+    cause: Throwable? = null
+) : DivaDatabaseException(
+    buildMessage(operation, Option.None, "Driver configuration error", details),
+    cause
+)
+
 class NoRowsAffectedException(
     override val operation: Option<DatabaseOperation>,
     override val table: Option<String> = Option.None,
     override val details: Option<String> = Option.None,
     cause: Throwable? = null
-) : DivaDatabaseException("No rows affected", cause)
+) : DivaDatabaseException(
+    buildMessage(operation, table, "No rows affected", details),
+    cause
+)
 
-// Constraint violation
 class ConstraintViolationException(
-    override val table: Option<String> = Option.None,
-    constraint: String,
+    override val table: Option<String>,
+    val constraint: String,
     override val details: Option<String> = Option.None,
     cause: Throwable? = null
-) : DivaDatabaseException("Constraint violation: $constraint", cause)
+) : DivaDatabaseException(
+    "Constraint violation on table '${table.getOrElse { "unknown" }}': $constraint",
+    cause
+)
 
-// Connection error
 class DatabaseConnectionException(
     override val details: Option<String>,
     cause: Throwable? = null
-) : DivaDatabaseException("Connection failed", cause) {
+) : DivaDatabaseException(
+    buildMessage(Option.of(DatabaseOperation.CONNECT), Option.None, "Connection failed", details),
+    cause
+) {
     override val operation: Option<DatabaseOperation> = Option.of(DatabaseOperation.CONNECT)
 }
 
-// Timeout
 class DatabaseTimeoutException(
     override val operation: Option<DatabaseOperation>,
     override val table: Option<String> = Option.None,
     override val details: Option<String> = Option.None,
     cause: Throwable? = null
-) : DivaDatabaseException("Query timeout", cause)
+) : DivaDatabaseException(
+    buildMessage(operation, table, "Query timeout", details),
+    cause
+)
+
+private fun buildMessage(
+    operation: Option<DatabaseOperation>,
+    table: Option<String>,
+    prefix: String,
+    details: Option<String>
+): String {
+    return buildString {
+        append(prefix)
+        operation.ifPresent { append(" (operation: ${it.name.lowercase()})") }
+        table.ifPresent { append(" on table '$it'") }
+        details.ifPresent { append(" - $it") }
+    }
+}

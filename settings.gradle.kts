@@ -34,9 +34,7 @@ enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
 include(
     ":diva-core",
     ":diva-database",
-    ":diva-di",
     ":diva-network-client",
-    ":diva-preferences",
     ":diva-ui",
 )
 
