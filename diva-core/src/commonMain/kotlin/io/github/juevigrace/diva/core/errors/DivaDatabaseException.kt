@@ -73,6 +73,40 @@ class DatabaseTimeoutException(
     cause
 )
 
+class ForeignKeyViolationException(
+    override val table: Option<String> = Option.None,
+    override val details: Option<String> = Option.None,
+    cause: Throwable? = null
+) : DivaDatabaseException(
+    buildMessage(Option.of(DatabaseOperation.DELETE), table, "Foreign key violation", details),
+    cause
+)
+
+class DuplicateKeyException(
+    override val table: Option<String> = Option.None,
+    override val details: Option<String> = Option.None,
+    cause: Throwable? = null
+) : DivaDatabaseException(
+    buildMessage(Option.of(DatabaseOperation.INSERT), table, "Duplicate key", details),
+    cause
+)
+
+class SyntaxErrorException(
+    override val details: Option<String> = Option.None,
+    cause: Throwable? = null
+) : DivaDatabaseException(
+    buildMessage(Option.of(DatabaseOperation.SELECT), Option.None, "SQL syntax error", details),
+    cause
+)
+
+class DatabaseLockedException(
+    override val details: Option<String> = Option.None,
+    cause: Throwable? = null
+) : DivaDatabaseException(
+    buildMessage(Option.of(DatabaseOperation.TRANSACTION), Option.None, "Database locked", details),
+    cause
+)
+
 private fun buildMessage(
     operation: Option<DatabaseOperation>,
     table: Option<String>,

@@ -25,6 +25,9 @@ kotlin {
             api(libs.sqldelight.jdbc.driver)
             api(libs.sqldelight.r2dbc.driver)
             api(libs.hikaricp)
+            implementation(libs.mysql)
+            implementation(libs.postgresql)
+            implementation(libs.sqlite)
         }
 
         jsMain.dependencies {

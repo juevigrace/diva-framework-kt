@@ -17,18 +17,13 @@ internal class DivaDatabaseImpl<S : TransacterBase>(
     private val driver: SqlDriver,
     private val db: S,
 ) : DivaDatabase<S> {
-    private fun onError(e: Exception): Exception {
-        // TODO: handle each exception type here
-        return when (e) {
-            else -> e
-        }
-    }
-
     override suspend fun <T : Any> getOne(
         block: S.() -> Query<T>
     ): Result<Option<T>> {
         return tryResult(
-            onError = ::onError
+            onError = { e ->
+                e.toDivaDatabaseException()
+            }
         ) {
             val result: T? = block(db).executeAsOneOrNull()
             Result.success(Option.of(result))
@@ -42,7 +37,7 @@ internal class DivaDatabaseImpl<S : TransacterBase>(
         return block(db).asFlow()
             .mapToOneOrNull(ctx)
             .catch { e ->
-                Result.failure<Option<T>>(onError(Exception(e)))
+                Result.failure<Option<T>>(e.toDivaDatabaseException())
             }
             .map { entity ->
                 Result.success(Option.of(entity))
@@ -53,7 +48,9 @@ internal class DivaDatabaseImpl<S : TransacterBase>(
         block: S.() -> Query<T>
     ): Result<List<T>> {
         return tryResult(
-            onError = ::onError
+            onError = { e ->
+                e.toDivaDatabaseException()
+            }
         ) {
             val list: List<T> = block(db).executeAsList()
             Result.success(list)
@@ -67,7 +64,7 @@ internal class DivaDatabaseImpl<S : TransacterBase>(
         return block(db).asFlow()
             .mapToList(ctx)
             .catch { e ->
-                Result.failure<List<T>>(onError(Exception(e)))
+                Result.failure<List<T>>(e.toDivaDatabaseException())
             }
             .map { list ->
                 Result.success(list)
@@ -78,7 +75,9 @@ internal class DivaDatabaseImpl<S : TransacterBase>(
         block: suspend S.() -> Result<T>
     ): Result<T> {
         return tryResult(
-            onError = ::onError
+            onError = { e ->
+                e.toDivaDatabaseException()
+            }
         ) {
             block(db)
         }
@@ -88,7 +87,9 @@ internal class DivaDatabaseImpl<S : TransacterBase>(
         block: suspend SqlDriver.() -> Result<T>
     ): Result<T> {
         return tryResult(
-            onError = ::onError
+            onError = { e ->
+                e.toDivaDatabaseException()
+            }
         ) {
             block(driver)
         }
@@ -96,7 +97,9 @@ internal class DivaDatabaseImpl<S : TransacterBase>(
 
     override suspend fun checkHealth(): Result<Boolean> {
         return tryResult(
-            onError = ::onError
+            onError = { e ->
+                e.toDivaDatabaseException()
+            }
         ) {
             driver.execute(null, "SELECT 1", 0).value
             Result.success(true)
@@ -105,7 +108,9 @@ internal class DivaDatabaseImpl<S : TransacterBase>(
 
     override suspend fun close(): Result<Unit> {
         return tryResult(
-            onError = ::onError
+            onError = { e ->
+                e.toDivaDatabaseException()
+            }
         ) {
             driver.close()
             Result.success(Unit)

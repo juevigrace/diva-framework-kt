@@ -13,6 +13,7 @@ fun Throwable.toDivaNetworkException(
     url: Option<String> = Option.None,
     details: Option<String> = Option.None
 ): DivaNetworkException = when (this) {
+    is DivaNetworkException -> this
     is HttpRequestTimeoutException -> NetworkTimeoutException(url, details, this)
     is ConnectTimeoutException -> NetworkTimeoutException(url, details, this)
     is ClientRequestException -> HttpException(
