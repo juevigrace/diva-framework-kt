@@ -27,14 +27,15 @@ internal class JvmDriverProvider(
                     )
             }
         ) {
-            createDriverFromDataSource().map { driver ->
-                runBlocking {
-                    when (schema) {
-                        is Schema.Sync -> schema.value.create(driver)
-                        is Schema.Async -> schema.value.synchronous().create(driver)
-                    }
-                    driver
+            val driver: SqlDriver = createDriverFromDataSource().getOrElse { err ->
+                throw err
+            }
+            runBlocking {
+                when (schema) {
+                    is Schema.Sync -> schema.value.create(driver)
+                    is Schema.Async -> schema.value.synchronous().create(driver)
                 }
+                driver
             }
         }
     }
@@ -63,9 +64,7 @@ internal class JvmDriverProvider(
                         conf.driverConf.username,
                         conf.driverConf.password,
                     )
-                    Result.success(
-                        HikariDataSource(config).asJdbcDriver()
-                    )
+                    Result.success(HikariDataSource(config).asJdbcDriver())
                 }
                 is DriverConf.PostgresqlDriverConf -> {
                     val config = createHikariConfig(
@@ -73,9 +72,7 @@ internal class JvmDriverProvider(
                         conf.driverConf.username,
                         conf.driverConf.password,
                     )
-                    Result.success(
-                        HikariDataSource(config).asJdbcDriver()
-                    )
+                    Result.success(HikariDataSource(config).asJdbcDriver())
                 }
                 is DriverConf.H2DriverConf -> {
                     val config = createHikariConfig(
@@ -83,9 +80,7 @@ internal class JvmDriverProvider(
                         conf.driverConf.username,
                         conf.driverConf.password,
                     )
-                    Result.success(
-                        HikariDataSource(config).asJdbcDriver()
-                    )
+                    Result.success(HikariDataSource(config).asJdbcDriver())
                 }
             }
         }

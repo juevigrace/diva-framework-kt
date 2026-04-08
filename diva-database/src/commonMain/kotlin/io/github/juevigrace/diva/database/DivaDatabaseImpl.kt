@@ -26,7 +26,7 @@ internal class DivaDatabaseImpl<S : TransacterBase>(
             }
         ) {
             val result: T? = block(db).executeAsOneOrNull()
-            Result.success(Option.of(result))
+            Option.of(result)
         }
     }
 
@@ -53,7 +53,7 @@ internal class DivaDatabaseImpl<S : TransacterBase>(
             }
         ) {
             val list: List<T> = block(db).executeAsList()
-            Result.success(list)
+            list
         }
     }
 
@@ -72,7 +72,7 @@ internal class DivaDatabaseImpl<S : TransacterBase>(
     }
 
     override suspend fun <T : Any> use(
-        block: suspend S.() -> Result<T>
+        block: suspend S.() -> T
     ): Result<T> {
         return tryResult(
             onError = { e ->
@@ -84,7 +84,7 @@ internal class DivaDatabaseImpl<S : TransacterBase>(
     }
 
     override suspend fun <T : Any> withDriver(
-        block: suspend SqlDriver.() -> Result<T>
+        block: suspend SqlDriver.() -> T
     ): Result<T> {
         return tryResult(
             onError = { e ->
@@ -102,7 +102,7 @@ internal class DivaDatabaseImpl<S : TransacterBase>(
             }
         ) {
             driver.execute(null, "SELECT 1", 0).value
-            Result.success(true)
+            true
         }
     }
 

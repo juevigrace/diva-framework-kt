@@ -6,7 +6,7 @@ class DivaDB(
     suspend fun count(): Result<Long> {
         return db.use {
             val value: Long = userQueries.count().executeAsOne()
-            Result.success(value)
+            value
         }
     }
 }

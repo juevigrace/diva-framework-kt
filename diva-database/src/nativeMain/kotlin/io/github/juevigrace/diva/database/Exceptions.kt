@@ -10,6 +10,7 @@ import io.github.juevigrace.diva.core.errors.ForeignKeyViolationException
 
 actual fun Throwable.toDivaDatabaseException(): DivaDatabaseException {
     return when (this) {
+        is DivaDatabaseException -> this
         is SQLiteException -> {
             val msg = message ?: ""
             when {

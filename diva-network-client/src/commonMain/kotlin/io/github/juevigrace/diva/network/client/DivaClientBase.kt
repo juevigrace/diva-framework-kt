@@ -28,6 +28,7 @@ import io.ktor.http.contentType
 import io.ktor.http.path
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.Serializer
 import kotlinx.serialization.json.Json
 
 abstract class DivaClientBase<C : HttpClientEngineConfig>(
@@ -46,12 +47,12 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
             }
         ) {
             client = client.config(config)
-            Result.success(Unit)
         }
     }
 
     override suspend fun sse(
         path: String,
+        queryParams: Map<String, String>,
         headers: Map<String, String>,
         block: suspend ClientSSESession.() -> Unit
     ): Result<Unit> {
@@ -60,7 +61,7 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
         ) {
             client.sse(
                 request = {
-                    parseAndSetUrl(path)
+                    parseAndSetUrl(parseQueryParams(path, queryParams))
                     headers.forEach { (key, value) ->
                         this.header(key, value)
                     }
@@ -68,12 +69,12 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
             ) {
                 block()
             }
-            Result.success(Unit)
         }
     }
 
     override suspend fun webSocket(
         path: String,
+        queryParams: Map<String, String>,
         headers: Map<String, String>,
         block: suspend DefaultClientWebSocketSession.() -> Unit
     ): Result<Unit> {
@@ -82,14 +83,121 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
         ) {
             client.webSocket(
                 request = {
-                    url(path)
+                    url(parseQueryParams(path, queryParams))
                     headers.forEach { (key, value) -> header(key, value) }
                 }
             ) {
                 block()
             }
-            Result.success(Unit)
         }
+    }
+
+    override suspend fun get(
+        path: String,
+        queryParams: Map<String, String>,
+        headers: Map<String, String>,
+        contentType: ContentType
+    ): Result<HttpResponse> {
+        return call(
+            method = HttpMethod.Get,
+            path = parseQueryParams(path, queryParams),
+            headers = headers,
+            contentType = contentType,
+        )
+    }
+
+    override suspend fun post(
+        path: String,
+        headers: Map<String, String>,
+        contentType: ContentType
+    ): Result<HttpResponse> {
+        return call(
+            method = HttpMethod.Post,
+            path = path,
+            headers = headers,
+            contentType = contentType,
+        )
+    }
+
+    override suspend fun <T> post(
+        path: String,
+        body: T,
+        headers: Map<String, String>,
+        contentType: ContentType,
+        serializer: KSerializer<T>,
+    ): Result<HttpResponse> {
+        return call(
+            method = HttpMethod.Post,
+            path = path,
+            body = body,
+            headers = headers,
+            contentType = contentType,
+            serializer = serializer
+        )
+    }
+
+    override suspend fun <T> put(
+        path: String,
+        body: T,
+        headers: Map<String, String>,
+        contentType: ContentType,
+        serializer: KSerializer<T>,
+    ): Result<HttpResponse> {
+        return call(
+            method = HttpMethod.Put,
+            path = path,
+            body = body,
+            headers = headers,
+            contentType = contentType,
+            serializer = serializer
+        )
+    }
+
+    override suspend fun <T> patch(
+        path: String,
+        body: T,
+        headers: Map<String, String>,
+        contentType: ContentType,
+        serializer: KSerializer<T>,
+    ): Result<HttpResponse> {
+        return call(
+            method = HttpMethod.Patch,
+            path = path,
+            body = body,
+            headers = headers,
+            contentType = contentType,
+            serializer = serializer
+        )
+    }
+
+    override suspend fun delete(
+        path: String,
+        headers: Map<String, String>,
+        contentType: ContentType,
+    ): Result<HttpResponse> {
+        return call(
+            method = HttpMethod.Delete,
+            path = path,
+            headers = headers,
+            contentType = contentType,
+        )
+    }
+
+    override suspend fun <T> delete(
+        path: String,
+        body: T,
+        headers: Map<String, String>,
+        contentType: ContentType,
+        serializer: KSerializer<T>,
+    ): Result<HttpResponse> {
+        return call(
+            method = HttpMethod.Delete,
+            path = path,
+            body = body,
+            headers = headers,
+            contentType = contentType,
+            serializer = serializer
+        )
     }
 
     override suspend fun call(
@@ -111,7 +219,7 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
                     this.header(key, value)
                 }
             }
-            Result.success(request)
+            request
         }
     }
 
@@ -137,8 +245,18 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
                 }
                 setBody(Json.encodeToString(serializer, body))
             }
-            Result.success(request)
+            request
         }
+    }
+
+    private fun parseQueryParams(path: String, params: Map<String, String>): String {
+        val fullPath = if (params.isNotEmpty()) {
+            val params = params.entries.joinToString("&") { "${it.key}=${it.value}" }
+            "$path?$params"
+        } else {
+            path
+        }
+        return fullPath
     }
 
     private fun HttpRequestBuilder.parseAndSetUrl(path: String) {

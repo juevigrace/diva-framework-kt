@@ -30,7 +30,7 @@ internal class NativeDriverProvider(
                 schema = syncSchema,
                 name = conf.driverConf.name,
             )
-            Result.success(driver)
+            driver
         }
     }
 }

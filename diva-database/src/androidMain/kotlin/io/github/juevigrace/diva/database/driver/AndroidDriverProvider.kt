@@ -37,7 +37,7 @@ internal class AndroidDriverProvider(
                     object : AndroidSqliteDriver.Callback(syncSchema) {}
                 },
             )
-            Result.success(driver)
+            driver
         }
     }
 

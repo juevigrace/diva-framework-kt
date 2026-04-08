@@ -23,9 +23,9 @@ interface DivaDatabase<S : TransacterBase> {
         block: S.() -> Query<T>,
     ): Flow<Result<List<T>>>
 
-    suspend fun<T : Any> use(block: suspend S.() -> Result<T>): Result<T>
+    suspend fun<T : Any> use(block: suspend S.() -> T): Result<T>
 
-    suspend fun<T : Any> withDriver(block: suspend SqlDriver.() -> Result<T>): Result<T>
+    suspend fun<T : Any> withDriver(block: suspend SqlDriver.() -> T): Result<T>
 
     suspend fun checkHealth(): Result<Boolean>
 

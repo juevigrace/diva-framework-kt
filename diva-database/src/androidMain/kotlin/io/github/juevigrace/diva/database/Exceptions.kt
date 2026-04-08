@@ -9,6 +9,7 @@ import io.github.juevigrace.diva.core.errors.ForeignKeyViolationException
 
 actual fun Throwable.toDivaDatabaseException(): DivaDatabaseException {
     return when (this) {
+        is DivaDatabaseException -> this
         is android.database.sqlite.SQLiteConstraintException -> {
             when {
                 message?.contains("UNIQUE", ignoreCase = true) == true ->

@@ -10,7 +10,6 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.serializer
 import kotlin.time.Duration
 
 interface DivaClient {
@@ -18,15 +17,68 @@ interface DivaClient {
 
     suspend fun sse(
         path: String,
+        queryParams: Map<String, String> = emptyMap(),
         headers: Map<String, String> = emptyMap(),
         block: suspend ClientSSESession.() -> Unit
     ): Result<Unit>
 
     suspend fun webSocket(
         path: String,
+        queryParams: Map<String, String> = emptyMap(),
         headers: Map<String, String> = emptyMap(),
         block: suspend DefaultClientWebSocketSession.() -> Unit
     ): Result<Unit>
+
+    suspend fun get(
+        path: String,
+        queryParams: Map<String, String> = emptyMap(),
+        headers: Map<String, String> = emptyMap(),
+        contentType: ContentType = ContentType.Application.Json,
+    ): Result<HttpResponse>
+
+    suspend fun<T> post(
+        path: String,
+        body: T,
+        headers: Map<String, String> = emptyMap(),
+        contentType: ContentType = ContentType.Application.Json,
+        serializer: KSerializer<T>,
+    ): Result<HttpResponse>
+
+    suspend fun post(
+        path: String,
+        headers: Map<String, String> = emptyMap(),
+        contentType: ContentType = ContentType.Application.Json,
+    ): Result<HttpResponse>
+
+    suspend fun<T> put(
+        path: String,
+        body: T,
+        headers: Map<String, String> = emptyMap(),
+        contentType: ContentType = ContentType.Application.Json,
+        serializer: KSerializer<T>,
+    ): Result<HttpResponse>
+
+    suspend fun<T> patch(
+        path: String,
+        body: T,
+        headers: Map<String, String> = emptyMap(),
+        contentType: ContentType = ContentType.Application.Json,
+        serializer: KSerializer<T>,
+    ): Result<HttpResponse>
+
+    suspend fun delete(
+        path: String,
+        headers: Map<String, String> = emptyMap(),
+        contentType: ContentType = ContentType.Application.Json,
+    ): Result<HttpResponse>
+
+    suspend fun<T> delete(
+        path: String,
+        body: T,
+        headers: Map<String, String> = emptyMap(),
+        contentType: ContentType = ContentType.Application.Json,
+        serializer: KSerializer<T>,
+    ): Result<HttpResponse>
 
     suspend fun call(
         method: HttpMethod,
@@ -51,144 +103,4 @@ interface DivaClient {
         val DEFAULT_CONNECT_TIMEOUT: Long = Duration.parse("10s").inWholeMilliseconds
         val DEFAULT_SOCKET_TIMEOUT: Long = Duration.parse("10s").inWholeMilliseconds
     }
-}
-
-suspend inline fun DivaClient.sse(
-    path: String,
-    queryParams: Map<String, String> = emptyMap(),
-    headers: Map<String, String> = emptyMap(),
-    noinline block: suspend ClientSSESession.() -> Unit
-): Result<Unit> {
-    val fullPath = if (queryParams.isNotEmpty()) {
-        val params = queryParams.entries.joinToString("&") { "${it.key}=${it.value}" }
-        "$path?$params"
-    } else {
-        path
-    }
-    return sse(path = fullPath, headers = headers, block = block)
-}
-
-suspend inline fun DivaClient.websocket(
-    path: String,
-    queryParams: Map<String, String> = emptyMap(),
-    headers: Map<String, String> = emptyMap(),
-    noinline block: suspend DefaultClientWebSocketSession.() -> Unit
-): Result<Unit> {
-    val fullPath = if (queryParams.isNotEmpty()) {
-        val params = queryParams.entries.joinToString("&") { "${it.key}=${it.value}" }
-        "$path?$params"
-    } else {
-        path
-    }
-    return webSocket(path = fullPath, headers = headers, block = block)
-}
-
-suspend inline fun DivaClient.get(
-    path: String,
-    queryParams: Map<String, String> = emptyMap(),
-    headers: Map<String, String> = emptyMap(),
-    contentType: ContentType = ContentType.Application.Json,
-): Result<HttpResponse> {
-    val fullPath = if (queryParams.isNotEmpty()) {
-        val params = queryParams.entries.joinToString("&") { "${it.key}=${it.value}" }
-        "$path?$params"
-    } else {
-        path
-    }
-    return call(
-        method = HttpMethod.Get,
-        path = fullPath,
-        headers = headers,
-        contentType = contentType,
-    )
-}
-
-suspend inline fun<reified T> DivaClient.post(
-    path: String,
-    body: T,
-    headers: Map<String, String> = emptyMap(),
-    contentType: ContentType = ContentType.Application.Json,
-): Result<HttpResponse> {
-    return call(
-        method = HttpMethod.Post,
-        path = path,
-        body = body,
-        headers = headers,
-        contentType = contentType,
-        serializer = serializer(),
-    )
-}
-
-suspend inline fun DivaClient.post(
-    path: String,
-    headers: Map<String, String> = emptyMap(),
-    contentType: ContentType = ContentType.Application.Json,
-): Result<HttpResponse> {
-    return call(
-        method = HttpMethod.Post,
-        path = path,
-        headers = headers,
-        contentType = contentType,
-    )
-}
-
-suspend inline fun<reified T> DivaClient.put(
-    path: String,
-    body: T,
-    headers: Map<String, String> = emptyMap(),
-    contentType: ContentType = ContentType.Application.Json,
-): Result<HttpResponse> {
-    return call(
-        method = HttpMethod.Put,
-        path = path,
-        body = body,
-        headers = headers,
-        contentType = contentType,
-        serializer = serializer(),
-    )
-}
-
-suspend inline fun<reified T> DivaClient.patch(
-    path: String,
-    body: T,
-    headers: Map<String, String> = emptyMap(),
-    contentType: ContentType = ContentType.Application.Json,
-): Result<HttpResponse> {
-    return call(
-        method = HttpMethod.Patch,
-        path = path,
-        body = body,
-        headers = headers,
-        contentType = contentType,
-        serializer = serializer(),
-    )
-}
-
-suspend inline fun DivaClient.delete(
-    path: String,
-    headers: Map<String, String> = emptyMap(),
-    contentType: ContentType = ContentType.Application.Json,
-): Result<HttpResponse> {
-    return call(
-        method = HttpMethod.Delete,
-        path = path,
-        headers = headers,
-        contentType = contentType,
-    )
-}
-
-suspend inline fun<reified T> DivaClient.delete(
-    path: String,
-    body: T,
-    headers: Map<String, String> = emptyMap(),
-    contentType: ContentType = ContentType.Application.Json,
-): Result<HttpResponse> {
-    return call(
-        method = HttpMethod.Delete,
-        path = path,
-        body = body,
-        headers = headers,
-        contentType = contentType,
-        serializer = serializer(),
-    )
 }

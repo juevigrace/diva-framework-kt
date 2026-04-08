@@ -35,7 +35,7 @@ internal class JsDriverProvider : DriverProvider {
                     }
                 }
             }
-            Result.success(driver)
+            driver
         }
     }
 }

@@ -1,0 +1,18 @@
+package io.github.juevigrace.diva.network.client
+
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
+import kotlin.time.Clock
+
+@Serializable
+data class ApiResponse<T>(
+    @Transient
+    val statusCode: Int = 200,
+    @SerialName("data")
+    val data: T? = null,
+    @SerialName("message")
+    val message: String,
+    @SerialName("time")
+    val time: Long = Clock.System.now().toEpochMilliseconds(),
+)

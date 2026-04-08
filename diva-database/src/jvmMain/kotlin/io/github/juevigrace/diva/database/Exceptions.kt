@@ -13,6 +13,7 @@ import org.sqlite.SQLiteErrorCode
 
 actual fun Throwable.toDivaDatabaseException(): DivaDatabaseException {
     return when (this) {
+        is DivaDatabaseException -> this
         is org.sqlite.SQLiteException -> {
             when (SQLiteErrorCode.getErrorCode(errorCode)) {
                 SQLiteErrorCode.SQLITE_BUSY,
