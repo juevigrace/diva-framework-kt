@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import io.github.juevigrace.diva.core.Option
 import io.github.juevigrace.diva.core.fold
-import io.github.juevigrace.diva.ui.components.toaster.Toaster
 
 // TODO: these screen layouts would need to add more customization options
 
@@ -22,7 +21,7 @@ fun Screen(
     bottomBar: @Composable () -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
     floatingActionButtonPosition: FabPosition = FabPosition.End,
-    snackBarHost: @Composable () -> Unit = { Toaster() },
+    snackBarHost: @Composable () -> Unit = {},
     containerColor: Color = MaterialTheme.colorScheme.background,
     contentColor: Color = MaterialTheme.colorScheme.onBackground,
     contentWindowInsets: WindowInsets = ScaffoldDefaults.contentWindowInsets,
