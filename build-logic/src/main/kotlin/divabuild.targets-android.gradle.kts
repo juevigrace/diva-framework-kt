@@ -6,7 +6,7 @@ plugins {
 }
 
 kotlin {
-    androidLibrary {
+    android {
         namespace = "io.github.juevigrace.${project.name.split("-").joinToString(".")}"
 
         compileSdk = libs.versions.android.compileSdk.get().toInt()
