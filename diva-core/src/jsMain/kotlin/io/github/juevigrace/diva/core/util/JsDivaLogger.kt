@@ -1,6 +1,6 @@
 package io.github.juevigrace.diva.core.util
 
-object WebDivaLogger : DivaLoggerBase() {
+object JsDivaLogger : DivaLoggerBase() {
     override fun logToPlatform(tag: String, message: String, level: LogLevel) {
         val output = "[$tag] $message"
         when (level) {
@@ -14,5 +14,5 @@ object WebDivaLogger : DivaLoggerBase() {
 }
 
 actual fun createDivaLogger(): DivaLogger {
-    return WebDivaLogger
+    return JsDivaLogger
 }

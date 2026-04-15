@@ -6,6 +6,7 @@ import app.cash.sqldelight.driver.worker.WebWorkerDriver
 import io.github.juevigrace.diva.core.Option
 import io.github.juevigrace.diva.core.errors.ConfigureDriverException
 import io.github.juevigrace.diva.core.tryResult
+import io.github.juevigrace.diva.core.util.logError
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -21,10 +22,12 @@ internal class JsDriverProvider : DriverProvider {
     override fun createDriver(schema: Schema): Result<SqlDriver> {
         return tryResult(
             onError = { e ->
-                ConfigureDriverException(
+                val err = ConfigureDriverException(
                     details = Option.of("Failed to create driver"),
                     cause = e
                 )
+                logError(err::class.simpleName ?: "ConfigureDriverException", err.message ?: err.toString())
+                err
             }
         ) {
             val driver: WebWorkerDriver = WebWorkerDriver(worker).also { d ->

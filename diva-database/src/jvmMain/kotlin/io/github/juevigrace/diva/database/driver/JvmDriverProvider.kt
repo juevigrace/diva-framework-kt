@@ -10,6 +10,7 @@ import io.github.juevigrace.diva.core.Option
 import io.github.juevigrace.diva.core.errors.ConfigureDriverException
 import io.github.juevigrace.diva.core.map
 import io.github.juevigrace.diva.core.tryResult
+import io.github.juevigrace.diva.core.util.logError
 import io.github.juevigrace.diva.database.driver.configuration.DriverConf
 import io.github.juevigrace.diva.database.driver.configuration.JvmConf
 import kotlinx.coroutines.runBlocking
@@ -20,11 +21,13 @@ internal class JvmDriverProvider(
     override fun createDriver(schema: Schema): Result<SqlDriver> {
         return tryResult(
             onError = { e ->
-                e as? ConfigureDriverException
+                val err = e as? ConfigureDriverException
                     ?: ConfigureDriverException(
                         details = Option.of("Failed to create driver with configuration: ${conf.driverConf}"),
                         cause = e
                     )
+                logError(err::class.simpleName ?: "ConfigureDriverException", err.message ?: err.toString())
+                err
             }
         ) {
             val driver: SqlDriver = createDriverFromDataSource().getOrElse { err ->
@@ -43,10 +46,12 @@ internal class JvmDriverProvider(
     private fun createDriverFromDataSource(): Result<SqlDriver> {
         return tryResult(
             onError = { e ->
-                ConfigureDriverException(
+                val err = ConfigureDriverException(
                     details = Option.of("Failed to create driver with configuration: ${conf.driverConf}"),
                     cause = e
                 )
+                logError(err::class.simpleName ?: "ConfigureDriverException", err.message ?: err.toString())
+                err
             }
         ) {
             return when (conf.driverConf) {

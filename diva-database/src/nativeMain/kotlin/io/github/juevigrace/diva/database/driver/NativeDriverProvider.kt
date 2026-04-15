@@ -8,6 +8,7 @@ import app.cash.sqldelight.driver.native.NativeSqliteDriver
 import io.github.juevigrace.diva.core.Option
 import io.github.juevigrace.diva.core.errors.ConfigureDriverException
 import io.github.juevigrace.diva.core.tryResult
+import io.github.juevigrace.diva.core.util.logError
 import io.github.juevigrace.diva.database.driver.configuration.NativeConf
 
 internal class NativeDriverProvider(
@@ -16,10 +17,12 @@ internal class NativeDriverProvider(
     override fun createDriver(schema: Schema): Result<SqlDriver> {
         return tryResult(
             onError = { e ->
-                ConfigureDriverException(
+                val err = ConfigureDriverException(
                     details = Option.of("Failed to create driver with configuration: ${conf.driverConf}"),
                     cause = e
                 )
+                logError(err::class.simpleName ?: "ConfigureDriverException", err.message ?: err.toString())
+                err
             }
         ) {
             val syncSchema: SqlSchema<QueryResult.Value<Unit>> = when (schema) {

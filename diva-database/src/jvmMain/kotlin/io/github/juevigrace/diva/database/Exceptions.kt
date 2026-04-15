@@ -8,11 +8,12 @@ import io.github.juevigrace.diva.core.errors.DivaDatabaseException
 import io.github.juevigrace.diva.core.errors.DuplicateKeyException
 import io.github.juevigrace.diva.core.errors.ForeignKeyViolationException
 import io.github.juevigrace.diva.core.errors.SyntaxErrorException
+import io.github.juevigrace.diva.core.util.logError
 import org.postgresql.util.PSQLState
 import org.sqlite.SQLiteErrorCode
 
 actual fun Throwable.toDivaDatabaseException(): DivaDatabaseException {
-    return when (this) {
+    val result = when (this) {
         is DivaDatabaseException -> this
         is org.sqlite.SQLiteException -> {
             when (SQLiteErrorCode.getErrorCode(errorCode)) {
@@ -95,4 +96,6 @@ actual fun Throwable.toDivaDatabaseException(): DivaDatabaseException {
             cause = this
         )
     }
+    logError(result::class.simpleName ?: "DivaDatabaseException", result.message ?: result.toString())
+    return result
 }

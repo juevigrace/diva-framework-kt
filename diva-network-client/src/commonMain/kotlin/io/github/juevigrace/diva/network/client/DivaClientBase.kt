@@ -3,6 +3,7 @@ package io.github.juevigrace.diva.network.client
 import io.github.juevigrace.diva.core.Option
 import io.github.juevigrace.diva.core.errors.ConfigureDriverException
 import io.github.juevigrace.diva.core.tryResult
+import io.github.juevigrace.diva.core.util.logError
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.call.body
@@ -40,10 +41,12 @@ abstract class DivaClientBase<C : HttpClientEngineConfig>(
     override fun config(config: HttpClientConfig<*>.() -> Unit): Result<Unit> {
         return tryResult(
             onError = { e ->
-                ConfigureDriverException(
+                val err = ConfigureDriverException(
                     details = Option.of("Failed to configure client"),
                     cause = e
                 )
+                logError(err::class.simpleName ?: "ConfigureDriverException", err.message ?: err.toString())
+                err
             }
         ) {
             client = client.config(config)
