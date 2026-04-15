@@ -19,18 +19,32 @@ actual fun Throwable.toDivaDatabaseException(): DivaDatabaseException {
             when (SQLiteErrorCode.getErrorCode(errorCode)) {
                 SQLiteErrorCode.SQLITE_BUSY,
                 SQLiteErrorCode.SQLITE_LOCKED -> DatabaseLockedException(
-                    details = Option.of(message)
+                    details = Option.of(message),
+                    cause = this
                 )
                 SQLiteErrorCode.SQLITE_CONSTRAINT_FOREIGNKEY -> ForeignKeyViolationException(
-                    details = Option.of(message)
+                    details = Option.of(message),
+                    cause = this
                 )
                 SQLiteErrorCode.SQLITE_CONSTRAINT_UNIQUE -> DuplicateKeyException(
-                    details = Option.of(message)
+                    details = Option.of(message),
+                    cause = this
                 )
-                SQLiteErrorCode.SQLITE_CONSTRAINT -> ConstraintViolationException(
+                SQLiteErrorCode.SQLITE_CONSTRAINT,
+                         SQLiteErrorCode.SQLITE_CONSTRAINT_CHECK,
+                         SQLiteErrorCode.SQLITE_CONSTRAINT_NOTNULL,
+                         SQLiteErrorCode.SQLITE_CONSTRAINT_PRIMARYKEY,
+                         SQLiteErrorCode.SQLITE_CONSTRAINT_TRIGGER,
+                         SQLiteErrorCode.SQLITE_CONSTRAINT_VTAB,
+                         SQLiteErrorCode.SQLITE_CONSTRAINT_ROWID,
+                         SQLiteErrorCode.SQLITE_CONSTRAINT_FUNCTION,
+                         SQLiteErrorCode.SQLITE_CONSTRAINT_COMMITHOOK,
+                         SQLiteErrorCode.SQLITE_CONSTRAINT_DATATYPE,
+                         SQLiteErrorCode.SQLITE_CONSTRAINT_PINNED-> ConstraintViolationException(
                     table = Option.None,
-                    constraint = "constraint",
-                    details = Option.of(message)
+                    constraint = message ?: "unknown",
+                    details = Option.of(message),
+                    cause = this
                 )
                 else -> DivaDatabaseException(
                     message = "SQLite error: $message",
@@ -44,23 +58,28 @@ actual fun Throwable.toDivaDatabaseException(): DivaDatabaseException {
             }
             when (state) {
                 PSQLState.UNIQUE_VIOLATION -> DuplicateKeyException(
-                    details = Option.of(message)
+                    details = Option.of(message),
+                    cause = this
                 )
                 PSQLState.FOREIGN_KEY_VIOLATION -> ForeignKeyViolationException(
-                    details = Option.of(message)
+                    details = Option.of(message),
+                    cause = this
                 )
                 PSQLState.NOT_NULL_VIOLATION -> ConstraintViolationException(
                     table = Option.None,
                     constraint = "not null",
-                    details = Option.of(message)
+                    details = Option.of(message),
+                    cause = this
                 )
                 PSQLState.SYNTAX_ERROR -> SyntaxErrorException(
-                    details = Option.of(message)
+                    details = Option.of(message),
+                    cause = this
                 )
                 PSQLState.CONNECTION_UNABLE_TO_CONNECT,
                 PSQLState.CONNECTION_REJECTED,
                 PSQLState.CONNECTION_FAILURE -> DatabaseConnectionException(
-                    details = Option.of(message)
+                    details = Option.of(message),
+                    cause = this
                 )
                 else -> DivaDatabaseException(
                     message = "PostgreSQL error: $message",
@@ -71,25 +90,30 @@ actual fun Throwable.toDivaDatabaseException(): DivaDatabaseException {
         is java.sql.SQLIntegrityConstraintViolationException -> {
             when (sqlState) {
                 "23505" -> DuplicateKeyException(
-                    details = Option.of(message)
+                    details = Option.of(message),
+                    cause = this
                 )
                 "23503" -> ForeignKeyViolationException(
-                    details = Option.of(message)
+                    details = Option.of(message),
+                    cause = this
                 )
                 "23502" -> ConstraintViolationException(
                     table = Option.None,
                     constraint = "not null",
-                    details = Option.of(message)
+                    details = Option.of(message),
+                    cause = this
                 )
                 else -> ConstraintViolationException(
                     table = Option.None,
                     constraint = "integrity",
-                    details = Option.of(message)
+                    details = Option.of(message),
+                    cause = this
                 )
             }
         }
         is java.sql.SQLSyntaxErrorException -> SyntaxErrorException(
-            details = Option.of(message)
+            details = Option.of(message),
+            cause = this
         )
         else -> DivaDatabaseException(
             message = message ?: "Unknown error",

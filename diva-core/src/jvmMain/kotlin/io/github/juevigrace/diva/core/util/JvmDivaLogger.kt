@@ -7,11 +7,11 @@ object JvmDivaLogger : DivaLoggerBase() {
 
     override fun logToPlatform(tag: String, message: String, level: LogLevel) {
         when (level) {
-            LogLevel.DEBUG -> logger.debug(message)
-            LogLevel.INFO -> logger.info(message)
-            LogLevel.WARN -> logger.warn(message)
-            LogLevel.ERROR -> logger.error(message)
-            LogLevel.FATAL -> logger.error(message)
+            LogLevel.DEBUG -> logger.debug("[$tag] $message")
+            LogLevel.INFO -> logger.info("[$tag] $message")
+            LogLevel.WARN -> logger.warn("[$tag] $message")
+            LogLevel.ERROR -> logger.error("[$tag] $message")
+            LogLevel.FATAL -> logger.error("[$tag] $message")
         }
     }
 }

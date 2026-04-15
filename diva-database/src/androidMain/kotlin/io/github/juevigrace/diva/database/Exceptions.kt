@@ -14,20 +14,21 @@ actual fun Throwable.toDivaDatabaseException(): DivaDatabaseException {
         is android.database.sqlite.SQLiteConstraintException -> {
             when {
                 message?.contains("UNIQUE", ignoreCase = true) == true ->
-                    DuplicateKeyException(details = Option.of(message))
+                    DuplicateKeyException(details = Option.of(message), cause = this)
                 message?.contains("foreign key", ignoreCase = true) == true ->
-                    ForeignKeyViolationException(details = Option.of(message))
+                    ForeignKeyViolationException(details = Option.of(message), cause = this)
                 else -> ConstraintViolationException(
                     table = Option.None,
                     constraint = "constraint",
-                    details = Option.of(message)
+                    details = Option.of(message),
+                    cause = this
                 )
             }
         }
         is android.database.sqlite.SQLiteDatabaseCorruptException ->
             DivaDatabaseException(message = "Database corrupted: $message", cause = this)
         is android.database.sqlite.SQLiteDiskIOException ->
-            DatabaseLockedException(details = Option.of(message))
+            DatabaseLockedException(details = Option.of(message), cause = this)
         is android.database.sqlite.SQLiteReadOnlyDatabaseException ->
             DivaDatabaseException(message = "Database read-only: $message", cause = this)
         is android.database.sqlite.SQLiteException ->

@@ -26,7 +26,6 @@ fun Throwable.toDivaNetworkException(
             details,
             this
         )
-
         is ServerResponseException -> HttpException(
             Option.Some(response.status.value),
             url,
@@ -34,7 +33,6 @@ fun Throwable.toDivaNetworkException(
             details,
             this
         )
-
         else -> DivaNetworkException(message ?: "Unknown error", this)
     }
 }
