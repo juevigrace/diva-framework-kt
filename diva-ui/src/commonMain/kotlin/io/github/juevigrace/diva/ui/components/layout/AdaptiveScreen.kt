@@ -4,9 +4,12 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ScaffoldDefaults
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,8 +23,8 @@ fun AdaptiveScreen(
     modifier: Modifier = Modifier,
     topBar: @Composable () -> Unit = {},
     drawerContent: @Composable ColumnScope.() -> Unit = {},
-    bottomBarActions: @Composable RowScope.() -> Unit = {},
-    bottomFab: Boolean = false,
+    drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
+    bottomBar: @Composable () -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
     floatingActionButtonPosition: FabPosition = FabPosition.End,
     snackBarHost: @Composable () -> Unit = { Toaster() },
@@ -33,11 +36,10 @@ fun AdaptiveScreen(
     val windowUtils: WindowUtils = LocalWindowUtils.current
     when (windowUtils.orientation) {
         ScreenOrientation.Portrait -> {
-            BottomScreen(
+            Screen(
                 modifier = modifier,
                 topBar = topBar,
-                bottomBarActions = bottomBarActions,
-                bottomFab = bottomFab,
+                bottomBar = bottomBar,
                 floatingActionButton = floatingActionButton,
                 floatingActionButtonPosition = floatingActionButtonPosition,
                 snackBarHost = snackBarHost,
@@ -52,6 +54,7 @@ fun AdaptiveScreen(
                 modifier = modifier,
                 topBar = topBar,
                 drawerContent = drawerContent,
+                drawerState = drawerState,
                 floatingActionButton = floatingActionButton,
                 floatingActionButtonPosition = floatingActionButtonPosition,
                 snackBarHost = snackBarHost,

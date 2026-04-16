@@ -24,6 +24,7 @@ import io.github.juevigrace.diva.ui.components.toaster.Toaster
 fun DrawerScreen(
     modifier: Modifier = Modifier,
     topBar: @Composable () -> Unit,
+    drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed),
     drawerContent: @Composable ColumnScope.() -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
     floatingActionButtonPosition: FabPosition = FabPosition.End,
@@ -33,10 +34,8 @@ fun DrawerScreen(
     contentWindowInsets: WindowInsets = ScaffoldDefaults.contentWindowInsets,
     content: @Composable (PaddingValues) -> Unit
 ) {
-    val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
     val drawer: @Composable (content: @Composable () -> Unit) -> Unit = remember {
-        {
-                content ->
+        { content ->
             ModalNavigationDrawer(
                 drawerContent = {
                     ModalDrawerSheet(

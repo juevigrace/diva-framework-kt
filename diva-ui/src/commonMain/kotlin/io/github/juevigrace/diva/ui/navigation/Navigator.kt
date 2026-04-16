@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
+// TODO: T can be removed and just use NavKey for the type
 data class BackStack<T : NavKey>(
     val current: Option<T>,
     val entries: List<T>,
